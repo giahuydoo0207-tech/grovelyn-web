@@ -478,3 +478,39 @@ export const projectsBy = (handle: string) => PROJECTS.filter((p) => p.owner ===
 
 /** Dung lượng mỗi tài khoản trong giai đoạn thử nghiệm. */
 export const QUOTA_MB = 100;
+
+/* Cộng đồng: nhóm, sự kiện và người đang online (dữ liệu mẫu cho bản giao diện). */
+
+export interface Group {
+  slug: string;
+  mark: string;
+  name: string;
+  members: number;
+  fresh: number;
+  tone: CoverTone;
+}
+
+export const GROUPS: Group[] = [
+  { slug: "kien-truc-nha-pho", mark: "KT", name: "Kiến trúc nhà phố", members: 128, fresh: 4, tone: "ink" },
+  { slug: "vhu-lam-du-an", mark: "VH", name: "Sinh viên VHU làm dự án", members: 312, fresh: 0, tone: "leaf" },
+  { slug: "freelance-thiet-ke", mark: "FL", name: "Freelance thiết kế", members: 86, fresh: 1, tone: "sap" },
+];
+
+export interface CommunityEvent {
+  id: string;
+  month: string;
+  day: string;
+  title: string;
+  where: string;
+  interested: number;
+}
+
+export const EVENTS: CommunityEvent[] = [
+  { id: "e1", month: "TH10", day: "18", title: "Làm portfolio cho người trái ngành", where: "Trực tuyến, 19:30", interested: 42 },
+  { id: "e2", month: "TH10", day: "24", title: "Ngày hội đồ án tốt nghiệp", where: "TP. Hồ Chí Minh, cả ngày", interested: 117 },
+  { id: "e3", month: "TH11", day: "02", title: "Chấm Thử thách tuần 42", where: "Trực tuyến, 20:00", interested: 23 },
+];
+
+/** Người đang online, hiện tối đa vài avatar và đếm phần còn lại. */
+export const ONLINE = ["quocbao", "thuha", "minhkhoa", "ngocanh", "hoanglong"];
+export const ONLINE_TOTAL = 14;

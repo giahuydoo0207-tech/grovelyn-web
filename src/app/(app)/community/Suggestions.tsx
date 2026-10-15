@@ -2,85 +2,85 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Plus, Check } from "lucide-react";
-import { ME, PROJECTS, USERS, userOf } from "@/lib/data";
+import { motion } from "motion/react";
+import { Check } from "lucide-react";
+import { EVENTS, ONLINE, ONLINE_TOTAL, userOf } from "@/lib/data";
 import { Avatar } from "@/components/Avatar";
 
-const TAGS = ["doantotnghiep", "timcongsu", "thuctap", "portfolio"];
-
+/** Cột phải trang chủ: ai đang online và sự kiện sắp tới. */
 export function Suggestions() {
-  const [following, setFollowing] = useState<string[]>([]);
-  const people = USERS.filter((u) => u.handle !== ME && u.handle !== "quocbao").slice(0, 3);
-  const top = [...PROJECTS].sort((a, b) => b.likes - a.likes).slice(0, 4);
+  const [going, setGoing] = useState<string[]>([]);
+  const people = ONLINE.map(userOf).filter((u) => u !== undefined);
+  const rest = ONLINE_TOTAL - people.length;
 
   return (
     <aside className="hidden flex-col gap-3 lg:flex lg:sticky lg:top-[88px]">
       <section className="rounded-2xl border border-line bg-white p-4">
-        <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Dự án nổi bật tuần này</h2>
-        <ol className="mt-2 flex flex-col">
-          {top.map((p) => (
-            <li key={p.slug}>
-              <Link href={`/p/${p.slug}`} className="-mx-2 block rounded-lg px-2 py-2 hover:bg-mist">
-                <span className="line-clamp-1 text-sm font-semibold">{p.title}</span>
-                <span className="text-[13px] text-moss">
-                  {p.field}, {p.likes} lượt thích
-                </span>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Đang online</h2>
+          <span className="text-[13px] text-moss">{ONLINE_TOTAL} người</span>
+        </div>
+        <ul className="mt-3 flex">
+          {people.map((u) => (
+            <li key={u.handle} className="-mr-1">
+              <Link href={`/u/${u.handle}`} className="relative block rounded-full ring-[3px] ring-white" aria-label={`${u.name}, đang online`}>
+                <Avatar initials={u.initials} tone={u.tone} size={40} />
+                <span className="absolute bottom-0 right-0 h-[11px] w-[11px] rounded-full bg-leaf ring-2 ring-white" />
               </Link>
             </li>
           ))}
-        </ol>
-        <Link href="/explore" className="mt-1 inline-block text-sm font-semibold text-leaf-deep hover:underline">
-          Xem tất cả dự án
-        </Link>
+          {rest > 0 && (
+            <li className="flex h-10 w-10 items-center justify-center rounded-full bg-mist text-[13px] font-bold text-moss ring-[3px] ring-white">
+              +{rest}
+            </li>
+          )}
+        </ul>
       </section>
 
       <section className="rounded-2xl border border-line bg-white p-4">
-        <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Người nên theo dõi</h2>
-        <ul className="mt-3 flex flex-col gap-4">
-          {people.map((u) => {
-            const on = following.includes(u.handle);
+        <div className="flex items-baseline justify-between">
+          <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Sự kiện sắp tới</h2>
+          <Link href="/community" className="text-[13px] font-semibold text-leaf-deep hover:underline">
+            Lịch
+          </Link>
+        </div>
+        <ul className="mt-3 flex flex-col gap-3">
+          {EVENTS.map((e) => {
+            const on = going.includes(e.id);
             return (
-              <li key={u.handle} className="flex items-start gap-3">
-                <Avatar initials={u.initials} tone={u.tone} size={44} />
+              <li key={e.id} className="flex gap-3">
+                <span className="flex h-[52px] w-12 shrink-0 flex-col overflow-hidden rounded-xl border border-line text-center" aria-hidden="true">
+                  <span className="bg-ink py-0.5 text-[11px] font-bold text-leaf">{e.month}</span>
+                  <span className="flex flex-1 items-center justify-center font-display text-xl font-bold">{e.day}</span>
+                </span>
                 <div className="min-w-0 flex-1">
-                  <Link href={`/u/${u.handle}`} className="block truncate text-[15px] font-semibold hover:underline">
-                    {u.name}
-                  </Link>
-                  <p className="line-clamp-2 text-[13px] leading-snug text-moss">{u.headline}</p>
-                  <button
+                  <p className="text-sm font-bold leading-snug">
+                    <span className="sr-only">
+                      Ngày {e.day} {e.month},{" "}
+                    </span>
+                    {e.title}
+                  </p>
+                  <p className="text-xs text-moss">
+                    {e.where}, {e.interested + (on ? 1 : 0)} người quan tâm
+                  </p>
+                  <motion.button
                     type="button"
+                    whileTap={{ scale: 0.95 }}
                     aria-pressed={on}
-                    onClick={() => setFollowing((f) => (on ? f.filter((h) => h !== u.handle) : [...f, u.handle]))}
-                    className={`mt-2 inline-flex h-8 items-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold transition-colors ${
-                      on ? "border-line bg-mist text-moss" : "border-ink text-ink hover:bg-mist"
+                    onClick={() => setGoing((g) => (on ? g.filter((x) => x !== e.id) : [...g, e.id]))}
+                    className={`mt-1.5 inline-flex h-[30px] items-center gap-1 rounded-full border px-3 text-xs font-bold transition-colors ${
+                      on ? "border-leaf-deep bg-sap text-leaf-deep" : "border-ink bg-white hover:bg-mist"
                     }`}
                   >
-                    {on ? <Check className="h-4 w-4" aria-hidden="true" /> : <Plus className="h-4 w-4" aria-hidden="true" />}
-                    {on ? "Đang theo dõi" : "Theo dõi"}
-                  </button>
+                    {on && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
+                    {on ? "Đã quan tâm" : "Quan tâm"}
+                  </motion.button>
                 </div>
               </li>
             );
           })}
         </ul>
       </section>
-
-      <section className="rounded-2xl bg-ink p-4 text-white">
-        <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Chủ đề sôi nổi</h2>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {TAGS.map((t) => (
-            <li key={t}>
-              <Link href={`/explore?q=${t}`} className="inline-block rounded-full border border-ink-line px-3 py-1.5 text-sm font-medium text-leaf hover:bg-white/10">
-                #{t}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <p className="px-2 text-xs leading-relaxed text-moss">
-        Grovelyn đang thử nghiệm. Góp ý gửi về {userOf(ME)?.name ?? "nhóm phát triển"}.
-      </p>
     </aside>
   );
 }
