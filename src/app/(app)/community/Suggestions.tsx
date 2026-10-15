@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Check } from "lucide-react";
-import { EVENTS, ONLINE, ONLINE_TOTAL, userOf } from "@/lib/data";
+import { ONLINE, ONLINE_TOTAL, userOf } from "@/lib/data";
+import { EVENTS, dateParts, placeLine } from "@/lib/events";
 import { Avatar } from "@/components/Avatar";
 
 /** Cột phải trang chủ: ai đang online và sự kiện sắp tới. */
@@ -40,34 +41,33 @@ export function Suggestions() {
       <section className="rounded-2xl border border-line bg-white p-4">
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Sự kiện sắp tới</h2>
-          <Link href="/community" className="text-[13px] font-semibold text-leaf-deep hover:underline">
-            Lịch
+          <Link href="/events" className="text-[13px] font-semibold text-leaf-deep hover:underline">
+            Xem tất cả
           </Link>
         </div>
         <ul className="mt-3 flex flex-col gap-3">
-          {EVENTS.map((e) => {
-            const on = going.includes(e.id);
+          {EVENTS.slice(0, 3).map((e) => {
+            const on = going.includes(e.slug);
+            const d = dateParts(e.date);
             return (
-              <li key={e.id} className="flex gap-3">
+              <li key={e.slug} className="flex gap-3">
                 <span className="flex h-[52px] w-12 shrink-0 flex-col overflow-hidden rounded-xl border border-line text-center" aria-hidden="true">
-                  <span className="bg-ink py-0.5 text-[11px] font-bold text-leaf">{e.month}</span>
-                  <span className="flex flex-1 items-center justify-center font-display text-xl font-bold">{e.day}</span>
+                  <span className="bg-ink py-0.5 text-[11px] font-bold text-leaf">{d.tag}</span>
+                  <span className="flex flex-1 items-center justify-center font-display text-xl font-bold">{d.day}</span>
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold leading-snug">
-                    <span className="sr-only">
-                      Ngày {e.day} {e.month},{" "}
-                    </span>
+                  <Link href={`/events/${e.slug}`} className="block text-sm font-bold leading-snug hover:underline">
+                    <span className="sr-only">{d.long}, </span>
                     {e.title}
-                  </p>
+                  </Link>
                   <p className="text-xs text-moss">
-                    {e.where}, {e.interested + (on ? 1 : 0)} người quan tâm
+                    {placeLine(e)}, {e.from}, {e.interested + (on ? 1 : 0)} người quan tâm
                   </p>
                   <motion.button
                     type="button"
                     whileTap={{ scale: 0.95 }}
                     aria-pressed={on}
-                    onClick={() => setGoing((g) => (on ? g.filter((x) => x !== e.id) : [...g, e.id]))}
+                    onClick={() => setGoing((g) => (on ? g.filter((x) => x !== e.slug) : [...g, e.slug]))}
                     className={`mt-1.5 inline-flex h-[30px] items-center gap-1 rounded-full border px-3 text-xs font-bold transition-colors ${
                       on ? "border-leaf-deep bg-sap text-leaf-deep" : "border-ink bg-white hover:bg-mist"
                     }`}
