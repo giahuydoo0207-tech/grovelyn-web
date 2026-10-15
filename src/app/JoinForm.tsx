@@ -12,10 +12,12 @@ const ROLES: { value: Role; hint: string }[] = [
   { value: "Doanh nghiệp", hint: "Tìm người qua dự án" },
 ];
 
-type Step = "form" | "code" | "done";
+type Step = "form" | "code" | "role" | "done";
+const STEPS: Step[] = ["form", "code", "role"];
 
 /**
- * Đăng ký không mật khẩu: nhập email và mã mời, nhận mã 6 số, nhập mã là vào.
+ * Đăng ký không mật khẩu theo 3 bước ngắn: email và mã mời, mã 6 số gửi về email, chọn vai trò.
+ * Chia bước để khung đăng ký luôn vừa một màn hình.
  * Bản giao diện: chưa gửi email thật, mã nào đủ 6 số cũng qua.
  */
 export function JoinForm() {
@@ -42,18 +44,36 @@ export function JoinForm() {
       // Dán cả mã 6 số vào một ô.
       const next = digits.slice(0, 6).split("");
       setCode((c) => c.map((_, k) => next[k] ?? ""));
-      if (next.length === 6) setStep("done");
+      if (next.length === 6) setStep("role");
       return;
     }
     const next = [...code];
     next[i] = digits;
     setCode(next);
     if (digits && i < 5) boxes.current[i + 1]?.focus();
-    if (next.every(Boolean)) setStep("done");
+    if (next.every(Boolean)) setStep("role");
   };
 
   return (
     <div className="w-full">
+      {step !== "done" && (
+        <ol className="mb-6 flex gap-1.5" aria-label="Các bước tham gia">
+          {STEPS.map((s, i) => {
+            const reached = STEPS.indexOf(step) >= i;
+            return (
+              <li key={s} className="h-1 flex-1 overflow-hidden rounded-full bg-line" aria-current={s === step ? "step" : undefined}>
+                <motion.span
+                  className="block h-full rounded-full bg-leaf-deep"
+                  initial={false}
+                  animate={{ width: reached ? "100%" : "0%" }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                />
+                <span className="sr-only">Bước {i + 1}</span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
       <AnimatePresence mode="wait" initial={false}>
         {step === "form" && (
           <motion.form
@@ -64,10 +84,10 @@ export function JoinForm() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.22 }}
-            className="flex flex-col gap-5"
+            className="flex flex-col gap-4"
           >
             <div>
-              <h2 className="font-display text-3xl font-bold tracking-[-0.03em]">Tham gia Grovelyn</h2>
+              <h2 className="font-display text-[28px] font-bold leading-tight tracking-[-0.03em]">Tham gia Grovelyn</h2>
               <p className="mt-2 text-[15px] text-moss">
                 Đã có tài khoản?{" "}
                 <Link href="/explore" className="font-semibold text-leaf-deep underline-offset-4 hover:underline">
@@ -117,43 +137,6 @@ export function JoinForm() {
               />
             </label>
 
-            <fieldset className="flex flex-col gap-2">
-              <legend className="mb-2 text-sm font-semibold">Bạn tham gia với tư cách</legend>
-              <div className="flex flex-col gap-2">
-                {ROLES.map((r) => {
-                  const on = r.value === role;
-                  return (
-                    <label
-                      key={r.value}
-                      className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
-                        on ? "border-ink bg-sap/60" : "border-line hover:bg-mist"
-                      }`}
-                    >
-                      <input type="radio" name="role" value={r.value} checked={on} onChange={() => setRole(r.value)} className="sr-only" />
-                      <span
-                        aria-hidden="true"
-                        className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-ink" : "border-line"}`}
-                      >
-                        {on && (
-                          <motion.span
-                            layoutId="role-check"
-                            className="flex h-5 w-5 items-center justify-center rounded-full bg-ink text-leaf"
-                            transition={{ type: "spring", stiffness: 500, damping: 32 }}
-                          >
-                            <Check className="h-3 w-3" strokeWidth={3} />
-                          </motion.span>
-                        )}
-                      </span>
-                      <span className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3">
-                        <span className="text-[15px] font-semibold">{r.value}</span>
-                        <span className="text-sm text-moss">{r.hint}</span>
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </fieldset>
-
             <AnimatePresence>
               {error && (
                 <motion.p
@@ -176,7 +159,7 @@ export function JoinForm() {
               Gửi mã xác nhận
             </motion.button>
             <p className="text-[13px] leading-relaxed text-moss">
-              Không cần mật khẩu. Tài khoản doanh nghiệp được duyệt trước khi dùng.
+              Không cần mật khẩu. Mã xác nhận sẽ gửi về email này.
             </p>
           </motion.form>
         )}
@@ -224,6 +207,72 @@ export function JoinForm() {
             <button type="button" onClick={() => setStep("form")} className="self-start text-sm font-semibold text-leaf-deep hover:underline">
               Đổi email
             </button>
+          </motion.div>
+        )}
+
+        {step === "role" && (
+          <motion.div
+            key="role"
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.22 }}
+            className="flex flex-col gap-5"
+          >
+            <div>
+              <h2 className="font-display text-[28px] font-bold leading-tight tracking-[-0.03em]">Bạn dùng Grovelyn để làm gì?</h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-moss">Chọn một vai trò. Đổi lại được trong phần cài đặt.</p>
+            </div>
+            <fieldset className="flex flex-col gap-2">
+              <legend className="sr-only">Vai trò</legend>
+              <div className="flex flex-col gap-2">
+                {ROLES.map((r) => {
+                  const on = r.value === role;
+                  return (
+                    <label
+                      key={r.value}
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
+                        on ? "border-ink bg-sap/60" : "border-line hover:bg-mist"
+                      }`}
+                    >
+                      <input type="radio" name="role" value={r.value} checked={on} onChange={() => setRole(r.value)} className="sr-only" />
+                      <span
+                        aria-hidden="true"
+                        className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-ink" : "border-line"}`}
+                      >
+                        {on && (
+                          <motion.span
+                            layoutId="role-check"
+                            className="flex h-5 w-5 items-center justify-center rounded-full bg-ink text-leaf"
+                            transition={{ type: "spring", stiffness: 500, damping: 32 }}
+                          >
+                            <Check className="h-3 w-3" strokeWidth={3} />
+                          </motion.span>
+                        )}
+                      </span>
+                      <span className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3">
+                        <span className="text-[15px] font-semibold">{r.value}</span>
+                        <span className="text-sm text-moss">{r.hint}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            {role === "Doanh nghiệp" && (
+              <p className="rounded-xl bg-mist px-4 py-3 text-sm leading-relaxed text-moss">
+                Tài khoản doanh nghiệp được duyệt trước khi xem hồ sơ ứng viên, thường trong một ngày.
+              </p>
+            )}
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="button"
+              onClick={() => setStep("done")}
+              className="rounded-xl bg-leaf py-3.5 text-base font-bold text-ink transition-colors hover:bg-[#6ee04d]"
+            >
+              Tiếp tục
+            </motion.button>
           </motion.div>
         )}
 
