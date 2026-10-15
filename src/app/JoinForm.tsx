@@ -53,7 +53,7 @@ export function JoinForm() {
   };
 
   return (
-    <div className="w-full max-w-[420px]">
+    <div className="w-full">
       <AnimatePresence mode="wait" initial={false}>
         {step === "form" && (
           <motion.form
@@ -119,27 +119,35 @@ export function JoinForm() {
 
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-2 text-sm font-semibold">Bạn tham gia với tư cách</legend>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col gap-2">
                 {ROLES.map((r) => {
                   const on = r.value === role;
                   return (
                     <label
                       key={r.value}
-                      className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border p-3 text-left transition-colors ${
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
                         on ? "border-ink bg-sap/60" : "border-line hover:bg-mist"
                       }`}
                     >
                       <input type="radio" name="role" value={r.value} checked={on} onChange={() => setRole(r.value)} className="sr-only" />
-                      <span className="text-[15px] font-semibold">{r.value}</span>
-                      <span className="text-xs leading-snug text-moss">{r.hint}</span>
-                      {on && (
-                        <motion.span
-                          layoutId="role-check"
-                          className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-leaf"
-                        >
-                          <Check className="h-3 w-3" strokeWidth={3} aria-hidden="true" />
-                        </motion.span>
-                      )}
+                      <span
+                        aria-hidden="true"
+                        className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-ink" : "border-line"}`}
+                      >
+                        {on && (
+                          <motion.span
+                            layoutId="role-check"
+                            className="flex h-5 w-5 items-center justify-center rounded-full bg-ink text-leaf"
+                            transition={{ type: "spring", stiffness: 500, damping: 32 }}
+                          >
+                            <Check className="h-3 w-3" strokeWidth={3} />
+                          </motion.span>
+                        )}
+                      </span>
+                      <span className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3">
+                        <span className="text-[15px] font-semibold">{r.value}</span>
+                        <span className="text-sm text-moss">{r.hint}</span>
+                      </span>
                     </label>
                   );
                 })}
