@@ -36,7 +36,7 @@ export default async function ProfilePage({ params }: PageProps<"/u/[handle]">) 
         <div className="flex flex-col gap-5 px-5 pb-6 sm:px-8">
           <div className="relative z-10 -mt-14 flex flex-wrap items-end justify-between gap-4">
             <Avatar initials={user.initials} tone={user.tone} size={112} ring />
-            <ProfileActions isMe={isMe} name={user.name} />
+            <ProfileActions isMe={isMe} name={user.name} handle={user.handle} />
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-3">

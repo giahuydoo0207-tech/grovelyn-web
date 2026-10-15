@@ -8,9 +8,7 @@ import { Bell, Compass, House, MessageCircleMore, Plus, Search, type LucideIcon 
 import { Mark } from "./Logo";
 import { Avatar } from "./Avatar";
 import { ME, NOTICES, userOf } from "@/lib/data";
-
-/** Tin nhắn nằm ở Replyn, mở sang tab mới. */
-const REPLYN_URL = "https://replyn-web.vercel.app";
+import { useChat } from "./chat/ChatProvider";
 
 interface Item {
   href: string;
@@ -18,7 +16,6 @@ interface Item {
   icon?: LucideIcon;
   match: (p: string) => boolean;
   badge?: number;
-  external?: boolean;
   me?: boolean;
 }
 
@@ -28,7 +25,7 @@ const ITEMS: Item[] = [
   { href: "/community", label: "Trang chủ", icon: House, match: (p) => p.startsWith("/community") },
   { href: "/explore", label: "Khám phá", icon: Compass, match: (p) => p.startsWith("/explore") || p.startsWith("/p/") },
   { href: "/new", label: "Tạo dự án", icon: Plus, match: (p) => p.startsWith("/new") },
-  { href: REPLYN_URL, label: "Nhắn tin", icon: MessageCircleMore, match: () => false, external: true },
+  { href: "/messages", label: "Nhắn tin", icon: MessageCircleMore, match: (p) => p.startsWith("/messages") },
   { href: "/notifications", label: "Thông báo", icon: Bell, match: (p) => p.startsWith("/notifications"), badge: unread },
   { href: `/u/${ME}`, label: "Tôi", match: (p) => p === `/u/${ME}`, me: true },
 ];
@@ -64,12 +61,13 @@ function NavLink({ item, active, compact }: { item: Item; active: boolean; compa
     compact ? "h-full flex-1 pt-1" : "h-16 min-w-[56px] px-1.5 xl:min-w-[60px]"
   } ${active ? "text-ink" : "text-moss hover:text-ink"}`;
 
-  return item.external ? (
-    <a href={item.href} target="_blank" rel="noreferrer" className={cls} aria-label={`${item.label} (mở Replyn)`}>
-      {body}
-    </a>
-  ) : (
-    <Link href={item.href} className={cls} aria-current={active ? "page" : undefined} aria-label={item.label}>
+  return (
+    <Link
+      href={item.href}
+      className={cls}
+      aria-current={active ? "page" : undefined}
+      aria-label={item.badge ? `${item.label}, ${item.badge} chưa đọc` : item.label}
+    >
       {body}
     </Link>
   );
@@ -83,6 +81,8 @@ export function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
+  const { unreadCount } = useChat();
+  const items = ITEMS.map((i) => (i.href === "/messages" ? { ...i, badge: unreadCount } : i));
 
   useEffect(() => {
     // Phím "/" đưa con trỏ vào ô tìm kiếm, trừ khi đang gõ trong ô khác.
@@ -129,7 +129,7 @@ export function NavBar() {
           </form>
 
           <nav aria-label="Điều hướng chính" className="hidden justify-self-end md:flex">
-            {ITEMS.map((item) => (
+            {items.map((item) => (
               <NavLink key={item.label} item={item} active={item.match(pathname)} />
             ))}
           </nav>
@@ -143,7 +143,7 @@ export function NavBar() {
         aria-label="Điều hướng chính"
         className="fixed inset-x-0 bottom-0 z-30 flex h-16 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
       >
-        {ITEMS.filter((i) => !i.me && !i.external).map((item) => (
+        {items.filter((i) => !i.me).map((item) => (
           <NavLink key={item.label} item={item} active={item.match(pathname)} compact />
         ))}
       </nav>
