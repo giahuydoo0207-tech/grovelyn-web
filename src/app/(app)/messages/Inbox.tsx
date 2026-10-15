@@ -204,10 +204,11 @@ export function Inbox() {
   const infoClass = info === null ? "hidden lg:flex" : info ? "flex" : "hidden";
 
   return (
-    <div className="relative flex h-[calc(100dvh-11.5rem)] min-h-[480px] overflow-hidden rounded-[22px] border border-line bg-white md:h-[calc(100dvh-8.5rem)]">
+    // Phủ kín màn hình dưới thanh trên cùng; điện thoại chừa chỗ cho thanh tab ở đáy.
+    <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] top-16 z-20 flex overflow-hidden bg-white md:bottom-0">
       <section
         aria-label="Cuộc trò chuyện"
-        className={`${mobileChat ? "hidden" : "flex"} w-full min-w-0 flex-col border-line md:flex md:w-[300px] md:shrink-0 md:border-r lg:w-[340px]`}
+        className={`${mobileChat ? "hidden" : "flex"} w-full min-w-0 flex-col border-line md:flex md:w-[300px] md:shrink-0 md:border-r lg:w-[340px] 2xl:w-[380px]`}
       >
         <div className="flex items-center justify-between px-[18px] pb-2.5 pt-[18px]">
           <h1 className="font-display text-2xl font-bold tracking-[-0.02em]">Tin nhắn</h1>
@@ -314,7 +315,7 @@ export function Inbox() {
 
       <aside
         aria-label="Thông tin cuộc trò chuyện"
-        className={`${infoClass} absolute inset-y-0 right-0 z-10 w-[300px] max-w-full flex-col overflow-y-auto border-l border-line bg-white px-[18px] py-5 shadow-[-12px_0_40px_rgba(6,17,10,0.12)] lg:static lg:shrink-0 lg:shadow-none`}
+        className={`${infoClass} absolute inset-y-0 right-0 z-10 w-[300px] max-w-full 2xl:w-[340px] flex-col overflow-y-auto border-l border-line bg-white px-[18px] py-5 shadow-[-12px_0_40px_rgba(6,17,10,0.12)] lg:static lg:shrink-0 lg:shadow-none`}
       >
         <InfoPanel conv={conv} onClose={() => setInfo(false)} />
       </aside>
