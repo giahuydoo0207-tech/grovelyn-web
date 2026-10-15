@@ -36,7 +36,7 @@ export function NewProjectForm() {
 
   if (done) {
     return (
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-10 rounded-[24px] bg-ink p-8 text-white">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-8 rounded-[24px] bg-ink p-8 text-white">
         <p className="font-display text-3xl font-bold tracking-[-0.03em]">Đã tạo dự án {title || "mới"}</p>
         <p className="mt-2 text-fog">Phiên bản v1 đã lưu. Chia sẻ lên Cộng đồng để mọi người góp ý.</p>
         <div className="mt-6 flex flex-wrap gap-3">
@@ -53,7 +53,7 @@ export function NewProjectForm() {
 
   return (
     <form
-      className="mt-10 flex flex-col gap-7"
+      className="mt-8 flex flex-col gap-7"
       onSubmit={(e) => {
         e.preventDefault();
         setDone(true);
@@ -194,7 +194,7 @@ export function NewProjectForm() {
         <motion.button whileTap={{ scale: 0.98 }} type="submit" className="h-12 rounded-xl bg-leaf px-6 font-bold text-ink hover:bg-[#6ee04d]">
           Tạo dự án
         </motion.button>
-        <Link href="/explore" className="flex h-12 items-center rounded-xl px-5 font-semibold text-moss hover:bg-mist hover:text-ink">
+        <Link href="/community" className="flex h-12 items-center rounded-xl px-5 font-semibold text-moss hover:bg-mist hover:text-ink">
           Hủy
         </Link>
       </div>
