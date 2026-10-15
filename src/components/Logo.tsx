@@ -16,9 +16,9 @@ export function Mark({ size = 28, color = "currentColor", leaf = "var(--color-le
 export function Logo({ dark = false }: { dark?: boolean }) {
   return (
     <Link
-      href="/explore"
+      href="/community"
       className={`flex items-center gap-2 rounded-lg ${dark ? "text-white" : "text-ink"}`}
-      aria-label="Grovelyn, về trang Khám phá"
+      aria-label="Grovelyn, về Trang chủ"
     >
       <Mark size={28} />
       <span className="font-display text-[22px] font-bold tracking-[-0.03em]">Grovelyn</span>

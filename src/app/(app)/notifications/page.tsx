@@ -10,17 +10,17 @@ export default function NotificationsPage() {
   const read = NOTICES.filter((n) => !n.unread);
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="font-display text-[clamp(2.2rem,4.4vw,3.2rem)] font-bold leading-none tracking-[-0.045em]">Thông báo</h1>
+    <div className="mx-auto max-w-2xl rounded-2xl border border-line bg-white p-5 sm:p-7">
+      <h1 className="font-display text-[clamp(1.8rem,3.4vw,2.4rem)] font-bold leading-none tracking-[-0.045em]">Thông báo</h1>
       {[
         { title: "Mới", items: unread },
         { title: "Trước đó", items: read },
       ].map(
         (group) =>
           group.items.length > 0 && (
-            <section key={group.title} className="mt-8">
+            <section key={group.title} className="mt-6">
               <h2 className="text-sm font-semibold text-moss">{group.title}</h2>
-              <ul className="mt-3 flex flex-col">
+              <ul className="-mx-3 mt-2 flex flex-col gap-1">
                 {group.items.map((n) => {
                   const u = userOf(n.actor)!;
                   return (

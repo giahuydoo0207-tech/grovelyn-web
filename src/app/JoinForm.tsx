@@ -90,7 +90,7 @@ export function JoinForm() {
               <h2 className="font-display text-[28px] font-bold leading-tight tracking-[-0.03em]">Tham gia Grovelyn</h2>
               <p className="mt-2 text-[15px] text-moss">
                 Đã có tài khoản?{" "}
-                <Link href="/explore" className="font-semibold text-leaf-deep underline-offset-4 hover:underline">
+                <Link href="/community" className="font-semibold text-leaf-deep underline-offset-4 hover:underline">
                   Đăng nhập
                 </Link>
               </p>
@@ -295,15 +295,15 @@ export function JoinForm() {
             <div>
               <h2 className="font-display text-3xl font-bold tracking-[-0.03em]">Chào mừng tới Grovelyn</h2>
               <p className="mt-2 text-[15px] leading-relaxed text-moss">
-                Bạn tham gia với tư cách {role.toLowerCase()}. Bước tiếp theo là điền hồ sơ, hoặc xem dự án của mọi người trước.
+                Bạn tham gia với tư cách {role.toLowerCase()}. Vào xem mọi người đang làm gì, hồ sơ điền sau cũng được.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link href="/u/giahuy" className="rounded-xl bg-ink px-5 py-3 font-semibold text-white transition-colors hover:bg-ink-2">
-                Điền hồ sơ
+              <Link href="/community" className="rounded-xl bg-leaf px-5 py-3 font-bold text-ink transition-colors hover:bg-[#6ee04d]">
+                Vào Grovelyn
               </Link>
-              <Link href="/explore" className="rounded-xl border border-line px-5 py-3 font-semibold transition-colors hover:bg-mist">
-                Xem dự án
+              <Link href="/u/giahuy" className="rounded-xl border border-line px-5 py-3 font-semibold transition-colors hover:bg-mist">
+                Điền hồ sơ
               </Link>
             </div>
           </motion.div>
