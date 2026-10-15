@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/*
+ * Grovelyn tokens. Ba màu chủ đạo: lá, đen, trắng.
+ * - ink: đen ngả xanh rừng, dùng cho dock, ảnh bìa, khối nhấn.
+ * - leaf: xanh lá tươi, chỉ dùng làm nền nút chính và điểm nhấn (chữ đen trên lá).
+ * - leaf-deep: xanh đậm cho chữ/link trên nền trắng (đủ tương phản 4.5:1).
+ * - moss: chữ phụ trên nền trắng.
+ */
+@theme {
+  --color-ink: #06110a;
+  --color-ink-2: #12201a;
+  --color-ink-line: #213328;
+  --color-paper: #ffffff;
+  --color-mist: #f2f5ef;
+  --color-line: #e2e7de;
+  --color-leaf: #5bd13a;
+  --color-leaf-deep: #1d6b1d;
+  --color-sap: #dcf6cf;
+  --color-moss: #56614f;
+  --color-fog: #a8b5a6;
+
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+
+  --ease-grow: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-leaf-deep);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+/* Ẩn thanh cuộn ngang của hàng lọc ngành nhưng vẫn cuộn được. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
