@@ -12,7 +12,7 @@ const SHORTCUTS: { href: string; label: string; icon: LucideIcon; count?: number
   { href: "/explore", label: "Đã lưu", icon: Bookmark, filled: true },
   { href: "/community", label: "Nhóm", icon: Users, count: GROUPS.filter((g) => g.fresh > 0).length + 1 },
   { href: "/community", label: "Bản tin", icon: Newspaper },
-  { href: "/community", label: "Sự kiện", icon: CalendarDays, count: 2 },
+  { href: "/events", label: "Sự kiện", icon: CalendarDays, count: 2 },
   { href: "/community", label: "Thử thách", icon: Flag },
   { href: "/explore", label: "Cơ hội", icon: BriefcaseBusiness },
 ];
