@@ -481,20 +481,87 @@ export const QUOTA_MB = 100;
 
 /* Cộng đồng: nhóm và người đang online (sự kiện ở events.ts) (dữ liệu mẫu cho bản giao diện). */
 
+export type GroupPrivacy = "Công khai" | "Riêng tư";
+
+export interface GroupPerms {
+  invite: boolean;
+  approvePosts: boolean;
+  attachProjects: boolean;
+  createEvents: boolean;
+}
+
 export interface Group {
   slug: string;
   mark: string;
   name: string;
   members: number;
+  /** Số bài mới kể từ lần cuối bạn vào nhóm. */
   fresh: number;
   tone: CoverTone;
+  description: string;
+  privacy: GroupPrivacy;
+  fields: Field[];
+  area: string;
+  founded: string;
+  admins: string[];
+  rules: string[];
+  coverSeed: number;
+  coverTone: CoverTone;
+  cover?: string;
+  /** Bạn (ME) đã ở trong nhóm chưa. */
+  joined: boolean;
+  /** Lý do gợi ý, cho nhóm bạn chưa tham gia. */
+  why?: string;
+  perms: GroupPerms;
 }
 
+const DEFAULT_PERMS: GroupPerms = { invite: true, approvePosts: false, attachProjects: true, createEvents: true };
+
 export const GROUPS: Group[] = [
-  { slug: "kien-truc-nha-pho", mark: "KT", name: "Kiến trúc nhà phố", members: 128, fresh: 4, tone: "ink" },
-  { slug: "vhu-lam-du-an", mark: "VH", name: "Sinh viên VHU làm dự án", members: 312, fresh: 0, tone: "leaf" },
-  { slug: "freelance-thiet-ke", mark: "FL", name: "Freelance thiết kế", members: 86, fresh: 1, tone: "sap" },
+  {
+    slug: "kien-truc-nha-pho", mark: "KT", name: "Kiến trúc nhà phố", members: 128, fresh: 4, tone: "ink",
+    description: "Chia sẻ đồ án, bản vẽ và giải pháp nhà ở tiết kiệm năng lượng cho khí hậu nóng ẩm.",
+    privacy: "Công khai", fields: ["Kiến trúc"], area: "TP. Hồ Chí Minh", founded: "2026-10-02", admins: ["quocbao", "giahuy"],
+    rules: ["Ghi nguồn khi dùng bản vẽ của người khác", "Góp ý vào dự án, không vào con người", "Tìm cộng sự thì ghi rõ thời gian và quyền lợi"],
+    coverSeed: 47, coverTone: "ink", cover: "/demo/event-cover.svg", joined: true, perms: DEFAULT_PERMS,
+  },
+  {
+    slug: "vhu-lam-du-an", mark: "VH", name: "Sinh viên VHU làm dự án", members: 312, fresh: 0, tone: "leaf",
+    description: "Sinh viên Đại học Văn Hiến mọi ngành tìm nhau làm dự án, khoe đồ án và rủ nhau đi thi.",
+    privacy: "Riêng tư", fields: ["Công nghệ thông tin", "Thiết kế", "Kinh tế"], area: "TP. Hồ Chí Minh", founded: "2026-09-12", admins: ["giahuy"],
+    rules: ["Chỉ dành cho sinh viên và cựu sinh viên VHU", "Dự án nhóm thì ghi đủ tên thành viên"],
+    coverSeed: 12, coverTone: "leaf", joined: true, perms: { ...DEFAULT_PERMS, approvePosts: true },
+  },
+  {
+    slug: "freelance-thiet-ke", mark: "FL", name: "Freelance thiết kế", members: 86, fresh: 1, tone: "sap",
+    description: "Người làm thiết kế tự do chia sẻ cách nhận việc, báo giá và giữ khách.",
+    privacy: "Riêng tư", fields: ["Thiết kế", "Truyền thông"], area: "Toàn quốc, sinh hoạt trực tuyến", founded: "2026-08-20", admins: ["thuha"],
+    rules: ["Không đăng việc trả công dưới mức thị trường", "Góp ý vào dự án, không vào con người"],
+    coverSeed: 31, coverTone: "sap", joined: true, perms: DEFAULT_PERMS,
+  },
+  {
+    slug: "robot-vi-dieu-khien", mark: "RB", name: "Robot và vi điều khiển", members: 204, fresh: 0, tone: "ink",
+    description: "Lắp, nạp code và thử robot cùng nhau. Có buổi lắp ráp mở mỗi tháng.",
+    privacy: "Công khai", fields: ["Kỹ thuật", "Công nghệ thông tin"], area: "TP. Hồ Chí Minh", founded: "2026-07-01", admins: ["hoanglong"],
+    rules: ["Đăng sơ đồ mạch kèm code khi hỏi lỗi"], coverSeed: 88, coverTone: "ink", joined: false,
+    why: "Võ Hoàng Long và 2 người bạn theo dõi đang ở đây", perms: DEFAULT_PERMS,
+  },
+  {
+    slug: "dung-phim-ngan", mark: "DP", name: "Dựng phim ngắn", members: 97, fresh: 0, tone: "sap",
+    description: "Quay, dựng và chấm phim ngắn cho thương hiệu nhỏ.", privacy: "Công khai", fields: ["Truyền thông", "Marketing"],
+    area: "Toàn quốc, sinh hoạt trực tuyến", founded: "2026-06-15", admins: ["ngocanh"], rules: [], coverSeed: 5, coverTone: "sap", joined: false,
+    why: "Hợp với kỹ năng Quay dựng trong hồ sơ", perms: DEFAULT_PERMS,
+  },
+  {
+    slug: "react-nextjs-vn", mark: "RN", name: "React và Next.js Việt Nam", members: 1240, fresh: 0, tone: "leaf",
+    description: "Hỏi đáp, chia sẻ dự án và cơ hội việc làm cho người làm React, Next.js.", privacy: "Riêng tư", fields: ["Công nghệ thông tin"],
+    area: "Toàn quốc, sinh hoạt trực tuyến", founded: "2026-03-01", admins: ["minhkhoa"], rules: [], coverSeed: 64, coverTone: "leaf", joined: false,
+    why: "Nhiều dự án Công nghệ thông tin bạn đã lưu", perms: { ...DEFAULT_PERMS, approvePosts: true },
+  },
 ];
+
+export const MY_GROUPS = GROUPS.filter((g) => g.joined);
+export const groupOf = (slug: string) => GROUPS.find((g) => g.slug === slug);
 
 /** Người đang online, hiện tối đa vài avatar và đếm phần còn lại. */
 export const ONLINE = ["quocbao", "thuha", "minhkhoa", "ngocanh", "hoanglong"];
