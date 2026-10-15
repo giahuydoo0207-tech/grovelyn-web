@@ -63,8 +63,8 @@ export function ImageCropper({ src, ratio, round = false, title = "Chỉnh khung
     return () => window.removeEventListener("keydown", onKey);
   }, [onCancel]);
 
-  const stageH = Math.round(stageW * 0.58);
-  let fw = round ? Math.min(stageH * 0.8, 320) : stageW * 0.86;
+  const stageH = Math.round(stageW * 0.565);
+  let fw = round || ratio === 1 ? Math.min(stageH * 0.8, 440) : stageW * 0.92;
   let fh = fw / ratio;
   if (fh > stageH * 0.86) {
     fh = stageH * 0.86;
@@ -105,7 +105,7 @@ export function ImageCropper({ src, ratio, round = false, title = "Chỉnh khung
     onDone(url);
   };
 
-  const previewW = round ? 88 : 220;
+  const previewW = ratio === 1 ? 96 : 280;
   const ps = previewW / fw;
   const imgStyle = (l: number, t: number, w: number, h: number) => ({ left: l, top: t, width: w, height: h });
 
@@ -120,7 +120,7 @@ export function ImageCropper({ src, ratio, round = false, title = "Chỉnh khung
         initial={{ opacity: 0, y: 16, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 32 }}
-        className="max-h-full w-full max-w-[760px] overflow-y-auto rounded-[22px] bg-white p-5 shadow-2xl outline-none sm:p-6"
+        className="max-h-full w-full max-w-[1040px] overflow-y-auto rounded-[22px] bg-white p-5 shadow-2xl outline-none sm:p-6"
       >
         <div className="flex items-center justify-between">
           <h2 id="crop-title" className="font-display text-[22px] font-bold tracking-[-0.02em]">

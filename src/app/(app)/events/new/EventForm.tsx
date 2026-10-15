@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUp, Camera, Check, Eye, ImagePlus, Plus, Trash2, X } from "lucide-react";
-import { GROUPS, ME, userOf } from "@/lib/data";
+import { MY_GROUPS as GROUPS, ME, userOf } from "@/lib/data";
 import {
   EVENT_MODES,
   SESSION_KINDS,
