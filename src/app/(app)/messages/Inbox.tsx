@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Bell, BellOff, FileText, Info, Search, SquarePen, X } from "lucide-react";
+import { ArrowLeft, Bell, BellOff, FileText, PanelRightClose, PanelRightOpen, Search, SquarePen, X } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { ProjectCover } from "@/components/ProjectCover";
 import { Composer, ConvAvatar, MessageList } from "@/components/chat/ChatParts";
@@ -26,8 +26,15 @@ function InfoPanel({ conv, onClose }: { conv: Conversation; onClose: () => void 
 
   return (
     <>
-      <div className="flex justify-end lg:hidden">
-        <button type="button" onClick={onClose} aria-label="Đóng thông tin" className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-mist">
+      <div className="-mt-1 mb-2 flex items-center justify-between">
+        <h2 className="text-sm font-bold text-moss">Thông tin</h2>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Ẩn thông tin"
+          title="Ẩn thông tin"
+          className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-mist"
+        >
           <X className="h-[18px] w-[18px]" aria-hidden="true" />
         </button>
       </div>
@@ -179,8 +186,8 @@ export function Inbox() {
   const { convs, convOf, active, setActive, markRead, muted, startDirect } = useChat();
   const [filter, setFilter] = useState<Filter>("Tất cả");
   const [q, setQ] = useState("");
-  // null: tự theo màn hình (hiện từ lg trở lên).
-  const [info, setInfo] = useState<boolean | null>(null);
+  // Cột thông tin bên phải ẩn sẵn, bấm nút ở đầu khung chat để mở.
+  const [info, setInfo] = useState(false);
   const [mobileChat, setMobileChat] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -201,7 +208,7 @@ export function Inbox() {
   };
 
   const l = lookOf(conv);
-  const infoClass = info === null ? "hidden lg:flex" : info ? "flex" : "hidden";
+  const infoClass = info ? "flex" : "hidden";
 
   return (
     // Phủ kín màn hình dưới thanh trên cùng; điện thoại chừa chỗ cho thanh tab ở đáy.
@@ -299,14 +306,14 @@ export function Inbox() {
           </span>
           <button
             type="button"
-            onClick={() => setInfo(!(info ?? window.matchMedia("(min-width: 1024px)").matches))}
-            aria-label="Thông tin cuộc trò chuyện"
-            aria-expanded={info ?? undefined}
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-              info === null ? "hover:bg-mist lg:bg-sap" : info ? "bg-sap" : "hover:bg-mist"
-            }`}
+            onClick={() => setInfo((v) => !v)}
+            aria-label={info ? "Ẩn thông tin" : "Hiện thông tin"}
+            title={info ? "Ẩn thông tin" : "Hiện thông tin"}
+            aria-expanded={info}
+            aria-controls="thong-tin-tro-chuyen"
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${info ? "bg-sap text-leaf-deep" : "hover:bg-mist"}`}
           >
-            <Info className="h-[18px] w-[18px]" aria-hidden="true" />
+            {info ? <PanelRightClose className="h-5 w-5" aria-hidden="true" /> : <PanelRightOpen className="h-5 w-5" aria-hidden="true" />}
           </button>
         </div>
         <MessageList conv={conv} />
@@ -314,6 +321,7 @@ export function Inbox() {
       </section>
 
       <aside
+        id="thong-tin-tro-chuyen"
         aria-label="Thông tin cuộc trò chuyện"
         className={`${infoClass} absolute inset-y-0 right-0 z-10 w-[300px] max-w-full 2xl:w-[340px] flex-col overflow-y-auto border-l border-line bg-white px-[18px] py-5 shadow-[-12px_0_40px_rgba(6,17,10,0.12)] lg:static lg:shrink-0 lg:shadow-none`}
       >
