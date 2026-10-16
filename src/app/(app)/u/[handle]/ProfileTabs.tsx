@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Pin } from "lucide-react";
 import type { Post, Project, User } from "@/lib/data";
@@ -25,10 +25,23 @@ export function ProfileTabs({
   isMe: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("Dự án");
+
+  // Liên kết "#bai-dang" (từ menu tài khoản) mở thẳng tab Bài đăng.
+  useEffect(() => {
+    const sync = () => {
+      if (window.location.hash === "#bai-dang") setTab("Bài đăng");
+    };
+    const raf = requestAnimationFrame(sync);
+    window.addEventListener("hashchange", sync);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("hashchange", sync);
+    };
+  }, []);
   const others = projects.filter((p) => !pinned.some((q) => q.slug === p.slug));
 
   return (
-    <div>
+    <div id="bai-dang" className="scroll-mt-24">
       <div role="tablist" aria-label="Hồ sơ" className="flex gap-6 border-b border-line">
         {TABS.map((t) => {
           const on = t === tab;

@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { Check, Mail } from "lucide-react";
+import { Check, LoaderCircle, LogOut, Mail } from "lucide-react";
 import type { Role } from "@/lib/data";
+import { signIn } from "./auth-actions";
 
 const ROLES: { value: Role; hint: string }[] = [
   { value: "Sinh viên", hint: "Lưu và khoe dự án" },
@@ -16,11 +17,18 @@ type Step = "form" | "code" | "role" | "done";
 const STEPS: Step[] = ["form", "code", "role"];
 
 /**
- * Đăng ký không mật khẩu theo 3 bước ngắn: email và mã mời, mã 6 số gửi về email, chọn vai trò.
- * Chia bước để khung đăng ký luôn vừa một màn hình.
- * Bản giao diện: chưa gửi email thật, mã nào đủ 6 số cũng qua.
+ * Tham gia hoặc đăng nhập không mật khẩu.
+ * Tham gia: email và mã mời, mã 6 số gửi về email, chọn vai trò. Đăng nhập: email rồi mã 6 số.
+ * Bản giao diện: chưa gửi email thật, mã nào đủ 6 số cũng qua; phiên đăng nhập lưu bằng cookie.
  */
 export function JoinForm() {
+  const params = useSearchParams();
+  const next = params.get("next") ?? undefined;
+  const signedOut = params.has("da-dang-xuat");
+  // Bị chuyển về từ một trang bên trong hoặc vừa đăng xuất thì mở sẵn khung đăng nhập.
+  const [mode, setMode] = useState<"join" | "login">(next || signedOut ? "login" : "join");
+  const [pending, startTransition] = useTransition();
+  const enter = (to?: string) => startTransition(() => signIn(to ?? next));
   const [step, setStep] = useState<Step>("form");
   const [role, setRole] = useState<Role>("Sinh viên");
   const [email, setEmail] = useState("");
@@ -32,7 +40,7 @@ export function JoinForm() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!/^\S+@\S+\.\S+$/.test(email)) return setError("Nhập email đúng dạng, ví dụ ban@email.com.");
-    if (invite.trim().length < 4) return setError("Nhập mã mời bạn được gửi. Chưa có mã thì hỏi người đã mời bạn.");
+    if (mode === "join" && invite.trim().length < 4) return setError("Nhập mã mời bạn được gửi. Chưa có mã thì hỏi người đã mời bạn.");
     setError("");
     setStep("code");
     setTimeout(() => boxes.current[0]?.focus(), 250);
@@ -44,19 +52,31 @@ export function JoinForm() {
       // Dán cả mã 6 số vào một ô.
       const next = digits.slice(0, 6).split("");
       setCode((c) => c.map((_, k) => next[k] ?? ""));
-      if (next.length === 6) setStep("role");
+      if (next.length === 6) codeDone();
       return;
     }
     const next = [...code];
     next[i] = digits;
     setCode(next);
     if (digits && i < 5) boxes.current[i + 1]?.focus();
-    if (next.every(Boolean)) setStep("role");
+    if (next.every(Boolean)) codeDone();
   };
+
+  // Đủ mã: đăng nhập thì vào luôn, tham gia thì sang bước chọn vai trò.
+  function codeDone() {
+    if (mode === "login") enter();
+    else setStep("role");
+  }
 
   return (
     <div className="w-full">
-      {step !== "done" && (
+      {signedOut && step === "form" && (
+        <p role="status" className="mb-5 flex items-center gap-2 rounded-xl bg-mist px-4 py-3 text-sm font-medium">
+          <LogOut className="h-4 w-4 shrink-0 text-leaf-deep" aria-hidden="true" />
+          Bạn đã đăng xuất. Hẹn gặp lại.
+        </p>
+      )}
+      {step !== "done" && mode === "join" && (
         <ol className="mb-6 flex gap-1.5" aria-label="Các bước tham gia">
           {STEPS.map((s, i) => {
             const reached = STEPS.indexOf(step) >= i;
@@ -87,18 +107,29 @@ export function JoinForm() {
             className="flex flex-col gap-4"
           >
             <div>
-              <h2 className="font-display text-[28px] font-bold leading-tight tracking-[-0.03em]">Tham gia Grovelyn</h2>
+              <h2 className="font-display text-[28px] font-bold leading-tight tracking-[-0.03em]">
+                {mode === "join" ? "Tham gia Grovelyn" : "Đăng nhập"}
+              </h2>
               <p className="mt-2 text-[15px] text-moss">
-                Đã có tài khoản?{" "}
-                <Link href="/community" className="font-semibold text-leaf-deep underline-offset-4 hover:underline">
-                  Đăng nhập
-                </Link>
+                {mode === "join" ? "Đã có tài khoản?" : "Chưa có tài khoản?"}{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode(mode === "join" ? "login" : "join");
+                    setError("");
+                  }}
+                  className="font-semibold text-leaf-deep underline-offset-4 hover:underline"
+                >
+                  {mode === "join" ? "Đăng nhập" : "Tham gia bằng mã mời"}
+                </button>
               </p>
             </div>
 
             <button
               type="button"
-              className="flex h-12 items-center justify-center gap-3 rounded-xl border border-line font-semibold transition-colors hover:bg-mist"
+              onClick={() => enter()}
+              disabled={pending}
+              className="flex h-12 items-center justify-center gap-3 rounded-xl border border-line font-semibold transition-colors hover:bg-mist disabled:opacity-60"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.3H12v4.3h5.9a5 5 0 01-2.2 3.3v2.7h3.6c2-1.9 3.2-4.7 3.2-8z" />
@@ -126,16 +157,18 @@ export function JoinForm() {
                 className="h-12 rounded-xl border border-line px-4 text-[15px] font-normal outline-none transition-colors focus:border-ink"
               />
             </label>
-            <label className="flex flex-col gap-2 text-sm font-semibold">
-              Mã mời
-              <input
-                value={invite}
-                onChange={(e) => setInvite(e.target.value.toUpperCase())}
-                placeholder="GROVE-2026"
-                autoComplete="off"
-                className="h-12 rounded-xl border border-line px-4 text-[15px] font-normal tracking-wide outline-none transition-colors focus:border-ink"
-              />
-            </label>
+            {mode === "join" && (
+              <label className="flex flex-col gap-2 text-sm font-semibold">
+                Mã mời
+                <input
+                  value={invite}
+                  onChange={(e) => setInvite(e.target.value.toUpperCase())}
+                  placeholder="GROVE-2026"
+                  autoComplete="off"
+                  className="h-12 rounded-xl border border-line px-4 text-[15px] font-normal tracking-wide outline-none transition-colors focus:border-ink"
+                />
+              </label>
+            )}
 
             <AnimatePresence>
               {error && (
@@ -156,7 +189,7 @@ export function JoinForm() {
               type="submit"
               className="h-13 rounded-xl bg-leaf py-3.5 text-base font-bold text-ink transition-colors hover:bg-[#6ee04d]"
             >
-              Gửi mã xác nhận
+              {mode === "join" ? "Gửi mã xác nhận" : "Gửi mã đăng nhập"}
             </motion.button>
             <p className="text-[13px] leading-relaxed text-moss">
               Không cần mật khẩu. Mã xác nhận sẽ gửi về email này.
@@ -204,9 +237,15 @@ export function JoinForm() {
                 ))}
               </div>
             </fieldset>
-            <button type="button" onClick={() => setStep("form")} className="self-start text-sm font-semibold text-leaf-deep hover:underline">
-              Đổi email
-            </button>
+            {pending ? (
+              <p role="status" className="flex items-center gap-2 text-sm font-semibold text-leaf-deep">
+                <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" /> Đang đăng nhập
+              </p>
+            ) : (
+              <button type="button" onClick={() => setStep("form")} className="self-start text-sm font-semibold text-leaf-deep hover:underline">
+                Đổi email
+              </button>
+            )}
           </motion.div>
         )}
 
@@ -299,12 +338,22 @@ export function JoinForm() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link href="/community" className="rounded-xl bg-leaf px-5 py-3 font-bold text-ink transition-colors hover:bg-[#6ee04d]">
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => enter()}
+                className="rounded-xl bg-leaf px-5 py-3 font-bold text-ink transition-colors hover:bg-[#6ee04d] disabled:opacity-60"
+              >
                 Vào Grovelyn
-              </Link>
-              <Link href="/u/giahuy" className="rounded-xl border border-line px-5 py-3 font-semibold transition-colors hover:bg-mist">
+              </button>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => enter("/u/giahuy")}
+                className="rounded-xl border border-line px-5 py-3 font-semibold transition-colors hover:bg-mist disabled:opacity-60"
+              >
                 Điền hồ sơ
-              </Link>
+              </button>
             </div>
           </motion.div>
         )}

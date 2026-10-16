@@ -6,9 +6,9 @@ import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { Bell, Compass, House, MessageCircleMore, Plus, Search, type LucideIcon } from "lucide-react";
 import { Mark } from "./Logo";
-import { Avatar } from "./Avatar";
-import { ME, NOTICES, userOf } from "@/lib/data";
+import { NOTICES } from "@/lib/data";
 import { useChat } from "./chat/ChatProvider";
+import { UserMenu } from "./UserMenu";
 
 interface Item {
   href: string;
@@ -16,7 +16,6 @@ interface Item {
   icon?: LucideIcon;
   match: (p: string) => boolean;
   badge?: number;
-  me?: boolean;
 }
 
 const unread = NOTICES.filter((n) => n.unread).length;
@@ -27,20 +26,14 @@ const ITEMS: Item[] = [
   { href: "/new", label: "Tạo dự án", icon: Plus, match: (p) => p.startsWith("/new") },
   { href: "/messages", label: "Nhắn tin", icon: MessageCircleMore, match: (p) => p.startsWith("/messages") },
   { href: "/notifications", label: "Thông báo", icon: Bell, match: (p) => p.startsWith("/notifications"), badge: unread },
-  { href: `/u/${ME}`, label: "Tôi", match: (p) => p === `/u/${ME}`, me: true },
 ];
 
 function NavLink({ item, active, compact }: { item: Item; active: boolean; compact?: boolean }) {
-  const me = userOf(ME)!;
   const Icon = item.icon;
   const body = (
     <>
       <span className="relative flex h-6 items-center justify-center">
-        {item.me ? (
-          <Avatar initials={me.initials} tone={me.tone} size={24} />
-        ) : Icon ? (
-          <Icon className="h-6 w-6" strokeWidth={active ? 2.4 : 1.9} aria-hidden="true" />
-        ) : null}
+        {Icon && <Icon className="h-6 w-6" strokeWidth={active ? 2.4 : 1.9} aria-hidden="true" />}
         {item.badge ? (
           <span className="absolute -right-2.5 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-leaf-deep px-1 text-[11px] font-bold text-white ring-2 ring-white">
             {item.badge}
@@ -132,10 +125,11 @@ export function NavBar() {
             {items.map((item) => (
               <NavLink key={item.label} item={item} active={item.match(pathname)} />
             ))}
+            <UserMenu />
           </nav>
-          <Link href={`/u/${ME}`} className="justify-self-end rounded-full md:hidden" aria-label="Hồ sơ của bạn">
-            <Avatar initials={userOf(ME)!.initials} tone={userOf(ME)!.tone} size={34} />
-          </Link>
+          <div className="justify-self-end md:hidden">
+            <UserMenu compact />
+          </div>
         </div>
       </header>
 
@@ -143,7 +137,7 @@ export function NavBar() {
         aria-label="Điều hướng chính"
         className="fixed inset-x-0 bottom-0 z-30 flex h-16 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
       >
-        {items.filter((i) => !i.me).map((item) => (
+        {items.map((item) => (
           <NavLink key={item.label} item={item} active={item.match(pathname)} compact />
         ))}
       </nav>

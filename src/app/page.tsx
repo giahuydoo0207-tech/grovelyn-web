@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { GrowingTree } from "@/components/GrowingTree";
 import { CircuitBackdrop } from "@/components/CircuitBackdrop";
 import { Mark } from "@/components/Logo";
@@ -35,7 +36,9 @@ export default function Landing() {
       <section className="relative flex items-center justify-center overflow-hidden bg-ink-2 px-5 py-12 sm:px-10 lg:py-8">
         <CircuitBackdrop className="pointer-events-none absolute inset-0 h-full w-full" />
         <div className="relative w-full max-w-[500px] rounded-[28px] bg-white p-7 text-ink sm:p-8 lg:max-h-full lg:overflow-y-auto shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/10">
-          <JoinForm />
+          <Suspense>
+            <JoinForm />
+          </Suspense>
         </div>
       </section>
     </div>
