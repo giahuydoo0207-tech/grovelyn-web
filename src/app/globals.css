@@ -37,10 +37,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-:focus-visible {
-  outline: 2px solid var(--color-leaf-deep);
-  outline-offset: 3px;
-  border-radius: 8px;
+/*
+ * Viền focus mặc định nằm trong lớp base để class outline-none của Tailwind ghi đè được.
+ * Ô nhập nằm trong khung đã có viền riêng (thanh tìm kiếm, ô chat) không bị vẽ thêm khung thứ hai.
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-leaf-deep);
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
 }
 
 .font-display {
