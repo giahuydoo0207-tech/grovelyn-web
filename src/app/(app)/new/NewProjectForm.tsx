@@ -3,8 +3,14 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { FileText, Globe2, Lock, UploadCloud, X } from "lucide-react";
-import { FIELDS, QUOTA_MB } from "@/lib/data";
+import { FileText, Globe2, Link2, Lock, Plus, UploadCloud, X } from "lucide-react";
+import { FIELDS, QUOTA_MB, type Field } from "@/lib/data";
+import { toEmbed } from "@/lib/embed";
+import { PHASES, type Phase } from "@/lib/showcase";
+import { TEMPLATES } from "@/lib/templates";
+
+const MAX_LINKS = 4;
+const MAX_TAGS = 6;
 
 const MAX_FILE_MB = 25;
 
@@ -21,7 +27,19 @@ export function NewProjectForm() {
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [title, setTitle] = useState("");
   const [done, setDone] = useState(false);
+  const [field, setField] = useState<Field>("Kiến trúc");
+  const [phase, setPhase] = useState<Phase>("concept");
+  const [links, setLinks] = useState<string[]>([""]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagDraft, setTagDraft] = useState("");
   const input = useRef<HTMLInputElement>(null);
+  const template = TEMPLATES[field];
+
+  const addTag = () => {
+    const t = tagDraft.trim().replace(/^#/, "");
+    if (t && !tags.includes(t) && tags.length < MAX_TAGS) setTags([...tags, t]);
+    setTagDraft("");
+  };
 
   const add = (list: FileList | null) => {
     if (!list) return;
@@ -38,7 +56,9 @@ export function NewProjectForm() {
     return (
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-8 rounded-[24px] bg-ink p-8 text-white">
         <p className="font-display text-3xl font-bold tracking-[-0.03em]">Đã tạo dự án {title || "mới"}</p>
-        <p className="mt-2 text-fog">Phiên bản v1 đã lưu. Chia sẻ lên Cộng đồng để mọi người góp ý.</p>
+        <p className="mt-2 text-fog">
+          Cột mốc đầu tiên “{PHASES.find((p) => p.id === phase)!.label}” đã lưu. Chia sẻ lên Cộng đồng để mọi người góp ý.
+        </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/community" className="rounded-xl bg-leaf px-5 py-3 font-bold text-ink">
             Chia sẻ lên Cộng đồng
@@ -73,7 +93,11 @@ export function NewProjectForm() {
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="flex flex-col gap-2 font-semibold">
           Ngành
-          <select className="h-12 rounded-xl border border-line bg-white px-3 font-normal outline-none focus:border-ink">
+          <select
+            value={field}
+            onChange={(e) => setField(e.target.value as Field)}
+            className="h-12 rounded-xl border border-line bg-white px-3 font-normal outline-none focus:border-ink"
+          >
             {FIELDS.filter((f) => f !== "Tất cả").map((f) => (
               <option key={f}>{f}</option>
             ))}
@@ -93,6 +117,128 @@ export function NewProjectForm() {
           className="rounded-xl border border-line px-4 py-3 font-normal leading-relaxed outline-none focus:border-ink"
         />
       </label>
+
+      <fieldset className="rounded-[22px] bg-mist p-5 sm:p-6">
+        <legend className="sr-only">Khung trình bày ngành {field}</legend>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={field} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.16 }} className="flex flex-col gap-6">
+            <div>
+              <p className="font-display text-xl font-bold tracking-[-0.02em]">Khung trình bày cho {field}</p>
+              <p className="mt-1 text-sm text-moss">Điền phần nào có, bỏ trống phần chưa có. Trang dự án sẽ tự xếp cho đẹp.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {template.facts.map((f) => (
+                <label key={f.key} className="flex flex-col gap-1.5 text-sm font-semibold">
+                  {f.label}
+                  <input name={`fact-${f.key}`} placeholder={f.placeholder} className="h-11 rounded-xl border border-line bg-white px-3.5 text-[15px] font-normal outline-none focus:border-ink" />
+                </label>
+              ))}
+            </div>
+            <div className="flex flex-col gap-4">
+              {template.sections.map((sec) => (
+                <label key={sec.heading} className="flex flex-col gap-1.5 text-sm font-semibold">
+                  {sec.heading}
+                  <textarea
+                    name={`section-${sec.heading}`}
+                    rows={2}
+                    placeholder={sec.prompt}
+                    className="rounded-xl border border-line bg-white px-3.5 py-2.5 text-[15px] font-normal leading-relaxed outline-none focus:border-ink"
+                  />
+                </label>
+              ))}
+            </div>
+            {template.beforeAfter && (
+              <p className="rounded-xl bg-white px-4 py-3 text-sm text-moss">
+                Ngành này hay có ảnh <strong className="text-ink">trước và sau</strong>. Đặt tên ảnh có chữ “truoc” và “sau” để trang dự án hiện thanh kéo so sánh.
+              </p>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </fieldset>
+
+      <fieldset>
+        <legend className="font-semibold">Dự án đang ở giai đoạn</legend>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {PHASES.map((p) => (
+            <label key={p.id} className={`cursor-pointer rounded-xl border px-3 py-3 text-center transition-colors ${phase === p.id ? "border-ink bg-sap/40" : "border-line hover:bg-mist"}`}>
+              <input type="radio" name="phase" className="sr-only" checked={phase === p.id} onChange={() => setPhase(p.id)} />
+              <span className="block font-semibold">{p.label}</span>
+              <span className="hidden text-xs text-moss sm:block">{p.hint}</span>
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-sm text-moss">Sau này bạn cập nhật cột mốc mới trong tab Hành trình của dự án.</p>
+      </fieldset>
+
+      <div>
+        <label htmlFor="tag-input" className="font-semibold">Thẻ</label>
+        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-xl border border-line px-3 py-2 focus-within:border-ink">
+          {tags.map((t) => (
+            <span key={t} className="inline-flex items-center gap-1 rounded-full bg-sap px-3 py-1 text-sm font-medium text-leaf-deep">
+              {t}
+              <button type="button" onClick={() => setTags(tags.filter((x) => x !== t))} aria-label={`Bỏ thẻ ${t}`} className="rounded-full p-0.5 hover:bg-white/60">
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </span>
+          ))}
+          {tags.length < MAX_TAGS && (
+            <input
+              id="tag-input"
+              value={tagDraft}
+              onChange={(e) => setTagDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === ",") {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+              onBlur={addTag}
+              placeholder={tags.length ? "" : "Nhà ở, thông gió, nhà phố… (Enter để thêm)"}
+              className="h-9 min-w-[10rem] flex-1 bg-transparent text-[15px] outline-none"
+            />
+          )}
+        </div>
+      </div>
+
+      <div>
+        <p className="flex items-center gap-1.5 font-semibold">
+          <Link2 className="h-4 w-4" aria-hidden="true" /> Link demo và nội dung nhúng
+        </p>
+        <p className="mt-1 text-sm text-moss">Figma, YouTube, Google Drive và file PDF hiện ngay trong trang dự án. Link khác hiện thành nút.</p>
+        <ul className="mt-3 flex flex-col gap-2">
+          {links.map((l, i) => {
+            const info = l.trim() ? toEmbed(l) : null;
+            const bad = l.trim() !== "" && !/^https:\/\//.test(l.trim());
+            return (
+              <li key={i} className="flex flex-col gap-1">
+                <div className="flex gap-2">
+                  <input
+                    value={l}
+                    inputMode="url"
+                    aria-label={`Link ${i + 1}`}
+                    onChange={(e) => setLinks(links.map((x, j) => (j === i ? e.target.value : x)))}
+                    placeholder="https://www.figma.com/design/…"
+                    className="h-11 min-w-0 flex-1 rounded-xl border border-line px-3.5 text-[15px] outline-none focus:border-ink"
+                  />
+                  {links.length > 1 && (
+                    <button type="button" onClick={() => setLinks(links.filter((_, j) => j !== i))} aria-label={`Bỏ link ${i + 1}`} className="flex h-11 w-11 items-center justify-center rounded-xl text-moss hover:bg-mist hover:text-ink">
+                      <X className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+                {info && <span className="text-sm text-leaf-deep">Nhúng được: {info.label}</span>}
+                {!info && l.trim() && !bad && <span className="text-sm text-moss">Hiện thành nút mở link</span>}
+                {bad && <span className="text-sm text-[#b42318]">Link cần bắt đầu bằng https://</span>}
+              </li>
+            );
+          })}
+        </ul>
+        {links.length < MAX_LINKS && (
+          <button type="button" onClick={() => setLinks([...links, ""])} className="mt-2 inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-leaf-deep hover:bg-mist">
+            <Plus className="h-4 w-4" aria-hidden="true" /> Thêm link
+          </button>
+        )}
+      </div>
 
       <div>
         <p className="font-semibold">Tệp dự án</p>

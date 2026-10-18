@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { Heart, MessageCircle, GitBranch } from "lucide-react";
+import { Heart, MessageCircle, Sprout } from "lucide-react";
 import type { Project } from "@/lib/data";
 import { userOf } from "@/lib/data";
+import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
 import { ProjectCover } from "./ProjectCover";
 import { Avatar } from "./Avatar";
 
 export function ProjectCard({ project, featured = false }: { project: Project; featured?: boolean }) {
   const owner = userOf(project.owner);
-  const latest = project.versions[0]?.tag;
+  const phase = phaseLabel(currentPhase(showcaseOf(project).milestones));
 
   return (
     <Link
@@ -50,12 +51,10 @@ export function ProjectCard({ project, featured = false }: { project: Project; f
               <span className="tabular-nums">{project.comments}</span>
               <span className="sr-only">bình luận</span>
             </span>
-            {latest && (
-              <span className="flex items-center gap-1" title="Phiên bản mới nhất">
-                <GitBranch className="h-3.5 w-3.5" aria-hidden="true" />
-                {latest}
-              </span>
-            )}
+            <span className="flex items-center gap-1 text-leaf-deep" title="Giai đoạn hiện tại">
+              <Sprout className="h-3.5 w-3.5" aria-hidden="true" />
+              {phase}
+            </span>
           </span>
         </div>
       </div>

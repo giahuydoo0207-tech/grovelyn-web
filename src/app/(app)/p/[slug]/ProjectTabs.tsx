@@ -1,15 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Box, Download, FileImage, FileSpreadsheet, FileText, FileVideo, Folder, type LucideIcon } from "lucide-react";
 import type { Project, ProjectFile } from "@/lib/data";
 import { userOf } from "@/lib/data";
+import type { Showcase } from "@/lib/showcase";
+import { TEMPLATES } from "@/lib/templates";
 import { Avatar } from "@/components/Avatar";
+import { BeforeAfter } from "@/components/project/BeforeAfter";
+import { Embed } from "@/components/project/Embed";
+import { Gallery } from "@/components/project/Gallery";
+import { Journey } from "@/components/project/Journey";
 
-const TABS = ["Tổng quan", "Tệp", "Phiên bản", "Thảo luận"] as const;
+const TABS = ["Tổng quan", "Hành trình", "Tệp", "Thảo luận"] as const;
 type Tab = (typeof TABS)[number];
+
+/** Link "#tep", "#hanh-trinh" mở thẳng đúng tab. */
+const HASH: Record<string, Tab> = { "#tong-quan": "Tổng quan", "#hanh-trinh": "Hành trình", "#tep": "Tệp", "#thao-luan": "Thảo luận" };
 
 const ICON: Record<ProjectFile["kind"], LucideIcon> = {
   folder: Folder,
@@ -25,13 +34,28 @@ const SAMPLE_THREAD = [
   { author: "hoanglong", text: "Giếng trời có tính chống mưa tạt chưa bạn?", when: "20 giờ trước" },
 ];
 
-export function ProjectTabs({ project }: { project: Project }) {
+export function ProjectTabs({ project, showcase, canEdit }: { project: Project; showcase: Showcase; canEdit: boolean }) {
   const [tab, setTab] = useState<Tab>("Tổng quan");
   const latest = project.versions[0];
-  const counts: Partial<Record<Tab, number>> = { "Tệp": project.files.length, "Phiên bản": project.versions.length, "Thảo luận": project.comments };
+  const counts: Partial<Record<Tab, number>> = { "Hành trình": showcase.milestones.length, "Tệp": project.files.length, "Thảo luận": project.comments };
+  const template = TEMPLATES[project.field];
+  const facts = template.facts.filter((f) => showcase.facts[f.key]);
+
+  useEffect(() => {
+    const sync = () => {
+      const next = HASH[window.location.hash];
+      if (next) {
+        setTab(next);
+        document.getElementById("noi-dung-du-an")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, []);
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 scroll-mt-24" id="noi-dung-du-an">
       <div role="tablist" aria-label="Nội dung dự án" className="no-scrollbar flex gap-6 overflow-x-auto border-b border-line">
         {TABS.map((t) => {
           const on = t === tab;
@@ -68,15 +92,48 @@ export function ProjectTabs({ project }: { project: Project }) {
           className="pt-6"
         >
           {tab === "Tổng quan" && (
-            <article className="flex max-w-[68ch] flex-col gap-6">
-              {project.readme.map((s) => (
-                <section key={s.heading}>
-                  <h2 className="font-display text-2xl font-bold tracking-[-0.025em]">{s.heading}</h2>
-                  <p className="mt-2 text-[16px] leading-[1.75] text-ink/85">{s.body}</p>
+            <div className="flex flex-col gap-10">
+              {facts.length > 0 && (
+                <dl className={`grid gap-px overflow-hidden rounded-[20px] border border-line bg-line ${facts.length >= 4 ? "grid-cols-2 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"}`}>
+                  {facts.map((f) => (
+                    <div key={f.key} className="bg-white p-4">
+                      <dt className="text-xs font-semibold uppercase tracking-[0.06em] text-moss">{f.label}</dt>
+                      <dd className="mt-1.5 font-display text-[17px] font-bold leading-snug tracking-[-0.01em]">{showcase.facts[f.key]}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              {showcase.gallery.length > 0 && <Gallery shots={showcase.gallery} />}
+              <article className="flex max-w-[68ch] flex-col gap-6">
+                {project.readme.map((s) => (
+                  <section key={s.heading}>
+                    <h2 className="font-display text-2xl font-bold tracking-[-0.025em]">{s.heading}</h2>
+                    <p className="mt-2 text-[16px] leading-[1.75] text-ink/85">{s.body}</p>
+                  </section>
+                ))}
+              </article>
+              {showcase.beforeAfter && (
+                <section>
+                  <h2 className="font-display text-2xl font-bold tracking-[-0.025em]">Trước và sau</h2>
+                  <div className="mt-4">
+                    <BeforeAfter before={showcase.beforeAfter.before} after={showcase.beforeAfter.after} />
+                  </div>
                 </section>
-              ))}
-            </article>
+              )}
+              {showcase.embeds.length > 0 && (
+                <section>
+                  <h2 className="font-display text-2xl font-bold tracking-[-0.025em]">Xem trực tiếp</h2>
+                  <div className="mt-4 flex flex-col gap-4">
+                    {showcase.embeds.map((e) => (
+                      <Embed key={e.url} url={e.url} title={e.title} />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
           )}
+
+          {tab === "Hành trình" && <Journey slug={project.slug} seed={showcase.milestones} canEdit={canEdit} />}
 
           {tab === "Tệp" && (
             <div className="overflow-hidden rounded-[20px] border border-line">
@@ -115,27 +172,6 @@ export function ProjectTabs({ project }: { project: Project }) {
                 })}
               </ul>
             </div>
-          )}
-
-          {tab === "Phiên bản" && (
-            <ol className="relative ml-3 flex flex-col gap-6 border-l-2 border-line pl-6">
-              {project.versions.map((v, i) => (
-                <li key={v.tag} className="relative">
-                  <span
-                    className={`absolute -left-[35px] top-0.5 flex h-[22px] w-[22px] items-center justify-center rounded-full ${i === 0 ? "bg-leaf" : "border-2 border-line bg-white"}`}
-                    aria-hidden="true"
-                  >
-                    {i === 0 && <span className="h-2 w-2 rounded-full bg-ink" />}
-                  </span>
-                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <span className="font-display text-lg font-bold">{v.tag}</span>
-                    <span className="text-sm text-moss">{v.when}</span>
-                    {i === 0 && <span className="rounded-full bg-sap px-2 py-0.5 text-xs font-semibold text-leaf-deep">Mới nhất</span>}
-                  </div>
-                  <p className="mt-1 text-[15px]">{v.note}</p>
-                </li>
-              ))}
-            </ol>
           )}
 
           {tab === "Thảo luận" && (

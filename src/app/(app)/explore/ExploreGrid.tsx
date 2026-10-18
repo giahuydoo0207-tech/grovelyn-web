@@ -5,20 +5,25 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { FIELDS, PROJECTS, userOf } from "@/lib/data";
+import { showcaseOf } from "@/lib/showcase";
 import { ProjectCard } from "@/components/ProjectCard";
 
 const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").toLowerCase();
 
 export function ExploreGrid() {
-  const q = useSearchParams().get("q") ?? "";
-  const [field, setField] = useState<(typeof FIELDS)[number]>("Tất cả");
+  const params = useSearchParams();
+  const q = params.get("q") ?? "";
+  const fromLink = params.get("nganh");
+  const [field, setField] = useState<(typeof FIELDS)[number]>(() =>
+    FIELDS.find((f) => f === fromLink) ?? "Tất cả",
+  );
 
   const list = useMemo(() => {
     const needle = norm(q.trim());
     return PROJECTS.filter((p) => field === "Tất cả" || p.field === field).filter((p) => {
       if (!needle) return true;
       const owner = userOf(p.owner)?.name ?? "";
-      return norm([p.title, p.summary, p.field, owner, ...p.tools].join(" ")).includes(needle);
+      return norm([p.title, p.summary, p.field, owner, ...p.tools, ...showcaseOf(p).tags].join(" ")).includes(needle);
     });
   }, [field, q]);
 

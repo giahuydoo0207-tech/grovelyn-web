@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Globe2 } from "lucide-react";
-import { PROJECTS, QUOTA_MB, projectOf, userOf } from "@/lib/data";
+import { ArrowUpRight, FileText, Code2, Globe2, Link2, Sprout } from "lucide-react";
+import { ME, PROJECTS, QUOTA_MB, projectOf, userOf } from "@/lib/data";
+import { currentPhase, phaseLabel, showcaseOf, type ProjectLink } from "@/lib/showcase";
 import { ProjectCover } from "@/components/ProjectCover";
 import { Avatar } from "@/components/Avatar";
 import { LikeButton } from "@/components/LikeButton";
@@ -24,6 +25,10 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
   if (!project) notFound();
   const owner = userOf(project.owner)!;
   const usedMb = 42;
+  const showcase = showcaseOf(project);
+  const phase = currentPhase(showcase.milestones);
+  const canEdit = project.owner === ME || project.members.some((m) => m.handle === ME);
+  const LINK_ICON: Record<ProjectLink["kind"], typeof Link2> = { demo: ArrowUpRight, file: FileText, repo: Code2, other: Link2 };
 
   return (
     <div className="flex flex-col gap-8">
@@ -50,7 +55,22 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
             </h1>
             <p className="mt-4 max-w-[62ch] text-[17px] leading-relaxed text-fog">{project.summary}</p>
           </div>
+          {showcase.tags.length > 0 && (
+            <ul aria-label="Thẻ" className="flex flex-wrap gap-2">
+              {showcase.tags.map((t) => (
+                <li key={t} className="rounded-full border border-ink-line px-3 py-1 text-sm text-fog">
+                  {t}
+                </li>
+              ))}
+            </ul>
+          )}
           <div className="flex flex-wrap items-center gap-3">
+            <a
+              href="#hanh-trinh"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-leaf/15 px-4 text-sm font-semibold text-leaf ring-1 ring-leaf/40 hover:bg-leaf/25"
+            >
+              <Sprout className="h-4 w-4" aria-hidden="true" /> {phaseLabel(phase)} · {showcase.milestones.length} cột mốc
+            </a>
             <LikeButton count={project.likes} dark />
             <SaveButton />
             <span className="ml-auto flex items-center gap-2 text-sm text-fog">
@@ -61,11 +81,11 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
       </section>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <ProjectTabs project={project} />
+        <ProjectTabs project={project} showcase={showcase} canEdit={canEdit} />
 
         <aside className="flex flex-col gap-4">
           <section className="rounded-[20px] border border-line p-5">
-            <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Người làm</h2>
+            <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Người đóng góp</h2>
             <ul className="mt-4 flex flex-col gap-4">
               {project.members.map((m) => {
                 const u = userOf(m.handle);
@@ -83,6 +103,38 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
                 );
               })}
             </ul>
+          </section>
+          {showcase.links.length > 0 && (
+            <section className="rounded-[20px] border border-line p-5">
+              <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Liên kết</h2>
+              <ul className="mt-3 flex flex-col gap-1">
+                {showcase.links.map((l) => {
+                  const Icon = LINK_ICON[l.kind];
+                  const external = /^https?:\/\//.test(l.url);
+                  return (
+                    <li key={l.label}>
+                      <a
+                        href={l.url}
+                        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                        className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2 font-medium hover:bg-mist"
+                      >
+                        <Icon className="h-4 w-4 text-leaf-deep" aria-hidden="true" />
+                        {l.label}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+          <section className="rounded-[20px] border border-line p-5">
+            <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Ngành nghề</h2>
+            <p className="mt-3 text-sm text-moss">
+              <Link href={`/explore?nganh=${encodeURIComponent(project.field)}`} className="font-semibold text-leaf-deep hover:underline">
+                {project.field}
+              </Link>{" "}
+              · {project.kind}
+            </p>
           </section>
           <section className="rounded-[20px] border border-line p-5">
             <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Công cụ</h2>

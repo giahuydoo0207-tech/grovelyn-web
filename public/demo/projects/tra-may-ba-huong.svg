@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect width="800" height="500" fill="#fbfcf9"/>
+<text x="40" y="60" font-family="Be Vietnam Pro, sans-serif" font-size="20" fill="#06110a" text-anchor="start" font-weight="600">Ba hướng logo ban đầu</text>
+<g transform="translate(160 260)"><circle r="90" fill="#dcf6cf"/><path d="M-50 10c0-30 40-30 45-10 5-30 55-25 50 10z" fill="none" stroke="#1d6b1d" stroke-width="6" stroke-linejoin="round"/></g>
+<g transform="translate(400 260)"><circle r="90" fill="#f7e9d7"/><path d="M-40 25h80M-30 5h60M-15-15h30" stroke="#b5743a" stroke-width="8" stroke-linecap="round"/></g>
+<g transform="translate(640 260)"><circle r="90" fill="#e3ecf5"/><path d="M-55 15q25-45 55-10 30-40 55 10" fill="none" stroke="#3a5f8a" stroke-width="7" stroke-linecap="round"/></g>
+<text x="160" y="400" font-family="Be Vietnam Pro, sans-serif" font-size="15" fill="#56614f" text-anchor="middle" font-weight="400">A · Mây một nét</text><text x="400" y="400" font-family="Be Vietnam Pro, sans-serif" font-size="15" fill="#56614f" text-anchor="middle" font-weight="400">B · Hoàng hôn</text><text x="640" y="400" font-family="Be Vietnam Pro, sans-serif" font-size="15" fill="#56614f" text-anchor="middle" font-weight="400">C · Sóng biển</text></svg>
