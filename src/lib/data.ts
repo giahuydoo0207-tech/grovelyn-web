@@ -60,8 +60,8 @@ export interface User {
   hoursPerWeek?: number;
   about: string;
   skills: string[];
-  experience: { title: string; where: string; when: string }[];
-  education: { title: string; where: string; when: string }[];
+  experience: { title: string; where: string; when: string; note?: string }[];
+  education: { title: string; where: string; when: string; note?: string }[];
   followers: number;
   following: number;
   pinned: string[];
@@ -167,17 +167,18 @@ export const USERS: User[] = [
     name: "Gia Huy",
     initials: "GH",
     role: "Sinh viên",
-    headline: "Sinh viên lập trình web",
+    headline: "Sinh viên Khoa học máy tính, tự xây sản phẩm web từ ý tưởng đến bản chạy được",
     location: "TP. Hồ Chí Minh",
     available: true,
     hoursPerWeek: 20,
-    about: "Đang xây Grovelyn.",
-    skills: ["Next.js", "TypeScript", "Tailwind", "Supabase"],
-    experience: [],
-    education: [{ title: "Lập trình web", where: "[Tên trường]", when: "2024 – nay" }],
+    about:
+      "Sinh viên Khoa học máy tính, Đại học Văn Hiến. Tự lên kế hoạch và làm trọn vẹn sản phẩm web cá nhân, từ phân tích nghiệp vụ, thiết kế giao diện đến front-end và back-end. Đang xây Grovelyn.",
+    skills: ["Next.js", "TypeScript", "React", "Tailwind CSS", "Flutter", "Dart", "Java", "Spring Boot", "PostgreSQL", "Supabase", "Solana", "Git"],
+    experience: [{ title: "Thiết kế đồ họa (bán thời gian)", where: "Chrome Room", when: "07/2026 – nay", note: "Thiết kế logo và bảng hiệu, tư vấn khách hàng và bán hàng." }],
+    education: [{ title: "Cử nhân Khoa học máy tính", where: "Đại học Văn Hiến", when: "2023 – nay" }],
     followers: 0,
     following: 0,
-    pinned: [],
+    pinned: ["nova-replyn"],
     tone: "leaf",
   },
 ];
@@ -190,6 +191,47 @@ const f = (name: string, kind: ProjectFile["kind"], size: string | undefined, up
 });
 
 export const PROJECTS: Project[] = [
+  {
+    slug: "nova-replyn",
+    title: "Nova × Replyn: từ kết nối nghề nghiệp đến hợp tác có thể kiểm chứng",
+    summary:
+      "Nova gom hồ sơ, portfolio, việc làm, cộng đồng, nhắn tin và thanh toán về một chỗ. Replyn là lớp niềm tin giúp hai bên chốt thỏa thuận, theo dõi tiến độ và giữ bằng chứng.",
+    field: "Công nghệ thông tin",
+    kind: "Dự án dự thi",
+    owner: "giahuy",
+    members: [{ handle: "giahuy", part: "Chủ dự án, sản phẩm và lập trình" }],
+    tools: ["TypeScript", "React", "Flutter", "Dart", "Java", "Spring Boot", "PostgreSQL", "Solana", "Docker", "Git"],
+    files: [
+      f("nova-business", "folder", undefined, "5 thg 10"),
+      f("nova-mobile", "folder", undefined, "5 thg 10"),
+      f("nova-backend", "folder", undefined, "5 thg 10"),
+      f("slide-thuyet-trinh.pdf", "pdf", undefined, "5 thg 10"),
+    ],
+    versions: [
+      { tag: "v3", note: "Bản demo nộp UniHackFest 2026", when: "5 thg 10, 2026" },
+      { tag: "v2", note: "Bổ sung Replyn, lớp niềm tin khi hợp tác", when: "3 thg 10, 2026" },
+      { tag: "v1", note: "Nova Mobile và Nova Business", when: "20 thg 9, 2026" },
+    ],
+    likes: 0,
+    comments: 0,
+    tone: "ink",
+    seed: 27,
+    updated: "5 thg 10, 2026",
+    readme: [
+      {
+        heading: "Vấn đề",
+        body: "Freelancer phải dùng nhiều nền tảng rời rạc để xây hồ sơ, chia sẻ portfolio, tìm việc, nhắn tin và theo dõi thanh toán, nên thành quả nghề nghiệp bị phân tán và khó tích lũy uy tín. Doanh nghiệp thì thường phải quyết định từ một hồ sơ ngắn, vài đường dẫn và những thông tin khó kiểm chứng. Và tìm được đúng người mới chỉ là bước đầu: phạm vi đã chốt chưa, ai được đổi deadline, sản phẩm nào là bản cuối, bằng chứng nằm ở đâu nếu có tranh chấp?",
+      },
+      {
+        heading: "Giải pháp",
+        body: "Nova gồm ứng dụng di động cho freelancer (Flutter) và web cho doanh nghiệp (Next.js), dùng chung một backend Spring Boot: hồ sơ, portfolio, cơ hội việc làm, cộng đồng, nhắn tin và thanh toán USDC trên Solana Devnet. Khi hai bên bắt đầu làm việc, Replyn giúp chốt thỏa thuận, chia giai đoạn, nộp sản phẩm, yêu cầu sửa và giữ nhật ký bằng chứng.",
+      },
+      {
+        heading: "Kết quả",
+        body: "Bản demo chạy trọn luồng trên Solana Devnet, chưa xử lý tiền thật: doanh nghiệp đăng việc, freelancer ứng tuyển, trao đổi, lập hóa đơn và nhận thanh toán thử. Dự án nộp UniHackFest 2026, hạng mục Best Product & Business.",
+      },
+    ],
+  },
   {
     slug: "nha-pho-thong-gio",
     title: "Nhà phố 4x16m thông gió tự nhiên",

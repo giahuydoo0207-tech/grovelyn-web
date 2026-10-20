@@ -1,4 +1,5 @@
 import type { Project } from "./data";
+import type { LogoKey } from "@/components/project/ProjectLogo";
 
 /**
  * Phần "sống" của trang dự án: bộ ảnh, thông số theo ngành, nội dung nhúng, liên kết và hành trình từ ý tưởng tới
@@ -42,7 +43,21 @@ export interface ProjectLink {
   kind: "demo" | "file" | "repo" | "other";
 }
 
+/** Bốn tài nguyên chính, hiện thành nút ở cột phải trang dự án. */
+export interface Resources {
+  demo?: string;
+  repo?: string;
+  slides?: string;
+  video?: string;
+}
+
 export interface Showcase {
+  logo?: LogoKey;
+  resources?: Resources;
+  /** Chuyên môn (Blockchain & Web3, Phát triển Mobile…). */
+  expertise?: string[];
+  /** Hạng mục dự thi, nếu là dự án dự thi. */
+  tracks?: string[];
   tags: string[];
   facts: Record<string, string>;
   gallery: Shot[];
@@ -55,8 +70,72 @@ export interface Showcase {
 
 const img = (name: string, caption: string): Shot => ({ src: `/demo/projects/${name}.svg`, caption });
 
+const shot = (name: string, caption: string): Shot => ({ src: `/demo/projects/${name}.png`, caption });
+
 const DATA: Record<string, Showcase> = {
+  "nova-replyn": {
+    logo: "nova",
+    resources: {
+      demo: "https://nivex-business.vercel.app/?lang=en",
+      repo: "https://github.com/giahuydoo0207-tech/NIVEX-BUSINESS",
+      video: "https://youtu.be/w0Qzx1Avk4g",
+    },
+    expertise: ["Blockchain & Web3", "Phát triển Full-stack", "Phát triển Mobile"],
+    tracks: ["Best Product & Business"],
+    tags: ["UniHackFest 2026", "Freelancer", "Thanh toán xuyên biên giới"],
+    facts: {
+      stack: "Flutter, Next.js, Spring Boot",
+      users: "Freelancer và doanh nghiệp",
+      status: "Prototype, Solana Devnet",
+      role: "Chủ dự án, lập trình",
+    },
+    gallery: [
+      shot("nova-tong-quan", "Tổng quan thanh toán (Business)"),
+      shot("nova-hoa-don", "Tạo hóa đơn"),
+      shot("nova-thanh-toan", "Xác nhận thanh toán USDC"),
+      shot("nova-replyn-chat", "Replyn: chat và thỏa thuận"),
+    ],
+    embeds: [],
+    links: [
+      { label: "Repo ứng dụng di động", url: "https://github.com/giahuydoo0207-tech/NIVEX-FLUTTER", kind: "repo" },
+    ],
+    milestones: [
+      {
+        id: "nr-3",
+        phase: "final",
+        title: "Bản demo nộp UniHackFest 2026",
+        note: "Chạy trọn luồng trên Solana Devnet: doanh nghiệp đăng việc, freelancer ứng tuyển, trao đổi, lập hóa đơn và nhận thanh toán thử.",
+        when: "5 thg 10, 2026",
+        version: "v3",
+        shots: [shot("nova-thanh-toan", "Xác nhận thanh toán USDC")],
+        embed: "https://youtu.be/w0Qzx1Avk4g",
+        by: "giahuy",
+      },
+      {
+        id: "nr-2",
+        phase: "draft",
+        title: "Bổ sung Replyn, lớp niềm tin khi hợp tác",
+        note: "Chốt thỏa thuận, chia giai đoạn, nộp sản phẩm, yêu cầu sửa và giữ nhật ký bằng chứng khi hai bên làm việc.",
+        when: "3 thg 10, 2026",
+        version: "v2",
+        shots: [shot("nova-replyn-chat", "Replyn: chat và thỏa thuận")],
+        by: "giahuy",
+      },
+      {
+        id: "nr-1",
+        phase: "concept",
+        title: "Nova Mobile và Nova Business",
+        note: "Xác định hai nhóm người dùng chính và hành trình từ xây hồ sơ, tìm việc đến bắt đầu hợp tác.",
+        when: "20 thg 9, 2026",
+        version: "v1",
+        shots: [shot("nova-tong-quan", "Tổng quan thanh toán (Business)")],
+        by: "giahuy",
+      },
+    ],
+  },
   "nha-pho-thong-gio": {
+    logo: "nha",
+    expertise: ["Kiến trúc nhà ở", "Thông gió tự nhiên"],
     tags: ["Nhà ở", "Thông gió tự nhiên", "Kiến trúc nhiệt đới", "Nhà phố"],
     facts: { area: "64 m² đất, 168 m² sàn", location: "Bình Thạnh, TP.HCM", cost: "1,8 tỷ đồng (ước tính)", time: "14 tuần" },
     gallery: [
@@ -117,6 +196,8 @@ const DATA: Record<string, Showcase> = {
     ],
   },
   "nhan-dien-tra-may": {
+    logo: "tra",
+    expertise: ["Nhận diện thương hiệu", "Thiết kế bao bì"],
     tags: ["Nhận diện thương hiệu", "Bao bì", "F&B", "Đà Nẵng"],
     facts: { client: "Quán trà Mây, Đà Nẵng", role: "Thiết kế chính", time: "3 tuần", deliverables: "Logo, bảng màu, ly, túi, tem nhãn" },
     gallery: [
@@ -150,6 +231,8 @@ const DATA: Record<string, Showcase> = {
     ],
   },
   "dat-ban-ca-phe": {
+    logo: "datban",
+    expertise: ["Phát triển web", "UI/UX"],
     tags: ["Web app", "Đặt bàn", "F&B", "Quán nhỏ"],
     facts: { stack: "Next.js, PostgreSQL", users: "Chủ quán và khách đặt bàn", status: "Chạy thử tại 1 quán ở Thủ Đức", role: "Lập trình, giao diện" },
     gallery: [
@@ -195,6 +278,8 @@ const DATA: Record<string, Showcase> = {
     ],
   },
   "ra-mat-nuoc-ep": {
+    logo: "nuocep",
+    expertise: ["Kế hoạch ra mắt", "Marketing mạng xã hội"],
     tags: ["Ra mắt sản phẩm", "TikTok", "Đồ uống", "Gen Z"],
     facts: {
       goal: "10.000 lượt dùng thử trong 6 tuần",
@@ -250,7 +335,8 @@ function fallback(project: Project): Showcase {
   };
 }
 
-export const showcaseOf = (project: Project): Showcase => DATA[project.slug] ?? fallback(project);
+export const showcaseOf = (project: Project): Showcase =>
+  DATA[project.slug] ?? { ...fallback(project), logo: project.slug === "robot-phan-loai-rac" ? "robot" : undefined };
 
 /** Giai đoạn hiện tại = giai đoạn của cột mốc mới nhất. */
 export const currentPhase = (milestones: Milestone[]): Phase => milestones[0]?.phase ?? "concept";

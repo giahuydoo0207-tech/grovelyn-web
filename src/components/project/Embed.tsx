@@ -26,7 +26,7 @@ export function Embed({ url, title }: { url: string; title: string }) {
   const ratio = info.ratio === "video" ? "aspect-video" : "aspect-[4/5] sm:aspect-[4/3]";
 
   return (
-    <figure className="overflow-hidden rounded-[20px] border border-line bg-white">
+    <figure className="overflow-hidden rounded-[20px] border border-line bg-white text-ink">
       <div className={`relative bg-mist ${open ? ratio : "h-52"}`}>
         {open ? (
           <iframe
@@ -42,7 +42,7 @@ export function Embed({ url, title }: { url: string; title: string }) {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="group absolute inset-0 flex flex-col items-center justify-center gap-3 text-center"
+            className="group absolute inset-0 flex flex-col items-center justify-center gap-3 text-center text-ink"
           >
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-ink text-white transition-transform duration-200 group-hover:scale-105">
               <Icon className="h-6 w-6" aria-hidden="true" />

@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { ArrowUpRight, Building2, Check, Circle, Code2, Eye, FolderKanban, GraduationCap, Shield, Text as TextIcon, Briefcase, ChevronRight, type LucideIcon } from "lucide-react";
 import { Pin } from "lucide-react";
 import type { Post, Project, User } from "@/lib/data";
 import { ProjectCard } from "@/components/ProjectCard";
+import { FolderCover } from "@/components/project/FolderCover";
+import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
 import { PostCard } from "../../community/PostCard";
 
 const TABS = ["Dự án", "Bài đăng", "Giới thiệu"] as const;
@@ -120,39 +123,207 @@ export function ProfileTabs({
             </div>
           )}
 
-          {tab === "Giới thiệu" && (
-            <div className="grid gap-5 md:grid-cols-2">
-              <section className="rounded-[20px] border border-line p-6 md:col-span-2">
-                <h2 className="font-display text-xl font-bold tracking-[-0.02em]">Về {user.name.split(" ").pop()}</h2>
-                <p className="mt-2 max-w-[70ch] text-[16px] leading-[1.75]">{user.about}</p>
-              </section>
-              <section className="rounded-[20px] border border-line p-6">
-                <h2 className="font-display text-xl font-bold tracking-[-0.02em]">Kỹ năng</h2>
-                <ul className="mt-3 flex flex-wrap gap-2">
-                  {user.skills.map((s) => (
-                    <li key={s} className="rounded-full bg-mist px-3 py-1.5 text-sm font-medium">
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-              <section className="rounded-[20px] border border-line p-6">
-                <h2 className="font-display text-xl font-bold tracking-[-0.02em]">Kinh nghiệm và học vấn</h2>
-                <ul className="mt-3 flex flex-col gap-3">
-                  {[...user.experience, ...user.education].map((e) => (
-                    <li key={e.title + e.where}>
-                      <p className="font-semibold">{e.title}</p>
-                      <p className="text-sm text-moss">
-                        {e.where}, {e.when}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            </div>
-          )}
+          {tab === "Giới thiệu" && <AboutTab user={user} projects={[...pinned, ...others]} isMe={isMe} />}
         </motion.div>
       </AnimatePresence>
     </div>
+  );
+}
+
+function SectionHead({ icon: Icon, title, right }: { icon: LucideIcon; title: string; right?: React.ReactNode }) {
+  return (
+    <div className="mb-4 flex items-center justify-between gap-3">
+      <h2 className="flex items-center gap-2.5 font-display text-xl font-bold tracking-[-0.02em]">
+        <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-sap">
+          <Icon className="h-[18px] w-[18px] text-leaf-deep" aria-hidden="true" />
+        </span>
+        {title}
+      </h2>
+      {right}
+    </div>
+  );
+}
+
+const card = "rounded-[22px] border border-line bg-white p-6";
+
+/** Tab Giới thiệu, sắp theo hồ sơ nghề nghiệp của Nova Mobile: giới thiệu, portfolio, kinh nghiệm, học vấn, kỹ năng. */
+function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; isMe: boolean }) {
+  const featured = projects.slice(0, 3);
+  const checks = [
+    { label: "Giới thiệu", done: user.about.trim().length > 0 },
+    { label: "Kỹ năng", done: user.skills.length > 0 },
+    { label: "Portfolio", done: projects.length > 0 },
+    { label: "Kinh nghiệm", done: user.experience.length > 0 },
+    { label: "Học vấn", done: user.education.length > 0 },
+    { label: "Chứng chỉ", done: false },
+  ];
+  const pct = Math.round((checks.filter((c) => c.done).length / checks.length) * 100);
+  const missing = checks.filter((c) => !c.done);
+
+  return (
+    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="flex min-w-0 flex-col gap-5">
+        <section className={card}>
+          <SectionHead icon={TextIcon} title="Giới thiệu" />
+          <p className="max-w-[70ch] text-[16px] leading-[1.75]">{user.about}</p>
+        </section>
+
+        <section className={card}>
+          <SectionHead icon={FolderKanban} title="Portfolio nổi bật" />
+          {featured.length === 0 ? (
+            <p className="text-moss">{isMe ? "Ghim một dự án để hiện ở đây." : "Chưa có dự án công khai."}</p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {featured.map((p) => {
+                const sc = showcaseOf(p);
+                const phase = currentPhase(sc.milestones);
+                const role = p.members.find((m) => m.handle === user.handle)?.part;
+                return (
+                  <li key={p.slug} className="grid gap-5 rounded-[18px] border border-line bg-[#fbfcfa] p-4 sm:grid-cols-[176px_minmax(0,1fr)]">
+                    <div className="rounded-[14px] bg-mist px-3 pt-3.5">
+                      <FolderCover tone={p.tone} title={p.title} logo={sc.logo} height={100} logoSize={46} />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="font-display text-lg font-bold leading-snug tracking-[-0.01em]">{p.title}</h3>
+                          {role && <p className="mt-0.5 text-sm font-semibold text-leaf-deep">{role}</p>}
+                        </div>
+                        <span
+                          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${phase === "final" ? "bg-ink text-sap" : phase === "draft" ? "bg-[#fff4e0] text-[#8a5300]" : "bg-mist text-moss"}`}
+                        >
+                          {phaseLabel(phase)}
+                        </span>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-[15px] leading-relaxed text-ink/80">{p.summary}</p>
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2.5">
+                        <ul className="flex flex-wrap gap-1.5">
+                          {p.tools.slice(0, 4).map((t) => (
+                            <li key={t} className="rounded-lg border border-line px-2.5 py-1 text-[13px] font-semibold">
+                              {t}
+                            </li>
+                          ))}
+                        </ul>
+                        <Link href={`/p/${p.slug}`} className="inline-flex items-center gap-1.5 text-sm font-bold text-leaf-deep hover:underline">
+                          <ArrowUpRight className="h-4 w-4" aria-hidden="true" /> Xem sản phẩm
+                        </Link>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {user.experience.length > 0 && (
+          <section className={card}>
+            <SectionHead icon={Briefcase} title="Kinh nghiệm" />
+            <Timeline items={user.experience} />
+          </section>
+        )}
+
+        <section className={card}>
+          <SectionHead icon={GraduationCap} title="Học vấn và chứng chỉ" />
+          <ul className="flex flex-col gap-3">
+            {user.education.map((e) => (
+              <li key={e.title + e.where} className="flex gap-4 rounded-2xl border border-line bg-[#fbfcfa] p-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-mist">
+                  <Building2 className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-display text-[17px] font-bold">{e.title}</p>
+                  <p className="mt-0.5 text-[15px] text-ink/80">
+                    {e.where} · {e.when}
+                  </p>
+                  <p className="mt-1.5 text-[13px] text-moss">Thông tin do người dùng tự khai</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <section className="rounded-[22px] border border-line bg-white p-5">
+          <div className="flex items-baseline justify-between">
+            <p className="font-semibold">Mức độ hoàn thiện hồ sơ</p>
+            <p className="font-display text-[22px] font-extrabold text-leaf-deep">{pct}%</p>
+          </div>
+          <div
+            className="mt-2.5 h-2 overflow-hidden rounded-full bg-mist"
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Mức độ hoàn thiện hồ sơ"
+          >
+            <div className="h-full rounded-full bg-leaf" style={{ width: `${pct}%` }} />
+          </div>
+          <ul className="mt-3.5 flex flex-col gap-2 text-sm">
+            <li className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-leaf-deep" aria-hidden="true" />
+              {checks.filter((c) => c.done).map((c) => c.label.toLowerCase()).join(", ").replace(/^./, (m) => m.toUpperCase())}
+            </li>
+            {missing.map((c) => (
+              <li key={c.label} className="flex items-center gap-2 text-moss">
+                <Circle className="h-4 w-4 text-line" aria-hidden="true" />
+                {c.label === "Chứng chỉ" ? "Thêm chứng chỉ để doanh nghiệp có thêm cơ sở đánh giá" : `Thêm ${c.label.toLowerCase()}`}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="rounded-[22px] border border-line bg-white p-5">
+          <SectionHead icon={Code2} title="Kỹ năng" />
+          <ul className="flex flex-wrap gap-2">
+            {user.skills.map((s, i) => (
+              <li key={s} className={`rounded-[10px] px-3 py-1.5 text-sm font-semibold ${i === 0 ? "bg-ink text-sap" : "bg-mist"}`}>
+                {s}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <div className="flex items-center gap-3.5 rounded-[22px] border border-line bg-white p-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-mist">
+            <Shield className="h-5 w-5 text-moss" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">Chưa xếp hạng</span>
+            <span className="block text-[13px] text-moss">Uy tín tăng dần qua đánh giá sau mỗi dự án</span>
+          </span>
+          <ChevronRight className="h-5 w-5 text-moss" aria-hidden="true" />
+        </div>
+
+        {isMe && (
+          <section className="flex gap-3 rounded-[22px] bg-ink p-5 text-white">
+            <Eye className="mt-0.5 h-5 w-5 shrink-0 text-leaf" aria-hidden="true" />
+            <div>
+              <p className="font-semibold">Hiển thị: Mọi người</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-fog">Email, số điện thoại và địa chỉ không xuất hiện trong hồ sơ này.</p>
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Timeline({ items }: { items: User["experience"] }) {
+  return (
+    <ol className="relative">
+      {items.map((e, i) => (
+        <li key={e.title + e.where} className="relative pb-5 pl-8 last:pb-0">
+          <span className="absolute left-0 top-1.5 h-3.5 w-3.5 rounded-full bg-leaf shadow-[0_0_0_4px_#dcf6cf]" aria-hidden="true" />
+          {i < items.length - 1 && <span className="absolute bottom-0 left-1.5 top-6 w-0.5 bg-line" aria-hidden="true" />}
+          <p className="font-semibold">{e.title}</p>
+          <p className="mt-0.5 text-sm font-semibold text-leaf-deep">
+            {e.where} · {e.when}
+          </p>
+          {e.note && <p className="mt-2 text-[15px] leading-relaxed text-ink/80">{e.note}</p>}
+        </li>
+      ))}
+    </ol>
   );
 }
