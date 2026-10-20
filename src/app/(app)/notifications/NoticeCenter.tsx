@@ -5,9 +5,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { AtSign, CalendarDays, CheckCheck, Eye, MessageCircle, Sprout, ThumbsUp, UserPlus, type LucideIcon } from "lucide-react";
 import { NOTICES, projectOf, userOf, type Notice, type NoticeKind } from "@/lib/data";
-import { showcaseOf } from "@/lib/showcase";
 import { Avatar } from "@/components/Avatar";
-import { ProjectLogo } from "@/components/project/ProjectLogo";
 
 export const KIND: Record<NoticeKind, { icon: LucideIcon; color: string; tint: string; label: string }> = {
   like: { icon: ThumbsUp, color: "#1d6b1d", tint: "#dcf6cf", label: "Lượt thích" },
@@ -43,79 +41,74 @@ const ACTION: Partial<Record<NoticeKind, string>> = {
   view: "Hoàn thiện hồ sơ",
 };
 
-function KindAvatar({ n }: { n: Notice }) {
-  const k = KIND[n.kind];
+/** Người gửi: ảnh đại diện. Thông báo từ Grovelyn: vòng tròn trung tính với icon một màu. */
+function Sender({ n }: { n: Notice }) {
   const u = n.actor ? userOf(n.actor) : undefined;
+  if (u) return <Avatar initials={u.initials} tone={u.tone} size={44} />;
+  const Icon = KIND[n.kind].icon;
   return (
-    <span className="relative block h-12 w-12 shrink-0">
-      {u ? (
-        <Avatar initials={u.initials} tone={u.tone} size={48} />
-      ) : (
-        <span className="flex h-12 w-12 items-center justify-center rounded-full" style={{ background: k.tint, color: k.color }}>
-          <k.icon className="h-[22px] w-[22px]" aria-hidden="true" />
-        </span>
-      )}
-      {u && (
-        <span
-          className="absolute -bottom-0.5 -right-1 flex h-[22px] w-[22px] items-center justify-center rounded-full text-white ring-2 ring-white"
-          style={{ background: k.color }}
-        >
-          <k.icon className="h-3 w-3" strokeWidth={2.5} aria-hidden="true" />
-        </span>
-      )}
+    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-mist text-moss">
+      <Icon className="h-5 w-5" aria-hidden="true" />
     </span>
   );
 }
 
-function NoticeRow({ n, unread, onRead }: { n: Notice; unread: boolean; onRead: () => void }) {
+/** Ghép câu thông báo, chèn tên dự án in đậm vào chỗ {p}. */
+function Sentence({ n }: { n: Notice }) {
   const u = n.actor ? userOf(n.actor) : undefined;
   const p = n.project ? projectOf(n.project) : undefined;
-  const sc = p ? showcaseOf(p) : undefined;
+  const [before, after] = n.text.split("{p}");
+  return (
+    <>
+      {u && <strong className="font-bold">{u.name}</strong>}
+      {u && n.others ? ` và ${n.others} người khác` : ""}
+      {u ? " " : ""}
+      {before}
+      {p && after !== undefined && <strong className="font-semibold">{p.title}</strong>}
+      {after}
+    </>
+  );
+}
+
+function NoticeRow({ n, unread, onRead }: { n: Notice; unread: boolean; onRead: () => void }) {
   const action = ACTION[n.kind];
   return (
-    <motion.li layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="relative">
-      <div className={`group relative flex gap-3.5 rounded-xl py-3.5 pl-3 pr-3 transition-colors sm:pr-4 ${unread ? "bg-sap/35 hover:bg-sap/50" : "hover:bg-mist"}`}>
-        <KindAvatar n={n} />
+    <motion.li layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="relative">
+      <div className={`relative flex gap-3.5 rounded-xl p-3 transition-colors sm:p-3.5 ${unread ? "bg-sap/35 hover:bg-sap/55" : "hover:bg-mist"}`}>
+        <Sender n={n} />
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] leading-relaxed">
+          <p className="text-[15px] leading-[1.55]">
             <Link href={n.href} onClick={onRead} className="after:absolute after:inset-0 after:rounded-xl">
-              {u && <strong className="font-bold">{u.name}</strong>}
-              {u && n.others ? ` và ${n.others} người khác` : ""} {n.text}
+              <Sentence n={n} />
             </Link>
           </p>
-          {n.quote && (
-            <p className="mt-2 rounded-lg border-l-[3px] bg-white/80 px-3 py-2 text-[15px] leading-relaxed text-ink/85" style={{ borderColor: KIND[n.kind].color }}>
-              {n.quote}
-            </p>
-          )}
-          {p && (
-            <span className="mt-2 inline-flex max-w-full items-center gap-2 rounded-lg border border-line bg-white py-1.5 pl-1.5 pr-3">
-              <ProjectLogo title={p.title} logo={sc?.logo} size={26} />
-              <span className="truncate text-sm font-semibold">{p.title}</span>
-            </span>
-          )}
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] text-moss">
-            <span>{n.when === "hôm qua" ? n.when : `${n.when} trước`}</span>
+          {n.quote && <p className={`mt-2 rounded-lg px-3 py-2 text-[15px] leading-[1.55] text-ink/80 ${unread ? "bg-white/85" : "bg-mist"}`}>{n.quote}</p>}
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span className="text-[13px] text-moss">{n.when === "hôm qua" ? n.when : `${n.when} trước`}</span>
             {action && (
               <Link
                 href={n.href}
                 onClick={onRead}
-                className="relative z-10 rounded-full border border-line bg-white px-3 py-1 text-[13px] font-semibold text-ink transition-colors hover:border-ink"
+                className="relative z-10 inline-flex h-8 items-center rounded-full border border-line bg-white px-3.5 text-[13px] font-semibold transition-colors hover:border-ink"
               >
                 {action}
               </Link>
             )}
           </div>
         </div>
-        <div className="relative z-10 flex flex-col items-end justify-between">
-          {unread ? (
-            <button type="button" onClick={onRead} className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white" aria-label="Đánh dấu đã đọc" title="Đánh dấu đã đọc">
-              <span className="h-2.5 w-2.5 rounded-full bg-leaf-deep" />
-            </button>
-          ) : (
-            <span className="h-8 w-8" />
-          )}
-        </div>
+        {unread ? (
+          <button
+            type="button"
+            onClick={onRead}
+            className="relative z-10 -mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full hover:bg-white"
+            aria-label="Đánh dấu đã đọc"
+            title="Đánh dấu đã đọc"
+          >
+            <span className="h-2.5 w-2.5 rounded-full bg-leaf-deep" />
+          </button>
+        ) : (
+          <span className="w-7 shrink-0" aria-hidden="true" />
+        )}
       </div>
     </motion.li>
   );
@@ -182,8 +175,7 @@ export function NoticeCenter() {
           if (!items.length) return null;
           return (
             <div key={d.id} className="mb-1 last:mb-0">
-              <h2 className="flex items-center gap-2 px-3 pb-1.5 pt-2 text-[13px] font-bold uppercase tracking-[0.05em] text-moss">
-                <span className="h-1.5 w-1.5 rounded-full bg-leaf" aria-hidden="true" />
+              <h2 className="px-3 pb-1.5 pt-2 text-sm font-semibold text-moss">
                 {d.label}
               </h2>
               <ul className="flex flex-col gap-1">
