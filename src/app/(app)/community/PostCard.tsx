@@ -22,6 +22,7 @@ export function PostCard({ post }: { post: Post }) {
   const project = post.project ? projectOf(post.project) : undefined;
   const [reaction, setReaction] = useState<string | null>(null);
   const [picker, setPicker] = useState(false);
+  const [hot, setHot] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [joined, setJoined] = useState(false);
   const [comments, setComments] = useState(post.comments);
@@ -102,8 +103,8 @@ export function PostCard({ post }: { post: Post }) {
         <span className="flex items-center gap-1.5">
           <span className="flex -space-x-1" aria-hidden="true">
             {REACTIONS.slice(0, 3).map((r) => (
-              <span key={r.key} className="flex h-5 w-5 items-center justify-center rounded-full bg-white ring-2 ring-white">
-                <r.icon className="h-3.5 w-3.5" style={{ color: r.color }} />
+              <span key={r.key} className="flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-white" style={{ background: r.tint }}>
+                <r.icon className="h-3 w-3" style={{ color: r.color }} />
               </span>
             ))}
           </span>
@@ -148,27 +149,48 @@ export function PostCard({ post }: { post: Post }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 6, scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 420, damping: 26 }}
-                className="absolute -top-16 left-0 z-20 flex gap-1 rounded-full border border-line bg-white p-1.5 shadow-[0_12px_32px_-12px_rgba(6,17,10,0.35)]"
+                className="absolute -top-16 left-0 z-20 flex gap-1.5 rounded-full border border-line bg-white p-1.5 shadow-[0_12px_32px_-12px_rgba(6,17,10,0.35)]"
               >
-                {REACTIONS.map((r, i) => (
-                  <motion.button
-                    key={r.key}
-                    type="button"
-                    aria-label={r.label}
-                    title={r.label}
-                    initial={{ y: 12, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1, transition: { delay: i * 0.025 } }}
-                    whileHover={{ scale: 1.3, y: -4 }}
-                    whileFocus={{ scale: 1.3, y: -4 }}
-                    onClick={() => {
-                      setReaction(r.key);
-                      setPicker(false);
-                    }}
-                    className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-mist"
-                  >
-                    <r.icon className="h-5 w-5" style={{ color: r.color }} aria-hidden="true" />
-                  </motion.button>
-                ))}
+                {REACTIONS.map((r, i) => {
+                  const on = hot === r.key;
+                  return (
+                    <motion.button
+                      key={r.key}
+                      type="button"
+                      aria-label={r.label}
+                      initial={{ y: 12, opacity: 0 }}
+                      animate={{ y: on ? -6 : 0, scale: on ? 1.22 : 1, opacity: 1, transition: { delay: on ? 0 : i * 0.025, type: "spring", stiffness: 500, damping: 22 } }}
+                      onMouseEnter={() => setHot(r.key)}
+                      onMouseLeave={() => setHot(null)}
+                      onFocus={() => setHot(r.key)}
+                      onBlur={() => setHot(null)}
+                      onClick={() => {
+                        setReaction(r.key);
+                        setPicker(false);
+                        setHot(null);
+                      }}
+                      className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-150"
+                      style={{ background: on ? r.color : r.tint }}
+                    >
+                      <r.icon className="h-5 w-5" style={{ color: on ? "#fff" : r.color }} aria-hidden="true" />
+                      <AnimatePresence>
+                        {on && (
+                          <motion.span
+                            aria-hidden="true"
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 2 }}
+                            transition={{ duration: 0.12 }}
+                            className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
+                            style={{ background: r.color }}
+                          >
+                            {r.label}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  );
+                })}
               </motion.div>
             )}
           </AnimatePresence>
