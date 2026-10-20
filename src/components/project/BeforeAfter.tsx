@@ -7,7 +7,7 @@ import type { Shot } from "@/lib/showcase";
 export function BeforeAfter({ before, after }: { before: Shot; after: Shot }) {
   const [pos, setPos] = useState(50);
   return (
-    <figure className="overflow-hidden rounded-[20px] border border-line">
+    <figure className="overflow-hidden rounded-2xl border border-line">
       <div className="relative aspect-[8/5] select-none bg-mist">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={after.src} alt={after.caption} className="absolute inset-0 h-full w-full object-cover" />

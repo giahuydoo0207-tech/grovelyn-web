@@ -17,7 +17,7 @@ const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/
 
 function MemberCard({ g }: { g: Group }) {
   return (
-    <article className="overflow-hidden rounded-[18px] border border-line bg-white">
+    <article className="overflow-hidden rounded-2xl border border-line bg-white">
       <Link href={`/groups/${g.slug}`} tabIndex={-1} aria-hidden="true" className="block aspect-[3/1]">
         <GroupCover cover={g.cover} seed={g.coverSeed} tone={g.coverTone} />
       </Link>
@@ -46,7 +46,7 @@ function MemberCard({ g }: { g: Group }) {
 
 function SuggestCard({ g, state, onJoin }: { g: Group; state: "none" | "joined" | "asked"; onJoin: () => void }) {
   return (
-    <article className="flex gap-3.5 rounded-[18px] border border-line bg-white p-4">
+    <article className="flex gap-3.5 rounded-2xl border border-line bg-white p-4">
       <GroupMark mark={g.mark} tone={g.tone} size={56} />
       <div className="min-w-0 flex-1">
         <h3 className="font-bold">
@@ -128,7 +128,7 @@ export function GroupsBoard() {
                   <MemberCard key={g.slug} g={g} />
                 ))}
               </section>
-              {mine.length === 0 && <p className="mt-5 rounded-[18px] border border-dashed border-[#c9d0c4] p-8 text-center text-moss">Không có nhóm nào khớp.</p>}
+              {mine.length === 0 && <p className="mt-5 rounded-2xl border border-dashed border-[#c9d0c4] p-8 text-center text-moss">Không có nhóm nào khớp.</p>}
               {others.length > 0 && (
                 <>
                   <h2 className="mt-10 font-display text-2xl font-bold tracking-[-0.02em]">Gợi ý cho bạn</h2>

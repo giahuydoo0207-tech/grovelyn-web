@@ -39,7 +39,7 @@ export function FolderCover({
   return (
     <div className={`relative ${className}`} style={fill ? { minHeight: height } : { height }}>
       <svg aria-hidden="true" viewBox="0 0 400 200" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-        <path d="M0 22 C0 10 8 4 20 4 H150 C164 4 170 22 186 22 H382 C394 22 400 30 400 42 V200 H0 Z" fill={c.back} />
+        <path d="M0 12 C0 7 3 4 8 4 H150 C164 4 170 22 186 22 H392 C397 22 400 25 400 30 V200 H0 Z" fill={c.back} />
       </svg>
       <svg aria-hidden="true" viewBox="0 0 400 200" preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-[80%] w-full">
         <path d="M0 26 C110 2 290 2 400 26 V200 H0 Z" fill={c.front} />
@@ -54,8 +54,8 @@ export function FolderCover({
         </span>
       )}
       <span
-        className="folder-logo absolute left-1/2 rounded-[20px] bg-white shadow-[0_4px_12px_-6px_rgba(6,17,10,0.35),0_0_0_1px_rgba(6,17,10,0.06)] transition-transform duration-300 ease-[var(--ease-grow)]"
-        style={{ top: "63%", marginTop: -Math.round(box / 2), marginLeft: -Math.round(box / 2), padding: pad }}
+        className="folder-logo absolute left-1/2 bg-white shadow-[0_4px_12px_-6px_rgba(6,17,10,0.35),0_0_0_1px_rgba(6,17,10,0.06)] transition-transform duration-300 ease-[var(--ease-grow)]"
+        style={{ top: "63%", marginTop: -Math.round(box / 2), marginLeft: -Math.round(box / 2), padding: pad, borderRadius: Math.round(logoSize * 0.18) + pad }}
       >
         <ProjectLogo title={title} logo={logo} src={logoSrc} size={logoSize} />
       </span>

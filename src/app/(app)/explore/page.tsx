@@ -21,7 +21,7 @@ export default function ExplorePage() {
           <span className="font-display text-2xl font-bold tabular-nums text-ink">{PROJECTS.length}</span> dự án mới cập nhật
         </p>
       </header>
-      <Suspense fallback={<div className="h-[60vh] rounded-[20px] bg-mist" aria-hidden="true" />}>
+      <Suspense fallback={<div className="h-[60vh] rounded-2xl bg-mist" aria-hidden="true" />}>
         <ExploreGrid />
       </Suspense>
     </div>

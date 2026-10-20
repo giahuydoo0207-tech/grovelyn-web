@@ -46,7 +46,7 @@ function MonthCalendar({ events, picked, onPick }: { events: CommunityEvent[]; p
   };
 
   return (
-    <section className="rounded-[18px] border border-line bg-white p-4">
+    <section className="rounded-2xl border border-line bg-white p-4">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-lg font-bold tracking-[-0.02em]" aria-live="polite">
           Tháng {m}, {y}
@@ -119,7 +119,7 @@ export function EventsBoard() {
     <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
       <div className="flex min-w-0 flex-col gap-5">
         {featured && (
-          <article className="grid overflow-hidden rounded-[20px] border border-line bg-white md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+          <article className="grid overflow-hidden rounded-2xl border border-line bg-white md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
             <Link href={`/events/${featured.slug}`} className="relative block aspect-[2/1] md:aspect-auto md:min-h-[280px]" aria-label={featured.title}>
               <EventCoverImage event={featured} className="absolute inset-0" />
               <span className="absolute left-4 top-4 rounded-full bg-ink px-2.5 py-1 text-xs font-bold text-leaf">Nổi bật</span>
@@ -177,7 +177,7 @@ export function EventsBoard() {
               const left = e.seats - e.registered;
               return (
                 <motion.li key={e.slug} layout initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }}>
-                  <article className="h-full overflow-hidden rounded-[18px] border border-line bg-white">
+                  <article className="h-full overflow-hidden rounded-2xl border border-line bg-white">
                     <Link href={`/events/${e.slug}`} className="relative block aspect-[2/1]" tabIndex={-1} aria-hidden="true">
                       <EventCoverImage event={e} className="absolute inset-0" />
                       <span className="absolute left-3 top-3">
@@ -209,7 +209,7 @@ export function EventsBoard() {
           </AnimatePresence>
         </motion.ul>
         {shown.length === 0 && (
-          <p className="rounded-[18px] border border-dashed border-[#c9d0c4] p-8 text-center text-moss">
+          <p className="rounded-2xl border border-dashed border-[#c9d0c4] p-8 text-center text-moss">
             Chưa có sự kiện nào ở đây.{" "}
             <Link href="/events/new" className="font-bold text-leaf-deep hover:underline">
               Tạo sự kiện đầu tiên
@@ -220,7 +220,7 @@ export function EventsBoard() {
 
       <aside className="flex flex-col gap-3 lg:sticky lg:top-[88px]">
         <MonthCalendar events={upcoming} picked={day} onPick={setDay} />
-        <section className="rounded-[18px] border border-line bg-white p-4">
+        <section className="rounded-2xl border border-line bg-white p-4">
           <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Bạn đã quan tâm</h2>
           {mine.length ? (
             <ul className="mt-3 flex flex-col gap-2.5">

@@ -32,11 +32,11 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
 
   return (
     <div className="flex flex-col gap-10">
-      <header className="overflow-hidden rounded-[28px] bg-ink text-white">
+      <header className="overflow-hidden rounded-3xl bg-ink text-white">
         <div className="grid items-center gap-10 p-6 sm:p-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
           <div className="min-w-0">
             <div className="flex items-center gap-3.5">
-              <span className="shrink-0 rounded-[18px] bg-white p-1">
+              <span className="shrink-0 rounded-2xl bg-white p-1">
                 <ProjectLogo title={project.title} logo={showcase.logo} size={52} />
               </span>
               <nav aria-label="Vị trí" className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-fog">
@@ -78,7 +78,7 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
             {video ? (
               <Embed url={video} title={`Video demo ${project.title}`} />
             ) : (
-              <div className="rounded-[22px] bg-ink-2 px-6 pt-8">
+              <div className="rounded-2xl bg-ink-2 px-6 pt-8">
                 <FolderCover tone="leaf" title={project.title} logo={showcase.logo} kind={project.kind} height={220} logoSize={96} />
               </div>
             )}

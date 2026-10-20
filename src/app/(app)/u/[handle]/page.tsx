@@ -29,7 +29,7 @@ export default async function ProfilePage({ params }: PageProps<"/u/[handle]">) 
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="overflow-hidden rounded-[28px] border border-line">
+      <section className="overflow-hidden rounded-3xl border border-line">
         <div className="relative h-40 sm:h-52">
           <ProjectCover seed={seed} tone="ink" className="absolute inset-0 h-full w-full" />
         </div>

@@ -26,7 +26,7 @@ export function Embed({ url, title }: { url: string; title: string }) {
   const ratio = info.ratio === "video" ? "aspect-video" : "aspect-[4/5] sm:aspect-[4/3]";
 
   return (
-    <figure className="overflow-hidden rounded-[20px] border border-line bg-white text-ink">
+    <figure className="overflow-hidden rounded-2xl border border-line bg-white text-ink">
       <div className={`relative bg-mist ${open ? ratio : "h-52"}`}>
         {open ? (
           <iframe

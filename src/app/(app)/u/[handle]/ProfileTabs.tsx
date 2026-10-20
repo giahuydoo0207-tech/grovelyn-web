@@ -76,7 +76,7 @@ export function ProfileTabs({
           {tab === "Dự án" && (
             <div className="flex flex-col gap-8">
               {projects.length === 0 ? (
-                <div className="rounded-[20px] border border-dashed border-line p-8">
+                <div className="rounded-2xl border border-dashed border-line p-8">
                   <p className="font-display text-xl font-bold">{isMe ? "Bạn chưa có dự án nào" : "Chưa có dự án công khai"}</p>
                   {isMe && (
                     <>
@@ -134,7 +134,7 @@ function SectionHead({ icon: Icon, title, right }: { icon: LucideIcon; title: st
   return (
     <div className="mb-4 flex items-center justify-between gap-3">
       <h2 className="flex items-center gap-2.5 font-display text-xl font-bold tracking-[-0.02em]">
-        <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-sap">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-sap">
           <Icon className="h-[18px] w-[18px] text-leaf-deep" aria-hidden="true" />
         </span>
         {title}
@@ -144,7 +144,7 @@ function SectionHead({ icon: Icon, title, right }: { icon: LucideIcon; title: st
   );
 }
 
-const card = "rounded-[22px] border border-line bg-white p-6";
+const card = "rounded-2xl border border-line bg-white p-6";
 
 /** Tab Giới thiệu, sắp theo hồ sơ nghề nghiệp của Nova Mobile: giới thiệu, portfolio, kinh nghiệm, học vấn, kỹ năng. */
 function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; isMe: boolean }) {
@@ -179,8 +179,8 @@ function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; i
                 const phase = currentPhase(sc.milestones);
                 const role = p.members.find((m) => m.handle === user.handle)?.part;
                 return (
-                  <li key={p.slug} className="grid gap-5 rounded-[18px] border border-line bg-[#fbfcfa] p-4 sm:grid-cols-[176px_minmax(0,1fr)]">
-                    <div className="rounded-[14px] bg-mist px-3 pt-3.5">
+                  <li key={p.slug} className="grid gap-5 rounded-2xl border border-line bg-[#fbfcfa] p-4 sm:grid-cols-[176px_minmax(0,1fr)]">
+                    <div className="rounded-xl bg-mist px-3 pt-3.5">
                       <FolderCover tone={p.tone} title={p.title} logo={sc.logo} height={100} logoSize={46} />
                     </div>
                     <div className="min-w-0">
@@ -245,7 +245,7 @@ function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; i
       </div>
 
       <div className="flex flex-col gap-4">
-        <section className="rounded-[22px] border border-line bg-white p-5">
+        <section className="rounded-2xl border border-line bg-white p-5">
           <div className="flex items-baseline justify-between">
             <p className="font-semibold">Mức độ hoàn thiện hồ sơ</p>
             <p className="font-display text-[22px] font-extrabold text-leaf-deep">{pct}%</p>
@@ -274,18 +274,18 @@ function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; i
           </ul>
         </section>
 
-        <section className="rounded-[22px] border border-line bg-white p-5">
+        <section className="rounded-2xl border border-line bg-white p-5">
           <SectionHead icon={Code2} title="Kỹ năng" />
           <ul className="flex flex-wrap gap-2">
             {user.skills.map((s, i) => (
-              <li key={s} className={`rounded-[10px] px-3 py-1.5 text-sm font-semibold ${i === 0 ? "bg-ink text-sap" : "bg-mist"}`}>
+              <li key={s} className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${i === 0 ? "bg-ink text-sap" : "bg-mist"}`}>
                 {s}
               </li>
             ))}
           </ul>
         </section>
 
-        <div className="flex items-center gap-3.5 rounded-[22px] border border-line bg-white p-4">
+        <div className="flex items-center gap-3.5 rounded-2xl border border-line bg-white p-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-mist">
             <Shield className="h-5 w-5 text-moss" aria-hidden="true" />
           </span>
@@ -297,7 +297,7 @@ function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; i
         </div>
 
         {isMe && (
-          <section className="flex gap-3 rounded-[22px] bg-ink p-5 text-white">
+          <section className="flex gap-3 rounded-2xl bg-ink p-5 text-white">
             <Eye className="mt-0.5 h-5 w-5 shrink-0 text-leaf" aria-hidden="true" />
             <div>
               <p className="font-semibold">Hiển thị: Mọi người</p>

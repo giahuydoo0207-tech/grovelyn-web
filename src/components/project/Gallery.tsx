@@ -93,7 +93,7 @@ export function Gallery({ shots, label = "Bộ ảnh dự án", compact = false 
 
 function Thumb({ shot, onOpen, ratio, small = false }: { shot: Shot; onOpen: () => void; ratio: string; small?: boolean }) {
   return (
-    <button type="button" onClick={onOpen} className="group block w-full overflow-hidden rounded-[18px] border border-line bg-mist text-left">
+    <button type="button" onClick={onOpen} className="group block w-full overflow-hidden rounded-2xl border border-line bg-mist text-left">
       {/* eslint-disable-next-line @next/next/no-img-element -- ảnh người dùng tải lên là data URL */}
       <img
         src={shot.src}

@@ -298,7 +298,7 @@ export function EventForm() {
             </p>
           )}
 
-          <section id="s-anh" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="s-anh" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <SectionHead n={1} title="Ảnh bìa" />
             <p className={`mt-1.5 ${HINT}`}>Tỉ lệ 2:1, tối đa {MAX_MB} MB. Ô ngày tự hiện ở góc dưới theo ngày bạn chọn.</p>
             <div className="relative mt-3.5 aspect-[2/1] overflow-hidden rounded-2xl bg-mist">
@@ -339,7 +339,7 @@ export function EventForm() {
             </div>
           </section>
 
-          <section id="s-tt" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="s-tt" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <SectionHead n={2} title="Nội dung chính" />
             <p className={`mt-1.5 ${HINT}`}>Hiện ở bên trái, cạnh khung đăng ký.</p>
             <div className="mt-4 flex flex-col gap-4">
@@ -373,7 +373,7 @@ export function EventForm() {
             </div>
           </section>
 
-          <section id="s-tg" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="s-tg" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <SectionHead n={3} title="Thời gian và địa điểm" />
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <label className={LABEL}>
@@ -472,7 +472,7 @@ export function EventForm() {
             )}
           </section>
 
-          <section id="s-sp" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="s-sp" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <SectionHead n={4} title="Speaker" extra={<span className="text-sm font-semibold text-moss">{speakers.length}</span>}>
               <AddButton onClick={addSpeaker}>Thêm speaker</AddButton>
             </SectionHead>
@@ -557,7 +557,7 @@ export function EventForm() {
             {speakers.length === 0 && <p className="mt-3 rounded-2xl border border-dashed border-[#c9d0c4] p-5 text-center text-sm text-moss">Chưa có speaker. Bấm Thêm speaker để bắt đầu.</p>}
           </section>
 
-          <section id="s-lt" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="s-lt" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <SectionHead n={5} title="Lịch trình" extra={<span className="text-sm font-semibold text-moss">{agenda.length}</span>}>
               <AddButton onClick={addSession}>Thêm mục</AddButton>
             </SectionHead>
@@ -645,12 +645,12 @@ export function EventForm() {
                 ))}
               </AnimatePresence>
             </ol>
-            <button type="button" onClick={addSession} className="mt-1 h-11 w-full rounded-[14px] border-2 border-dashed border-[#c9d0c4] text-sm font-bold text-leaf-deep hover:bg-sap/40">
+            <button type="button" onClick={addSession} className="mt-1 h-11 w-full rounded-xl border-2 border-dashed border-[#c9d0c4] text-sm font-bold text-leaf-deep hover:bg-sap/40">
               Thêm mục lúc {nextStart}
             </button>
           </section>
 
-          <section id="s-dk" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="s-dk" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <SectionHead n={6} title="Đăng ký" />
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <label className={LABEL}>
@@ -709,9 +709,9 @@ export function EventForm() {
         </form>
 
         <aside className="flex flex-col gap-3 lg:sticky lg:top-[88px]">
-          <nav aria-label="Các phần" className="rounded-[20px] border border-line bg-white p-2.5">
+          <nav aria-label="Các phần" className="rounded-2xl border border-line bg-white p-2.5">
             {nav.map((n) => (
-              <a key={n.id} href={`#${n.id}`} className="flex h-[42px] items-center gap-2.5 rounded-[10px] px-2.5 text-sm font-semibold hover:bg-mist">
+              <a key={n.id} href={`#${n.id}`} className="flex h-[42px] items-center gap-2.5 rounded-lg px-2.5 text-sm font-semibold hover:bg-mist">
                 <span className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full ${n.ok ? "bg-leaf-deep text-white" : "bg-line"}`}>
                   {n.ok && <Check className="h-3.5 w-3.5" strokeWidth={3} aria-label="Đã xong" />}
                 </span>

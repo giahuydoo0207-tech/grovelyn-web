@@ -90,14 +90,14 @@ function InfoPanel({ conv, onClose }: { conv: Conversation; onClose: () => void 
             <div className="grid grid-cols-3 gap-1.5">
               {images.map((m) => (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img key={m.id} src={m.image} alt="Ảnh đã gửi" className="aspect-square w-full rounded-[10px] object-cover" />
+                <img key={m.id} src={m.image} alt="Ảnh đã gửi" className="aspect-square w-full rounded-lg object-cover" />
               ))}
             </div>
           )}
           <ul className="mt-1.5 flex flex-col gap-1">
             {files.map((m) => (
               <li key={m.id} className="flex items-center gap-2.5 rounded-xl p-1.5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-sap">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sap">
                   <FileText className="h-4 w-4 text-leaf-deep" aria-hidden="true" />
                 </span>
                 <span className="min-w-0">
@@ -117,7 +117,7 @@ function InfoPanel({ conv, onClose }: { conv: Conversation; onClose: () => void 
             {projects.map((p) => (
               <li key={p.slug}>
                 <Link href={`/p/${p.slug}`} className="flex items-center gap-2.5 rounded-xl bg-mist p-2 hover:bg-sap">
-                  <ProjectCover seed={p.seed} tone={p.tone} className="h-9 w-9 shrink-0 overflow-hidden rounded-[9px]" />
+                  <ProjectCover seed={p.seed} tone={p.tone} className="h-9 w-9 shrink-0 overflow-hidden rounded-lg" />
                   <span className="min-w-0 truncate text-sm font-bold">{p.title}</span>
                 </Link>
               </li>
@@ -260,7 +260,7 @@ export function Inbox() {
                   type="button"
                   onClick={() => open(c.id)}
                   aria-current={on ? "true" : undefined}
-                  className={`flex w-full items-center gap-3 rounded-[14px] p-2.5 text-left transition-colors ${on ? "bg-sap" : "hover:bg-mist"}`}
+                  className={`flex w-full items-center gap-3 rounded-xl p-2.5 text-left transition-colors ${on ? "bg-sap" : "hover:bg-mist"}`}
                 >
                   <ConvAvatar conv={c} size={48} ring={on ? "ring-sap" : "ring-white"} />
                   <span className="min-w-0 flex-1">

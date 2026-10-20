@@ -23,7 +23,7 @@ export function Avatar({
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex shrink-0 items-center justify-center ${square ? "rounded-[10px]" : "rounded-full"} font-display font-bold ${STYLE[tone]} ${ring ? "ring-4 ring-white" : ""}`}
+      className={`inline-flex shrink-0 items-center justify-center ${square ? "rounded-lg" : "rounded-full"} font-display font-bold ${STYLE[tone]} ${ring ? "ring-4 ring-white" : ""}`}
       style={{ width: size, height: size, fontSize: Math.round(size * 0.36) }}
     >
       {initials}

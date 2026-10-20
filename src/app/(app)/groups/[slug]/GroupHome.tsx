@@ -69,7 +69,7 @@ export function GroupHome({ group }: { group: Group }) {
   return (
     <div>
       <section className="mx-auto max-w-[1232px]">
-        <div className="-mt-6 aspect-[4/1] max-h-[300px] overflow-hidden rounded-b-[20px] bg-ink">
+        <div className="-mt-6 aspect-[4/1] max-h-[300px] overflow-hidden rounded-b-2xl bg-ink">
           <GroupCover cover={group.cover} seed={group.coverSeed} tone={group.coverTone} />
         </div>
         <div className="flex flex-wrap items-end gap-4 px-2 sm:px-6">
@@ -124,7 +124,7 @@ export function GroupHome({ group }: { group: Group }) {
                   type="button"
                   aria-current={on ? "page" : undefined}
                   onClick={() => setTab(label)}
-                  className={`flex h-11 shrink-0 items-center gap-3 rounded-[10px] px-2.5 text-left text-[15px] transition-colors ${on ? "bg-sap font-bold" : "font-semibold hover:bg-mist"}`}
+                  className={`flex h-11 shrink-0 items-center gap-3 rounded-lg px-2.5 text-left text-[15px] transition-colors ${on ? "bg-sap font-bold" : "font-semibold hover:bg-mist"}`}
                 >
                   <Icon className={`h-[22px] w-[22px] ${on ? "text-leaf-deep" : ""}`} aria-hidden="true" />
                   <span className="flex-1 whitespace-nowrap">{label}</span>

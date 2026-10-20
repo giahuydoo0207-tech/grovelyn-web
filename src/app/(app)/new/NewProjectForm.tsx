@@ -46,7 +46,7 @@ interface Shot {
 
 function Step({ n, title, hint, children }: { n: string; title: string; hint: string; children: React.ReactNode }) {
   return (
-    <section aria-labelledby={`buoc-${n}`} className="rounded-[22px] border border-line bg-white p-5 sm:p-7">
+    <section aria-labelledby={`buoc-${n}`} className="rounded-2xl border border-line bg-white p-5 sm:p-7">
       <div className="mb-5 flex items-baseline gap-3.5">
         <span className="font-display text-[15px] font-bold tabular-nums text-leaf-deep">{n}</span>
         <div>
@@ -182,7 +182,7 @@ export function NewProjectForm() {
 
   if (done) {
     return (
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[24px] bg-ink p-8 text-white">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-ink p-8 text-white">
         <p className="font-display text-3xl font-bold tracking-[-0.03em]">Đã tạo dự án {title || "mới"}</p>
         <p className="mt-2 text-fog">
           Cột mốc đầu tiên “{PHASES.find((p) => p.id === phase)!.label}” đã lưu. Chia sẻ lên Cộng đồng để mọi người góp ý.
@@ -387,7 +387,7 @@ export function NewProjectForm() {
               e.preventDefault();
               addFiles(e.dataTransfer.files);
             }}
-            className="mt-2 flex w-full flex-col items-center gap-2 rounded-[18px] border-2 border-dashed border-line px-6 py-7 text-center transition-colors hover:bg-mist"
+            className="mt-2 flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-line px-6 py-7 text-center transition-colors hover:bg-mist"
           >
             <UploadCloud className="h-7 w-7 text-leaf-deep" aria-hidden="true" />
             <span className="font-semibold">Kéo thả tệp hoặc bấm để chọn</span>
@@ -519,7 +519,7 @@ export function NewProjectForm() {
 
       <aside className="flex flex-col gap-4 lg:sticky lg:top-24">
         <p className="text-xs font-bold uppercase tracking-[0.06em] text-moss">Xem trước thẻ dự án</p>
-        <article className="overflow-hidden rounded-[22px] border border-line bg-white">
+        <article className="overflow-hidden rounded-2xl border border-line bg-white">
           <div className="bg-mist px-[18px] pt-[22px]">
             <FolderCover tone={tone} title={title || "Dự án mới"} logoSrc={logoSrc} kind={kind || undefined} height={176} logoSize={78} />
           </div>
@@ -540,7 +540,7 @@ export function NewProjectForm() {
           </div>
         </article>
 
-        <section className="rounded-[20px] border border-line bg-white p-5">
+        <section className="rounded-2xl border border-line bg-white p-5">
           <div className="flex items-baseline justify-between">
             <p className="font-semibold">Mức đầy đủ của hồ sơ dự án</p>
             <p className="font-display text-lg font-extrabold text-leaf-deep">{pct}%</p>

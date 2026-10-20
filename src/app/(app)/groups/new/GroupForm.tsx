@@ -166,7 +166,7 @@ export function GroupForm() {
             </p>
           )}
 
-          <section id="g-anh" className="scroll-mt-24 overflow-hidden rounded-[20px] border border-line bg-white">
+          <section id="g-anh" className="scroll-mt-24 overflow-hidden rounded-2xl border border-line bg-white">
             <div className="relative aspect-[3/1] bg-[#e8ede4]">
               {cover ? (
                 <img src={cover} alt="Ảnh bìa đã chọn" className="h-full w-full object-cover" />
@@ -238,7 +238,7 @@ export function GroupForm() {
             </div>
           </section>
 
-          <section id="g-tt" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="g-tt" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <Head n={1} title="Giới thiệu nhóm" />
             <div className="mt-4 flex flex-col gap-4">
               <label className={LABEL}>
@@ -286,7 +286,7 @@ export function GroupForm() {
             </div>
           </section>
 
-          <section id="g-qt" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="g-qt" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <Head n={2} title="Quy tắc" extra={<span className="text-sm font-semibold text-moss">{rules.length} / 10</span>}>
               <button
                 type="button"
@@ -339,7 +339,7 @@ export function GroupForm() {
             )}
           </section>
 
-          <section id="g-xem" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="g-xem" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <Head n={3} title="Ai xem được nhóm" />
             <div role="radiogroup" className="mt-3.5 grid gap-2.5 sm:grid-cols-2">
               {(
@@ -402,11 +402,11 @@ export function GroupForm() {
             </AnimatePresence>
           </section>
 
-          <section id="g-quyen" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="g-quyen" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <Head n={4} title="Quyền của thành viên" />
             <div className="mt-3.5 flex flex-col gap-2">
               {PERMS.map((p) => (
-                <div key={p.key} className="flex items-center justify-between gap-3.5 rounded-[14px] bg-mist p-3.5">
+                <div key={p.key} className="flex items-center justify-between gap-3.5 rounded-xl bg-mist p-3.5">
                   <span>
                     <span className="block font-bold">{p.label}</span>
                     <span className="text-[13px] leading-normal text-moss">{p.hint}</span>
@@ -417,7 +417,7 @@ export function GroupForm() {
             </div>
           </section>
 
-          <section id="g-moi" className="scroll-mt-24 rounded-[20px] border border-line bg-white p-5 sm:p-6">
+          <section id="g-moi" className="scroll-mt-24 rounded-2xl border border-line bg-white p-5 sm:p-6">
             <Head n={5} title="Mời người vào nhóm" extra={<span className={HINT}>tùy chọn</span>} />
             <label className="mt-3.5 flex h-[46px] items-center gap-2.5 rounded-xl border border-[#dfe5da] px-3.5 focus-within:border-leaf-deep">
               <Search className="h-[18px] w-[18px] text-moss" aria-hidden="true" />
@@ -453,7 +453,7 @@ export function GroupForm() {
 
         <aside className="flex flex-col gap-3 lg:sticky lg:top-[88px]">
           <p className="text-[13px] font-bold text-moss">Xem trước thẻ nhóm</p>
-          <article className="overflow-hidden rounded-[18px] border border-line bg-white">
+          <article className="overflow-hidden rounded-2xl border border-line bg-white">
             <div className="aspect-[3/1] bg-[#e8ede4]">{cover && <img src={cover} alt="" className="h-full w-full object-cover" />}</div>
             <div className="px-4 pb-4">
               <div className="relative -mt-6">
@@ -467,9 +467,9 @@ export function GroupForm() {
               <p className="mt-2 line-clamp-3 text-sm leading-normal text-[#3d4a38]">{desc.trim() || "Mô tả ngắn sẽ hiện ở đây."}</p>
             </div>
           </article>
-          <nav aria-label="Các phần" className="rounded-[18px] border border-line bg-white p-2">
+          <nav aria-label="Các phần" className="rounded-2xl border border-line bg-white p-2">
             {nav.map((n) => (
-              <a key={n.id} href={`#${n.id}`} className="flex h-10 items-center gap-2.5 rounded-[10px] px-2.5 text-sm font-semibold hover:bg-mist">
+              <a key={n.id} href={`#${n.id}`} className="flex h-10 items-center gap-2.5 rounded-lg px-2.5 text-sm font-semibold hover:bg-mist">
                 <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${n.ok ? "bg-leaf-deep text-white" : "bg-line"}`}>
                   {n.ok && <Check className="h-3 w-3" strokeWidth={3} aria-label="Đã xong" />}
                 </span>

@@ -36,7 +36,7 @@ export default function CommunityPage() {
 
         <nav aria-label="Lối tắt" className="rounded-2xl border border-line bg-white p-1.5">
           {SHORTCUTS.map(({ href, label, icon: Icon, count, filled }) => (
-            <Link key={label} href={href} className="flex h-11 items-center gap-3 rounded-[10px] px-2.5 text-[15px] font-semibold transition-colors hover:bg-mist">
+            <Link key={label} href={href} className="flex h-11 items-center gap-3 rounded-lg px-2.5 text-[15px] font-semibold transition-colors hover:bg-mist">
               <Icon className="h-[22px] w-[22px]" fill={filled ? "currentColor" : "none"} strokeWidth={2} aria-hidden="true" />
               <span className="flex-1">{label}</span>
               {count ? (

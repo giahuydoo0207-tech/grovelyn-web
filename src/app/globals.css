@@ -23,6 +23,16 @@
   --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
 
+  /*
+   * Bo góc 4 cấp, càng vào trong càng nhỏ:
+   * lg 6px chi tiết nhỏ, xl 8px nút và ô nhập, 2xl 12px thẻ, 3xl 16px khối lớn.
+   * Nút dạng viên thuốc và ảnh đại diện dùng rounded-full.
+   */
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 1rem;
+
   --ease-grow: cubic-bezier(0.22, 1, 0.36, 1);
 }
 

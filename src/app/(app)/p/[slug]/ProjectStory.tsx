@@ -191,7 +191,7 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
           {view === "story" && (
             <>
               {facts.length > 0 && (
-                <dl className={`mb-2 grid gap-px overflow-hidden rounded-[20px] border border-line bg-line ${facts.length >= 4 ? "grid-cols-2 xl:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"}`}>
+                <dl className={`mb-2 grid gap-px overflow-hidden rounded-2xl border border-line bg-line ${facts.length >= 4 ? "grid-cols-2 xl:grid-cols-4" : "grid-cols-1 sm:grid-cols-3"}`}>
                   {facts.map((f) => (
                     <div key={f.key} className="bg-white p-4">
                       <dt className="text-xs font-semibold uppercase tracking-[0.06em] text-moss">{f.label}</dt>
@@ -231,7 +231,7 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
               </section>
               <section>
                 <h2 className="mb-5 font-display text-[clamp(1.6rem,2.6vw,2.1rem)] font-bold tracking-[-0.03em]">Tệp</h2>
-                <div id="tep" className="overflow-hidden rounded-[20px] border border-line bg-white">
+                <div id="tep" className="overflow-hidden rounded-2xl border border-line bg-white">
                   <div className="flex flex-wrap items-center justify-between gap-3 bg-mist px-4 py-3">
                     <p className="text-sm text-moss">
                       Bản mới nhất <strong className="text-ink">{project.versions[0]?.tag}</strong>: {project.versions[0]?.note}
@@ -334,7 +334,7 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
   return (
     <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
       {(present.length > 0 || project.updated) && (
-        <section className="rounded-[20px] border border-line bg-white p-5">
+        <section className="rounded-2xl border border-line bg-white p-5">
           {present.length > 0 && (
             <div className="mb-4 grid grid-cols-2 gap-2.5">
               {present.map((r) => (
@@ -354,7 +354,7 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
           <p className="text-[13px] text-moss">Cập nhật {project.updated}</p>
         </section>
       )}
-      <section className="rounded-[20px] border border-line bg-white p-5">
+      <section className="rounded-2xl border border-line bg-white p-5">
         <h2 className="font-semibold">Giai đoạn</h2>
         <button type="button" onClick={onTimeline} className="mt-3 block w-full text-left" aria-label="Xem hành trình dự án">
           <ol className="grid grid-cols-3 gap-2">
@@ -399,7 +399,7 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
           </>
         )}
       </section>
-      <section className="rounded-[20px] border border-line bg-white p-5">
+      <section className="rounded-2xl border border-line bg-white p-5">
         <h2 className="font-semibold">Người đóng góp</h2>
         <ul className="mt-3 flex flex-col gap-3">
           {project.members.map((m) => {

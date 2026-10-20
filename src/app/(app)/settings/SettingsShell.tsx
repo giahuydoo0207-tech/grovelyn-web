@@ -95,7 +95,7 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <span
-                    className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-[10px] lg:flex ${on ? "bg-leaf text-ink" : "bg-mist text-moss"}`}
+                    className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg lg:flex ${on ? "bg-leaf text-ink" : "bg-mist text-moss"}`}
                   >
                     <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
                   </span>

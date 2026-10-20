@@ -28,7 +28,7 @@ export function DateBadge({ iso, size = "lg" }: { iso: string; size?: "sm" | "lg
   const lg = size === "lg";
   return (
     <span
-      className={`block overflow-hidden bg-white text-center ${lg ? "w-[84px] rounded-[18px] shadow-[0_0_0_5px_#f2f5ef,0_6px_16px_rgba(6,17,10,0.18)]" : "w-12 rounded-xl shadow-[0_2px_8px_rgba(6,17,10,0.2)]"}`}
+      className={`block overflow-hidden bg-white text-center ${lg ? "w-[84px] rounded-2xl shadow-[0_0_0_5px_#f2f5ef,0_6px_16px_rgba(6,17,10,0.18)]" : "w-12 rounded-xl shadow-[0_2px_8px_rgba(6,17,10,0.2)]"}`}
       aria-hidden="true"
     >
       <span className={`block bg-ink font-bold text-leaf ${lg ? "py-1 text-[15px]" : "py-0.5 text-[11px]"}`}>{d.tag}</span>
@@ -64,7 +64,7 @@ export function EventView({ event, preview = false }: { event: CommunityEvent; p
 
   return (
     <article className="mx-auto max-w-[1180px]">
-      <div className="-mt-6 aspect-[2/1] max-h-[480px] w-full overflow-hidden rounded-b-[20px] bg-ink">
+      <div className="-mt-6 aspect-[2/1] max-h-[480px] w-full overflow-hidden rounded-b-2xl bg-ink">
         <EventCoverImage event={event} />
       </div>
 
@@ -100,7 +100,7 @@ export function EventView({ event, preview = false }: { event: CommunityEvent; p
           <ul className="mt-6 flex flex-col gap-3.5">
             {facts.map(({ icon: Icon, k, v }) => (
               <li key={k} className="flex items-center gap-3 text-base font-semibold">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-sap">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sap">
                   <Icon className="h-[18px] w-[18px] text-leaf-deep" aria-hidden="true" />
                 </span>
                 <span>
@@ -136,7 +136,7 @@ export function EventView({ event, preview = false }: { event: CommunityEvent; p
                     <span className={`h-4 w-4 shrink-0 rounded-full ring-[5px] ring-mist ${main ? "bg-leaf-deep" : a.kind === "Thảo luận" ? "bg-leaf" : a.kind === "Mở đầu" ? "bg-ink" : "bg-fog"}`} />
                     <span className={`w-0.5 flex-1 ${i === event.agenda.length - 1 ? "bg-transparent" : "bg-[#d6ddd1]"}`} />
                   </span>
-                  <div className="mb-3.5 rounded-[18px] border border-line bg-white px-5 py-4 sm:px-6">
+                  <div className="mb-3.5 rounded-2xl border border-line bg-white px-5 py-4 sm:px-6">
                     <p className="text-xs font-bold text-leaf-deep">{a.kind}</p>
                     <h3 className="mt-1 text-lg font-bold leading-snug sm:text-xl">{a.title || "Chưa đặt tiêu đề"}</h3>
                     {who && (

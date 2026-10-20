@@ -82,7 +82,7 @@ export function Journey({ slug, seed, canEdit }: { slug: string; seed: Milestone
 
   return (
     <div className="flex flex-col gap-8">
-      <section aria-label="Giai đoạn của dự án" className="rounded-[20px] bg-mist p-5">
+      <section aria-label="Giai đoạn của dự án" className="rounded-2xl bg-mist p-5">
         <ol className="grid grid-cols-3 gap-2">
           {PHASES.map((p, i) => {
             const done = i <= reached;
@@ -105,7 +105,7 @@ export function Journey({ slug, seed, canEdit }: { slug: string; seed: Milestone
         <button
           type="button"
           onClick={() => setComposing(true)}
-          className="flex items-center gap-3 rounded-[20px] border-2 border-dashed border-line px-5 py-4 text-left transition-colors hover:border-leaf-deep hover:bg-sap/30"
+          className="flex items-center gap-3 rounded-2xl border-2 border-dashed border-line px-5 py-4 text-left transition-colors hover:border-leaf-deep hover:bg-sap/30"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-leaf text-ink">
             <Plus className="h-5 w-5" aria-hidden="true" />
@@ -212,7 +212,7 @@ function Composer({ current, onCancel, onAdd }: { current: Phase; onCancel: () =
           by: ME,
         });
       }}
-      className="flex flex-col gap-5 rounded-[22px] border border-line p-5 sm:p-6"
+      className="flex flex-col gap-5 rounded-2xl border border-line p-5 sm:p-6"
       aria-label="Cập nhật cột mốc"
     >
       <div className="flex items-center justify-between gap-3">

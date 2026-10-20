@@ -15,7 +15,7 @@ export function ProjectCard({ project, featured = false }: { project: Project; f
   return (
     <Link
       href={`/p/${project.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-[22px] border border-line bg-white transition-[border-color,box-shadow] duration-200 hover:border-ink/25 hover:shadow-[0_14px_40px_-18px_rgba(6,17,10,0.35)] [&:hover_.folder-logo]:-translate-y-1"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white transition-[border-color,box-shadow] duration-200 hover:border-ink/25 hover:shadow-[0_14px_40px_-18px_rgba(6,17,10,0.35)] [&:hover_.folder-logo]:-translate-y-1"
     >
       <div className={`bg-mist px-[18px] pt-[22px] ${featured ? "lg:flex lg:flex-1 lg:flex-col" : ""}`}>
         <FolderCover

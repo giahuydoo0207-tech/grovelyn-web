@@ -51,7 +51,7 @@ export function PostCard({ post }: { post: Post }) {
   };
 
   return (
-    <article className="rounded-[22px] border border-line bg-white p-5">
+    <article className="rounded-2xl border border-line bg-white p-5">
       <header className="flex items-center gap-3">
         <Avatar initials={author.initials} tone={author.tone} size={44} />
         <div className="min-w-0 flex-1">

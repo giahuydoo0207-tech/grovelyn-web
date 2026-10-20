@@ -120,7 +120,7 @@ export function ImageCropper({ src, ratio, round = false, title = "Chỉnh khung
         initial={{ opacity: 0, y: 16, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 32 }}
-        className="max-h-full w-full max-w-[1040px] overflow-y-auto rounded-[22px] bg-white p-5 shadow-2xl outline-none sm:p-6"
+        className="max-h-full w-full max-w-[1040px] overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl outline-none sm:p-6"
       >
         <div className="flex items-center justify-between">
           <h2 id="crop-title" className="font-display text-[22px] font-bold tracking-[-0.02em]">
@@ -215,7 +215,7 @@ export function ImageCropper({ src, ratio, round = false, title = "Chỉnh khung
 
         <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-line pt-4">
           <div
-            className={`relative shrink-0 overflow-hidden bg-[#0b1a10] ${round ? "rounded-full" : "rounded-[10px]"}`}
+            className={`relative shrink-0 overflow-hidden bg-[#0b1a10] ${round ? "rounded-full" : "rounded-lg"}`}
             style={{ width: previewW, height: previewW / ratio }}
             aria-hidden="true"
           >

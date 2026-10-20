@@ -113,7 +113,7 @@ export function MessageList({ conv, compact = false }: { conv: Conversation; com
               {group && !mine && firstOfRun && <span className="mb-0.5 ml-1 text-xs font-bold text-moss">{u?.name ?? m.from}</span>}
               {m.text && (
                 <p
-                  className={`whitespace-pre-wrap break-words ${bubble} ${compact ? "rounded-2xl px-3 py-2 text-sm" : "rounded-[18px] px-3.5 py-2.5 text-[15px]"} leading-snug`}
+                  className={`whitespace-pre-wrap break-words ${bubble} ${compact ? "rounded-2xl px-3 py-2 text-sm" : "rounded-2xl px-3.5 py-2.5 text-[15px]"} leading-snug`}
                 >
                   {m.text}
                 </p>
@@ -125,7 +125,7 @@ export function MessageList({ conv, compact = false }: { conv: Conversation; com
                   onClick={(e) => e.preventDefault()}
                   className={`flex items-center gap-2.5 rounded-2xl px-3.5 py-2.5 ${bubble}`}
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white">
                     <FileText className="h-[18px] w-[18px] text-leaf-deep" aria-hidden="true" />
                   </span>
                   <span className="min-w-0">
@@ -260,7 +260,7 @@ export function Composer({ convId, compact = false, label }: { convId: string; c
                 setPicker(false);
               }}
             >
-              <ProjectCover seed={p.seed} tone={p.tone} className="h-9 w-9 shrink-0 rounded-[9px]" />
+              <ProjectCover seed={p.seed} tone={p.tone} className="h-9 w-9 shrink-0 rounded-lg" />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-bold">{p.title}</span>
                 <span className="text-xs text-moss">{p.field}</span>

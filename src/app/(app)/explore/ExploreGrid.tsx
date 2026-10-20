@@ -63,7 +63,7 @@ export function ExploreGrid() {
       )}
 
       {list.length === 0 ? (
-        <div className="flex flex-col items-start gap-3 rounded-[20px] border border-dashed border-line p-10">
+        <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-line p-10">
           <p className="font-display text-2xl font-bold tracking-[-0.02em]">Chưa có dự án nào ở đây</p>
           <p className="max-w-[48ch] text-moss">Thử ngành khác, hoặc là người đầu tiên đăng dự án cho ngành này.</p>
           <Link href="/new" className="mt-2 rounded-xl bg-leaf px-5 py-3 font-bold text-ink hover:bg-[#6ee04d]">
