@@ -9,7 +9,7 @@ const TONE: Record<CoverTone, { back: string; front: string; line: string; tab: 
 
 /**
  * Bìa dự án kiểu bìa hồ sơ: tab ghi loại dự án, logo dự án đặt chính giữa mặt trước như nhãn in sẵn.
- * `height` là chiều cao bìa; logo tự canh giữa phần mặt trước.
+ * `height` là chiều cao bìa; logo tự canh giữa phần mặt trước. Tab co giãn theo nhãn, chữ dài thì cắt bằng dấu ba chấm.
  */
 export function FolderCover({
   tone,
@@ -36,23 +36,27 @@ export function FolderCover({
   const c = TONE[tone];
   const pad = Math.max(4, Math.round(logoSize * 0.06));
   const box = logoSize + pad * 2;
+  // Chiều cao tab: đủ cho một dòng chữ 11px khi có nhãn, nằm trên đường cong mặt trước.
+  const tab = kind ? (height >= 220 ? 28 : 24) : Math.max(12, Math.round(height * 0.12));
   return (
     <div className={`relative ${className}`} style={fill ? { minHeight: height } : { height }}>
-      <svg aria-hidden="true" viewBox="0 0 400 200" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-        <path d="M0 12 C0 7 3 4 8 4 H150 C164 4 170 22 186 22 H392 C397 22 400 25 400 30 V200 H0 Z" fill={c.back} />
-      </svg>
+      {/* Thân sau và tab dựng bằng px nên góc bo không phình theo bề ngang, tab co theo độ dài chữ. */}
+      <div className="absolute inset-x-0 bottom-0 rounded-tr-[10px]" style={{ top: tab, background: c.back }} />
+      <div className="absolute left-0 top-0 flex max-w-[calc(100%-2.5rem)]" style={{ height: tab + 1 }}>
+        <span
+          className="flex min-w-0 items-center rounded-tl-[10px] pl-3.5 pr-1.5"
+          style={{ background: c.back, color: c.tab }}
+        >
+          {kind && <span className="truncate pt-px text-[11px] font-bold uppercase leading-[16px] tracking-[0.04em] opacity-90">{kind}</span>}
+        </span>
+        <svg aria-hidden="true" viewBox="0 0 30 20" preserveAspectRatio="none" className="h-full shrink-0" style={{ width: Math.round(tab * 1.4) }}>
+          <path d="M0 0 H4 C14 0 16 20 30 20 V21 H0 Z" fill={c.back} />
+        </svg>
+      </div>
       <svg aria-hidden="true" viewBox="0 0 400 200" preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-[80%] w-full">
         <path d="M0 26 C110 2 290 2 400 26 V200 H0 Z" fill={c.front} />
         <path d="M22 36 C130 16 270 16 378 36" fill="none" stroke={c.line} strokeOpacity=".35" strokeWidth="1.5" />
       </svg>
-      {kind && (
-        <span
-          className="absolute left-3.5 max-w-[34%] truncate text-[11px] font-bold uppercase tracking-[0.04em] opacity-85"
-          style={{ top: Math.max(2, Math.round(height * 0.025)), color: c.tab }}
-        >
-          {kind}
-        </span>
-      )}
       <span
         className="folder-logo absolute left-1/2 bg-white shadow-[0_4px_12px_-6px_rgba(6,17,10,0.35),0_0_0_1px_rgba(6,17,10,0.06)] transition-transform duration-300 ease-[var(--ease-grow)]"
         style={{ top: "63%", marginTop: -Math.round(box / 2), marginLeft: -Math.round(box / 2), padding: pad, borderRadius: Math.round(logoSize * 0.18) + pad }}
