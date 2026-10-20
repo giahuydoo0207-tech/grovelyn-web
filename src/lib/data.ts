@@ -495,21 +495,36 @@ export const POSTS: Post[] = [
   },
 ];
 
+export type NoticeKind = "like" | "comment" | "follow" | "mention" | "milestone" | "view" | "event";
+
+/** Không có `actor` là thông báo từ Grovelyn (sự kiện, lượt xem hồ sơ, cột mốc). */
 export interface Notice {
   id: string;
-  actor: string;
+  kind: NoticeKind;
+  actor?: string;
   others?: number;
   text: string;
+  /** Dự án liên quan, hiện thành thẻ nhỏ dưới nội dung. */
+  project?: string;
+  /** Trích đoạn bình luận hoặc bài viết. */
+  quote?: string;
   when: string;
+  day: "today" | "week" | "earlier";
   unread: boolean;
   href: string;
 }
 
 export const NOTICES: Notice[] = [
-  { id: "n1", actor: "thuha", others: 5, text: "đã thích dự án Ứng dụng đặt bàn cho quán cà phê", when: "10 phút trước", unread: true, href: "/p/dat-ban-ca-phe" },
-  { id: "n2", actor: "quocbao", text: "đã bình luận: Giao diện đặt bàn gọn quá, có bản điện thoại chưa?", when: "1 giờ trước", unread: true, href: "/p/dat-ban-ca-phe" },
-  { id: "n3", actor: "hoanglong", text: "đã bắt đầu theo dõi bạn", when: "hôm qua", unread: false, href: "/u/hoanglong" },
-  { id: "n4", actor: "ngocanh", text: "đã nhắc đến bạn trong bài Tìm cộng sự", when: "2 ngày trước", unread: false, href: "/community" },
+  { id: "n1", kind: "like", actor: "thuha", others: 5, text: "đã thích dự án của bạn", project: "dat-ban-ca-phe", when: "10 phút", day: "today", unread: true, href: "/p/dat-ban-ca-phe" },
+  { id: "n2", kind: "comment", actor: "quocbao", text: "đã bình luận về dự án của bạn", project: "dat-ban-ca-phe", quote: "Giao diện đặt bàn gọn quá, có bản điện thoại chưa?", when: "1 giờ", day: "today", unread: true, href: "/p/dat-ban-ca-phe#thao-luan" },
+  { id: "n3", kind: "milestone", actor: "minhkhoa", text: "vừa đăng bản mới cho dự án bạn đang theo dõi", project: "robot-phan-loai-rac", when: "3 giờ", day: "today", unread: true, href: "/p/robot-phan-loai-rac#hanh-trinh" },
+  { id: "n4", kind: "view", text: "Hồ sơ của bạn được 2 doanh nghiệp xem trong tuần này. Thêm chứng chỉ để hồ sơ đầy đủ hơn.", when: "5 giờ", day: "today", unread: false, href: "/u/giahuy" },
+  { id: "n5", kind: "follow", actor: "hoanglong", text: "đã bắt đầu theo dõi bạn", when: "hôm qua", day: "week", unread: false, href: "/u/hoanglong" },
+  { id: "n6", kind: "mention", actor: "ngocanh", text: "đã nhắc đến bạn trong bài Tìm cộng sự", quote: "Cần thêm một bạn làm web đặt món, @giahuy có hứng không?", when: "2 ngày", day: "week", unread: false, href: "/community" },
+  { id: "n7", kind: "event", text: "Sự kiện Làm portfolio cho người trái ngành bạn quan tâm sẽ diễn ra sau 2 ngày, 19:00 tại Xưởng Lá Coworking.", when: "3 ngày", day: "week", unread: false, href: "/events" },
+  { id: "n8", kind: "like", actor: "minhkhoa", others: 1, text: "đã thích dự án của bạn", project: "nova-replyn", when: "5 ngày", day: "week", unread: false, href: "/p/nova-replyn" },
+  { id: "n9", kind: "milestone", text: "Dự án của bạn đã đủ 3 cột mốc: Ý tưởng, Bản nháp và Bản cuối.", project: "nova-replyn", when: "2 tuần", day: "earlier", unread: false, href: "/p/nova-replyn#hanh-trinh" },
+  { id: "n10", kind: "comment", actor: "thuha", text: "đã trả lời bình luận của bạn", project: "nhan-dien-tra-may", quote: "Đúng rồi, bảng màu lấy từ lá trà non và gốm men lam.", when: "3 tuần", day: "earlier", unread: false, href: "/p/nhan-dien-tra-may#thao-luan" },
 ];
 
 export const ME = "giahuy";
