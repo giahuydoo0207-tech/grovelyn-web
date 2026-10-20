@@ -36,18 +36,19 @@ export function FolderCover({
   const c = TONE[tone];
   const pad = Math.max(4, Math.round(logoSize * 0.06));
   const box = logoSize + pad * 2;
-  // Chiều cao tab: đủ cho một dòng chữ 11px khi có nhãn, nằm trên đường cong mặt trước.
-  const tab = kind ? (height >= 220 ? 28 : 24) : Math.max(12, Math.round(height * 0.12));
+  // Bìa lớn (thẻ nổi bật, trang dự án) dùng tab và chữ lớn hơn để cân với khung.
+  const big = logoSize >= 96;
+  const tab = kind ? (big ? 38 : 24) : Math.max(12, Math.round(height * 0.12));
   return (
     <div className={`relative ${className}`} style={fill ? { minHeight: height } : { height }}>
       {/* Thân sau và tab dựng bằng px nên góc bo không phình theo bề ngang, tab co theo độ dài chữ. */}
-      <div className="absolute inset-x-0 bottom-0 rounded-tr-[10px]" style={{ top: tab, background: c.back }} />
+      <div className="absolute inset-x-0 bottom-0" style={{ top: tab, borderTopRightRadius: big ? 14 : 10, background: c.back }} />
       <div className="absolute left-0 top-0 flex max-w-[calc(100%-2.5rem)]" style={{ height: tab + 1 }}>
         <span
-          className="flex min-w-0 items-center rounded-tl-[10px] pl-3.5 pr-1.5"
+          className={`flex min-w-0 items-center ${big ? "rounded-tl-[14px] pl-5 pr-2" : "rounded-tl-[10px] pl-3.5 pr-1.5"}`}
           style={{ background: c.back, color: c.tab }}
         >
-          {kind && <span className="truncate pt-px text-[11px] font-bold uppercase leading-[16px] tracking-[0.04em] opacity-90">{kind}</span>}
+          {kind && <span className={`truncate pt-px font-bold uppercase tracking-[0.04em] opacity-90 ${big ? "text-[14px] leading-[20px]" : "text-[11px] leading-[16px]"}`}>{kind}</span>}
         </span>
         <svg aria-hidden="true" viewBox="0 0 30 20" preserveAspectRatio="none" className="h-full shrink-0" style={{ width: Math.round(tab * 1.4) }}>
           <path d="M0 0 H4 C14 0 16 20 30 20 V21 H0 Z" fill={c.back} />
