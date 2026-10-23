@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { MessageCircle, MoreHorizontal, Repeat2, Send, ThumbsUp } from "lucide-react";
 import type { Post } from "@/lib/data";
 import { ME, projectOf, userOf } from "@/lib/data";
+import { contributorsOf } from "@/lib/exchange";
 import { Avatar } from "@/components/Avatar";
 import { ProjectCover } from "@/components/ProjectCover";
 import { REACTIONS } from "./reactions";
@@ -98,6 +99,7 @@ export function PostCard({ post }: { post: Post }) {
           </div>
         </Link>
       )}
+      {project && <Credit slug={project.slug} />}
 
       <div className="mt-4 flex items-center justify-between text-sm text-moss">
         <span className="flex items-center gap-1.5">
@@ -270,5 +272,35 @@ export function PostCard({ post }: { post: Post }) {
         )}
       </AnimatePresence>
     </article>
+  );
+}
+
+/** Ghi công người có góp ý được áp dụng qua tab Trao đổi. */
+function Credit({ slug }: { slug: string }) {
+  const people = contributorsOf(slug)
+    .map((h) => userOf(h))
+    .filter((u) => !!u);
+  if (!people.length) return null;
+  return (
+    <p className="mt-3 flex items-center gap-2 text-sm text-moss">
+      <span className="flex -space-x-1.5" aria-hidden="true">
+        {people.slice(0, 3).map((u) => (
+          <span key={u.handle} className="rounded-full ring-2 ring-white">
+            <Avatar initials={u.initials} tone={u.tone} size={22} />
+          </span>
+        ))}
+      </span>
+      <span>
+        Hoàn thiện cùng góp ý của{" "}
+        {people.map((u, i) => (
+          <span key={u.handle}>
+            {i > 0 && (i === people.length - 1 ? " và " : ", ")}
+            <Link href={`/u/${u.handle}`} className="font-semibold text-ink hover:underline">
+              {u.handle === ME ? "bạn" : u.name}
+            </Link>
+          </span>
+        ))}
+      </span>
+    </p>
   );
 }

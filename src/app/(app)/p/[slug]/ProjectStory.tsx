@@ -28,8 +28,12 @@ import { BeforeAfter } from "@/components/project/BeforeAfter";
 import { Embed } from "@/components/project/Embed";
 import { Gallery } from "@/components/project/Gallery";
 import { Journey } from "@/components/project/Journey";
+import { ProjectExchange } from "@/components/exchange/ProjectExchange";
+import { contributorsOf, topicsOf } from "@/lib/exchange";
 
-type View = "story" | "resources" | "discussion";
+type View = "story" | "exchange" | "resources" | "discussion";
+
+const VIEW_HASH: Record<Exclude<View, "story">, string> = { exchange: "trao-doi", resources: "tai-nguyen", discussion: "thao-luan" };
 
 const FILE_ICON: Record<ProjectFile["kind"], LucideIcon> = {
   folder: Folder,
@@ -101,11 +105,12 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
     return list;
   }, [project, showcase, canEdit]);
 
-  // Link "#tai-nguyen", "#thao-luan", "#hanh-trinh", "#tep" mở đúng phần.
+  // Link "#trao-doi", "#tai-nguyen", "#thao-luan", "#hanh-trinh", "#tep" mở đúng phần.
   useEffect(() => {
     const sync = () => {
       const h = window.location.hash.slice(1);
-      if (h === "tai-nguyen" || h === "tep") setView("resources");
+      if (h === "trao-doi") setView("exchange");
+      else if (h === "tai-nguyen" || h === "tep") setView("resources");
       else if (h === "thao-luan") setView("discussion");
       else if (chapters.some((c) => c.id === h)) {
         setView("story");
@@ -145,7 +150,7 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
   };
   const goView = (v: View) => {
     setView(v);
-    history.replaceState(null, "", v === "story" ? window.location.pathname : `#${v === "resources" ? "tai-nguyen" : "thao-luan"}`);
+    history.replaceState(null, "", v === "story" ? window.location.pathname : `#${VIEW_HASH[v]}`);
     requestAnimationFrame(() => document.getElementById("noi-dung-du-an")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
@@ -173,8 +178,9 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
             </li>
           ))}
           <li className="shrink-0 lg:mt-4 lg:shrink lg:border-t lg:border-line lg:pt-3">
-            {navItem(`Tài nguyên (${resourceCount})`, view === "resources", () => goView("resources"))}
+            {navItem(`Trao đổi (${topicsOf(project.slug).filter((t) => t.status !== "done").length})`, view === "exchange", () => goView("exchange"))}
           </li>
+          <li className="shrink-0 lg:shrink">{navItem(`Tài nguyên (${resourceCount})`, view === "resources", () => goView("resources"))}</li>
           <li className="shrink-0 lg:shrink">{navItem(`Thảo luận (${project.comments})`, view === "discussion", () => goView("discussion"))}</li>
         </ol>
       </nav>
@@ -211,6 +217,8 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
               ))}
             </>
           )}
+
+          {view === "exchange" && <ProjectExchange project={project} canEdit={canEdit} />}
 
           {view === "resources" && (
             <div className="flex flex-col gap-10">
@@ -417,6 +425,23 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
               </li>
             );
           })}
+          {contributorsOf(project.slug)
+            .filter((h) => !project.members.some((m) => m.handle === h))
+            .map((h) => {
+              const u = userOf(h);
+              if (!u) return null;
+              return (
+                <li key={h} className="flex items-center gap-3">
+                  <Avatar initials={u.initials} tone={u.tone} size={38} />
+                  <div className="min-w-0">
+                    <Link href={`/u/${u.handle}`} className="block truncate font-semibold hover:text-leaf-deep">
+                      {u.name}
+                    </Link>
+                    <p className="truncate text-sm text-moss">Góp ý qua Trao đổi</p>
+                  </div>
+                </li>
+              );
+            })}
         </ul>
         <p className="mt-4 text-sm text-moss">
           <Link href={`/explore?nganh=${encodeURIComponent(project.field)}`} className="font-semibold text-leaf-deep hover:underline">

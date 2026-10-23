@@ -12,7 +12,7 @@ const SLOTS: [number, number, number][] = [
   [84, 117, 20], [178, 101, -20], [96, 70, 25], [162, 62, -25], [118, 40, 20],
 ];
 
-const PEOPLE: NoticeKind[] = ["like", "comment", "follow", "mention", "milestone"];
+const PEOPLE: NoticeKind[] = ["like", "comment", "follow", "mention", "milestone", "exchange"];
 const LEAF = "M0 -11 C7 -6 7 6 0 11 C-7 6 -7 -6 0 -11 Z";
 
 /** Cây tuần này: mỗi lượt tương tác từ người khác trong 7 ngày là một chiếc lá, màu theo loại. */

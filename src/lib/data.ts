@@ -463,7 +463,7 @@ export const POSTS: Post[] = [
     author: "quocbao",
     kind: "Khoe dự án",
     when: "2 giờ trước",
-    text: "Vừa lên v5 cho đồ án nhà phố: thêm mặt cắt và phối cảnh ban đêm. Mọi người góp ý giúp mình phần giếng trời nhé.",
+    text: "Đồ án nhà phố đã bảo vệ xong. Bản cuối có thêm mặt cắt thông gió và phối cảnh ban đêm, giếng trời lùi về giữa một nhịp cột.",
     project: "nha-pho-thong-gio",
     likes: 210,
     comments: [
@@ -495,7 +495,7 @@ export const POSTS: Post[] = [
   },
 ];
 
-export type NoticeKind = "like" | "comment" | "follow" | "mention" | "milestone" | "view" | "event";
+export type NoticeKind = "like" | "comment" | "follow" | "mention" | "milestone" | "view" | "event" | "exchange";
 
 /** Không có `actor` là thông báo từ Grovelyn (sự kiện, lượt xem hồ sơ, cột mốc). */
 export interface Notice {
@@ -518,6 +518,7 @@ export const NOTICES: Notice[] = [
   { id: "n1", kind: "like", actor: "thuha", others: 5, text: "đã thích dự án {p}", project: "dat-ban-ca-phe", when: "10 phút", day: "today", unread: true, href: "/p/dat-ban-ca-phe" },
   { id: "n2", kind: "comment", actor: "quocbao", text: "đã bình luận về dự án {p}", project: "dat-ban-ca-phe", quote: "Giao diện đặt bàn gọn quá, có bản điện thoại chưa?", when: "1 giờ", day: "today", unread: true, href: "/p/dat-ban-ca-phe#thao-luan" },
   { id: "n3", kind: "milestone", actor: "minhkhoa", text: "vừa đăng bản mới cho dự án {p} mà bạn đang theo dõi", project: "robot-phan-loai-rac", when: "3 giờ", day: "today", unread: true, href: "/p/robot-phan-loai-rac#hanh-trinh" },
+  { id: "n11", kind: "exchange", actor: "minhkhoa", text: "mở trao đổi ở dự án {p}, cùng ngành Công nghệ thông tin với bạn", project: "dat-ban-ca-phe", quote: "Màn chọn bàn nên là sơ đồ quán hay danh sách giờ còn trống?", when: "2 giờ", day: "today", unread: false, href: "/p/dat-ban-ca-phe#trao-doi" },
   { id: "n4", kind: "view", text: "Hồ sơ của bạn được 2 doanh nghiệp xem trong tuần này. Thêm chứng chỉ để hồ sơ đầy đủ hơn.", when: "5 giờ", day: "today", unread: false, href: "/u/giahuy" },
   { id: "n5", kind: "follow", actor: "hoanglong", text: "đã bắt đầu theo dõi bạn", when: "hôm qua", day: "week", unread: false, href: "/u/hoanglong" },
   { id: "n6", kind: "mention", actor: "ngocanh", text: "đã nhắc đến bạn trong bài Tìm cộng sự", quote: "Cần thêm một bạn làm web đặt món, @giahuy có hứng không?", when: "2 ngày", day: "week", unread: false, href: "/community" },
@@ -525,6 +526,7 @@ export const NOTICES: Notice[] = [
   { id: "n8", kind: "like", actor: "minhkhoa", others: 1, text: "đã thích dự án {p}", project: "nova-replyn", when: "5 ngày", day: "week", unread: false, href: "/p/nova-replyn" },
   { id: "n9", kind: "milestone", text: "Dự án {p} đã đủ 3 cột mốc: Ý tưởng, Bản nháp và Bản cuối.", project: "nova-replyn", when: "2 tuần", day: "earlier", unread: false, href: "/p/nova-replyn#hanh-trinh" },
   { id: "n10", kind: "comment", actor: "thuha", text: "đã trả lời bình luận của bạn trong dự án {p}", project: "nhan-dien-tra-may", quote: "Đúng rồi, bảng màu lấy từ lá trà non và gốm men lam.", when: "3 tuần", day: "earlier", unread: false, href: "/p/nhan-dien-tra-may#thao-luan" },
+  { id: "n12", kind: "exchange", actor: "thuha", text: "đã áp dụng góp ý của bạn vào bản v2 của dự án {p}", project: "nhan-dien-tra-may", when: "tháng 9", day: "earlier", unread: false, href: "/p/nhan-dien-tra-may#trao-doi" },
 ];
 
 export const ME = "giahuy";

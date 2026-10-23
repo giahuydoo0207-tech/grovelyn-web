@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { AtSign, CalendarDays, CheckCheck, Eye, MessageCircle, Sprout, ThumbsUp, UserPlus, type LucideIcon } from "lucide-react";
+import { AtSign, CalendarDays, CheckCheck, Eye, HandHelping, MessageCircle, Sprout, ThumbsUp, UserPlus, type LucideIcon } from "lucide-react";
 import { NOTICES, projectOf, userOf, type Notice, type NoticeKind } from "@/lib/data";
 import { Avatar } from "@/components/Avatar";
 
@@ -15,12 +15,14 @@ export const KIND: Record<NoticeKind, { icon: LucideIcon; color: string; tint: s
   milestone: { icon: Sprout, color: "#0f766e", tint: "#ccfbf1", label: "Cột mốc" },
   view: { icon: Eye, color: "#c2410c", tint: "#ffedd5", label: "Lượt xem" },
   event: { icon: CalendarDays, color: "#e11d48", tint: "#ffe4e6", label: "Sự kiện" },
+  exchange: { icon: HandHelping, color: "#4d7c0f", tint: "#ecfccb", label: "Trao đổi" },
 };
 
 const FILTERS: { id: string; label: string; kinds: NoticeKind[] | null }[] = [
   { id: "all", label: "Tất cả", kinds: null },
   { id: "project", label: "Dự án", kinds: ["like", "milestone"] },
   { id: "talk", label: "Bình luận", kinds: ["comment", "mention"] },
+  { id: "exchange", label: "Trao đổi", kinds: ["exchange"] },
   { id: "people", label: "Người theo dõi", kinds: ["follow"] },
   { id: "chance", label: "Cơ hội", kinds: ["view", "event"] },
 ];
@@ -39,6 +41,7 @@ const ACTION: Partial<Record<NoticeKind, string>> = {
   milestone: "Xem hành trình",
   event: "Xem sự kiện",
   view: "Hoàn thiện hồ sơ",
+  exchange: "Xem trao đổi",
 };
 
 /** Người gửi: ảnh đại diện. Thông báo từ Grovelyn: vòng tròn trung tính với icon một màu. */

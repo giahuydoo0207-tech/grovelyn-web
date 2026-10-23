@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, Building2, Check, Circle, Code2, Eye, FolderKanban, GraduationCap, Shield, Text as TextIcon, Briefcase, ChevronRight, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Building2, Handshake, Check, Circle, Code2, Eye, FolderKanban, GraduationCap, Shield, Text as TextIcon, Briefcase, ChevronRight, type LucideIcon } from "lucide-react";
 import { Pin } from "lucide-react";
 import type { Post, Project, User } from "@/lib/data";
 import { ProjectCard } from "@/components/ProjectCard";
 import { FolderCover } from "@/components/project/FolderCover";
 import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
+import { contributionsBy } from "@/lib/exchange";
+import { projectOf, userOf } from "@/lib/data";
 import { PostCard } from "../../community/PostCard";
 
 const TABS = ["Dự án", "Bài đăng", "Giới thiệu"] as const;
@@ -33,6 +35,7 @@ export function ProfileTabs({
   useEffect(() => {
     const sync = () => {
       if (window.location.hash === "#bai-dang") setTab("Bài đăng");
+      if (window.location.hash === "#gioi-thieu") setTab("Giới thiệu");
     };
     const raf = requestAnimationFrame(sync);
     window.addEventListener("hashchange", sync);
@@ -223,6 +226,8 @@ function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; i
           </section>
         )}
 
+        <GivenSection handle={user.handle} />
+
         <section className={card}>
           <SectionHead icon={GraduationCap} title="Học vấn và chứng chỉ" />
           <ul className="flex flex-col gap-3">
@@ -325,5 +330,32 @@ function Timeline({ items }: { items: User["experience"] }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+/** Góp ý của người này đã được chủ dự án khác áp dụng (lấy từ tab Trao đổi). */
+function GivenSection({ handle }: { handle: string }) {
+  const given = contributionsBy(handle);
+  if (!given.length) return null;
+  return (
+    <section className={card}>
+      <SectionHead icon={Handshake} title="Đã góp sức" right={<span className="text-sm text-moss">{given.length} góp ý được áp dụng</span>} />
+      <ul className="flex flex-col">
+        {given.map(({ topic, reply }) => {
+          const p = projectOf(topic.project)!;
+          return (
+            <li key={reply.id} className="border-t border-line py-3.5 first:border-t-0 first:pt-0">
+              <Link href={`/p/${p.slug}#trao-doi`} className="font-bold hover:underline">
+                {p.title}
+              </Link>
+              <p className="mt-0.5 text-sm leading-relaxed text-moss">
+                {topic.question} Áp dụng ở bản {reply.applied}, dự án của {userOf(p.owner)?.name}.
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-3 text-[13px] text-moss">Chỉ tính góp ý đã được chủ dự án xác nhận áp dụng.</p>
+    </section>
   );
 }
