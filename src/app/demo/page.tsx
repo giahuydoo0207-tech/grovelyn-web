@@ -8,19 +8,30 @@ import { levelHint } from "@/lib/model";
 import { Mark } from "@/components/Logo";
 import { FolderCover } from "@/components/project/FolderCover";
 import { enterDemo } from "../auth-actions";
+import { GroveReveal, LoadingPreview } from "@/components/grove-reveal";
 
 export const metadata: Metadata = {
   title: "Giới thiệu",
-  description: "Grovelyn giúp bạn trưng bày việc mình làm và nhận góp ý để làm tốt hơn, dù bạn làm trong lĩnh vực nào.",
+  description:
+    "Grovelyn giúp bạn trưng bày việc mình làm và nhận góp ý để làm tốt hơn, dù bạn làm trong lĩnh vực nào.",
 };
 
 const DEMO_URL = "https://grovelyn-web.vercel.app/demo";
 
 /** Ba ví dụ khác ngành, mỗi ví dụ kèm một dòng tiếng Anh cho người xem quốc tế. */
 const EXAMPLES = [
-  { slug: "nha-pho-thong-gio", en: "Graduation architecture project: natural ventilation for a narrow townhouse. Designed, not built." },
-  { slug: "chuoi-cung-ung-ca-phe", en: "Research report on the Central Highlands coffee supply chain, with method and limits." },
-  { slug: "ra-mat-nuoc-ep", en: "Launch plan for a small juice brand, still in progress and asking for feedback." },
+  {
+    slug: "nha-pho-thong-gio",
+    en: "Graduation architecture project: natural ventilation for a narrow townhouse. Designed, not built.",
+  },
+  {
+    slug: "chuoi-cung-ung-ca-phe",
+    en: "Research report on the Central Highlands coffee supply chain, with method and limits.",
+  },
+  {
+    slug: "ra-mat-nuoc-ep",
+    en: "Launch plan for a small juice brand, still in progress and asking for feedback.",
+  },
 ];
 
 const DIFF = [
@@ -48,27 +59,56 @@ const STATUS = [
   {
     title: "Đang chạy thật",
     en: "Works today",
-    items: ["Giao diện và điều hướng", "Đăng bài, tạo dự án, mở trao đổi kèm ảnh và video (giữ trong phiên)", "Lọc theo lĩnh vực, dạng đầu ra, góc nhìn"],
+    items: [
+      "Giao diện và điều hướng",
+      "Đăng bài, tạo dự án, mở trao đổi kèm ảnh và video (giữ trong phiên)",
+      "Lọc theo lĩnh vực, dạng đầu ra, góc nhìn",
+    ],
   },
   {
     title: "Đang mô phỏng",
     en: "Simulated",
-    items: ["Đăng nhập bằng tài khoản mẫu", "Mọi người dùng, dự án, lượt thích, thông báo", "Người đang online, sự kiện"],
+    items: [
+      "Đăng nhập bằng tài khoản mẫu",
+      "Mọi người dùng, dự án, lượt thích, thông báo",
+      "Người đang online, sự kiện",
+    ],
   },
   {
     title: "Mới là định hướng",
     en: "Planned",
-    items: ["Tài khoản thật và lưu trữ", "Cộng tác nhiều người cùng lúc", "Trang Business cho doanh nghiệp, mở khi người dùng ổn định"],
+    items: [
+      "Tài khoản thật và lưu trữ",
+      "Cộng tác nhiều người cùng lúc",
+      "Trang Business cho doanh nghiệp, mở khi người dùng ổn định",
+    ],
   },
 ];
 
 const STEPS = [
-  { vi: "Đăng dự án, chọn dạng đầu ra: đồ án, báo cáo, chiến dịch, ứng dụng…", en: "Post a project and pick what it is." },
-  { vi: "Đang làm dở thì mở Trao đổi kèm ảnh, video, chọn góc nhìn cần nhận.", en: "Stuck? Open an exchange and ask for the view you need." },
-  { vi: "Hoàn tất thì Công bố. Người góp ý được ghi tên vào dự án.", en: "Done? Publish it. Helpers get credited." },
+  {
+    vi: "Đăng dự án, chọn dạng đầu ra: đồ án, báo cáo, chiến dịch, ứng dụng…",
+    en: "Post a project and pick what it is.",
+  },
+  {
+    vi: "Đang làm dở thì mở Trao đổi kèm ảnh, video, chọn góc nhìn cần nhận.",
+    en: "Stuck? Open an exchange and ask for the view you need.",
+  },
+  {
+    vi: "Hoàn tất thì Công bố. Người góp ý được ghi tên vào dự án.",
+    en: "Done? Publish it. Helpers get credited.",
+  },
 ];
 
-function DemoButton({ next = "/community", children, light = false }: { next?: string; children: React.ReactNode; light?: boolean }) {
+function DemoButton({
+  next = "/community",
+  children,
+  light = false,
+}: {
+  next?: string;
+  children: React.ReactNode;
+  light?: boolean;
+}) {
   return (
     <form action={enterDemo}>
       <input type="hidden" name="next" value={next} />
@@ -87,20 +127,30 @@ function DemoButton({ next = "/community", children, light = false }: { next?: s
  * Dùng cho phần demo 2–3 phút ở Buildstuffs: chiếu mã QR, người xem mở trên điện thoại.
  */
 export default async function DemoPage() {
-  const qr = await QRCode.toString(DEMO_URL, { type: "svg", margin: 0, color: { dark: "#06110a", light: "#ffffff" } });
+  const qr = await QRCode.toString(DEMO_URL, {
+    type: "svg",
+    margin: 0,
+    color: { dark: "#06110a", light: "#ffffff" },
+  });
 
   return (
     <div className="min-h-dvh bg-mist text-ink">
       <p className="bg-ink px-4 py-2 text-center text-[13px] text-fog">
-        Bản thử nghiệm. Mọi người dùng, dự án và số liệu là dữ liệu mẫu. <span lang="en">Sample data.</span>
+        Bản thử nghiệm. Mọi người dùng, dự án và số liệu là dữ liệu mẫu.{" "}
+        <span lang="en">Sample data.</span>
       </p>
 
       <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
         <span className="flex items-center gap-2">
           <Mark size={30} />
-          <span className="font-display text-[22px] font-bold tracking-[-0.03em]">Grovelyn</span>
+          <span className="font-display text-[22px] font-bold tracking-[-0.03em]">
+            Grovelyn
+          </span>
         </span>
-        <Link href="/" className="text-sm font-semibold text-leaf-deep hover:underline">
+        <Link
+          href="/"
+          className="text-sm font-semibold text-leaf-deep hover:underline"
+        >
           Tham gia hoặc đăng nhập
         </Link>
       </header>
@@ -108,90 +158,206 @@ export default async function DemoPage() {
       <main className="mx-auto flex max-w-6xl flex-col gap-14 px-4 pb-16 sm:px-6">
         <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div>
-            <h1 className="max-w-[18ch] font-display text-[clamp(2.2rem,5vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.045em] [text-wrap:balance]">
-              Trưng bày việc bạn làm. Cùng nhau làm tốt hơn.
-            </h1>
-            <p className="mt-5 max-w-[56ch] text-lg leading-relaxed text-ink/85">
-              Grovelyn giúp bạn trưng bày việc mình làm và nhận góp ý để làm tốt hơn, dù bạn làm trong lĩnh vực nào: đồ án kiến trúc, báo cáo thị trường hay một
-              ứng dụng.
-            </p>
-            <p lang="en" className="mt-3 max-w-[56ch] text-[15px] leading-relaxed text-moss">
-              Show your work. Make it better together. Grovelyn helps people showcase their work and get feedback to make it better, across disciplines.
-            </p>
+            <GroveReveal
+              revealOnHydrate
+              duration="cinematic"
+              origin="top-left"
+              replay="Chạy lại"
+            >
+              <h1 className="max-w-[18ch] font-display text-[clamp(2.2rem,5vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.045em] [text-wrap:balance]">
+                Trưng bày việc bạn làm. Cùng nhau làm tốt hơn.
+              </h1>
+              <p className="mt-5 max-w-[56ch] text-lg leading-relaxed text-ink/85">
+                Grovelyn giúp bạn trưng bày việc mình làm và nhận góp ý để làm
+                tốt hơn, dù bạn làm trong lĩnh vực nào: đồ án kiến trúc, báo cáo
+                thị trường hay một ứng dụng.
+              </p>
+              <p
+                lang="en"
+                className="mt-3 max-w-[56ch] text-[15px] leading-relaxed text-moss"
+              >
+                Show your work. Make it better together. Grovelyn helps people
+                showcase their work and get feedback to make it better, across
+                disciplines.
+              </p>
+            </GroveReveal>
             <div className="mt-7 flex flex-wrap gap-3">
               <DemoButton>
-                Mở bản demo <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                Mở bản demo{" "}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </DemoButton>
               <DemoButton next="/exchange" light>
                 Xem tab Trao đổi
               </DemoButton>
             </div>
-            <p className="mt-3 text-[13px] text-moss">Không cần đăng ký. Bạn vào bằng một tài khoản mẫu. Bài đăng do người dùng tự đăng, Grovelyn không kiểm định nội dung.</p>
+            <p className="mt-3 text-[13px] text-moss">
+              Không cần đăng ký. Bạn vào bằng một tài khoản mẫu. Bài đăng do
+              người dùng tự đăng, Grovelyn không kiểm định nội dung.
+            </p>
           </div>
           <figure className="mx-auto w-full max-w-[300px] rounded-2xl border border-line bg-white p-5">
-            <div className="aspect-square w-full [&_svg]:h-full [&_svg]:w-full" role="img" aria-label={`Mã QR mở ${DEMO_URL}`} dangerouslySetInnerHTML={{ __html: qr }} />
+            <div
+              className="aspect-square w-full [&_svg]:h-full [&_svg]:w-full"
+              role="img"
+              aria-label={`Mã QR mở ${DEMO_URL}`}
+              dangerouslySetInnerHTML={{ __html: qr }}
+            />
             <figcaption className="mt-4 text-center text-sm">
-              <span className="block font-semibold">Quét để mở trên điện thoại</span>
+              <span className="block font-semibold">
+                Quét để mở trên điện thoại
+              </span>
               <span lang="en" className="block text-moss">
                 Scan to open on your phone
               </span>
-              <span className="mt-2 block break-all font-mono text-[12px] text-moss">{DEMO_URL.replace("https://", "")}</span>
+              <span className="mt-2 block break-all font-mono text-[12px] text-moss">
+                {DEMO_URL.replace("https://", "")}
+              </span>
             </figcaption>
           </figure>
         </section>
 
         <section aria-labelledby="vi-du">
-          <h2 id="vi-du" className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]">
+          <h2
+            id="vi-du"
+            className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]"
+          >
             Ba dự án, ba ngành
           </h2>
           <p lang="en" className="mt-1 text-[15px] text-moss">
             Three projects from three fields, each presented its own way.
           </p>
-          <ul className="mt-6 grid gap-5 md:grid-cols-3">
-            {EXAMPLES.map(({ slug, en }) => {
-              const p = projectOf(slug)!;
-              const sc = showcaseOf(p);
-              const phase = currentPhase(sc.milestones);
-              const owner = userOf(p.owner)!;
-              return (
-                <li key={slug} className="flex flex-col overflow-hidden rounded-xl border border-line bg-white">
-                  <div className="bg-mist px-[18px] pt-[22px]">
-                    <FolderCover tone={p.tone} title={p.title} logo={sc.logo} kind={p.output} height={150} logoSize={66} />
-                  </div>
-                  <div className="flex flex-1 flex-col gap-2 p-5">
-                    <p className="text-[13px] font-semibold text-leaf-deep">
-                      {p.field}, {phaseLabel(phase).toLowerCase()}
-                    </p>
-                    <h3 className="font-display text-lg font-bold leading-tight">{p.title}</h3>
-                    <p className="text-sm text-moss">
-                      {contextLabel(p)}. {levelHint(p.output, phase)}{p.usage ? `, ${p.usage.toLowerCase()}` : ""}. {owner.name}, {owner.intro.toLowerCase()}.
-                    </p>
-                    <p lang="en" className="text-sm italic text-ink/70">
-                      {en}
-                    </p>
-                    <div className="mt-auto pt-3">
-                      <DemoButton next={`/p/${slug}`} light>
-                        Xem dự án
-                      </DemoButton>
+          <GroveReveal revealOnHydrate>
+            <ul className="mt-6 grid gap-5 md:grid-cols-3">
+              {EXAMPLES.map(({ slug, en }) => {
+                const p = projectOf(slug)!;
+                const sc = showcaseOf(p);
+                const phase = currentPhase(sc.milestones);
+                const owner = userOf(p.owner)!;
+                return (
+                  <li
+                    key={slug}
+                    data-ascii="surface"
+                    className="flex flex-col overflow-hidden rounded-xl border border-line bg-white"
+                  >
+                    <div className="bg-mist px-[18px] pt-[22px]">
+                      <FolderCover
+                        tone={p.tone}
+                        title={p.title}
+                        logo={sc.logo}
+                        kind={p.output}
+                        height={150}
+                        logoSize={66}
+                      />
                     </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                    <div className="flex flex-1 flex-col gap-2 p-5">
+                      <p className="text-[13px] font-semibold text-leaf-deep">
+                        {p.field}, {phaseLabel(phase).toLowerCase()}
+                      </p>
+                      <h3 className="font-display text-lg font-bold leading-tight">
+                        {p.title}
+                      </h3>
+                      <p className="text-sm text-moss">
+                        {contextLabel(p)}. {levelHint(p.output, phase)}
+                        {p.usage ? `, ${p.usage.toLowerCase()}` : ""}.{" "}
+                        {owner.name}, {owner.intro.toLowerCase()}.
+                      </p>
+                      <p lang="en" className="text-sm italic text-ink/70">
+                        {en}
+                      </p>
+                      <div className="mt-auto pt-3">
+                        <DemoButton next={`/p/${slug}`} light>
+                          Xem dự án
+                        </DemoButton>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </GroveReveal>
+        </section>
+
+        <section
+          aria-labelledby="dang-tai"
+          className="grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]"
+        >
+          <div>
+            <h2
+              id="dang-tai"
+              className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]"
+            >
+              Lúc mạng chậm, cây mọc trước
+            </h2>
+            <p className="mt-2 max-w-[48ch] text-[15px] leading-relaxed text-ink/85">
+              Trong lúc chờ dữ liệu, cái cây trong logo Grovelyn mọc lên bằng ký
+              tự. Dữ liệu về thì chữ hiện dần vào đúng chỗ, bố cục không bị xô.
+            </p>
+            <p lang="en" className="mt-1.5 text-sm text-moss">
+              While data loads, the Grovelyn tree grows in characters, then the
+              content settles into place.
+            </p>
+            <p className="mt-3 text-[13px] text-moss">
+              Dựng trên thư viện mã nguồn mở{" "}
+              <a
+                href="https://github.com/quanhoangindex/ascii-reveal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-leaf-deep hover:underline"
+              >
+                ascii-reveal
+              </a>{" "}
+              của Quan Hoang (MIT).
+            </p>
+          </div>
+          <LoadingPreview>
+            <article className="rounded-xl border border-line bg-white p-5">
+              <p className="text-[13px] font-semibold text-leaf-deep">
+                Kinh doanh và tài chính, đang làm
+              </p>
+              <h3 className="mt-1 font-display text-xl font-bold leading-tight">
+                Chuỗi cung ứng cà phê Tây Nguyên
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-moss">
+                Phân tích đường đi của hạt cà phê từ nông hộ đến quán, chỉ ra
+                chỗ người trồng bị ép giá.
+              </p>
+              <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4 text-sm">
+                <div>
+                  <dt className="text-moss">Nông hộ</dt>
+                  <dd className="font-display text-lg font-bold">42</dd>
+                </div>
+                <div>
+                  <dt className="text-moss">Trao đổi</dt>
+                  <dd className="font-display text-lg font-bold">3</dd>
+                </div>
+                <div>
+                  <dt className="text-moss">Bản</dt>
+                  <dd className="font-display text-lg font-bold">v2</dd>
+                </div>
+              </dl>
+            </article>
+          </LoadingPreview>
         </section>
 
         <section aria-labelledby="khac-gi">
-          <h2 id="khac-gi" className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]">
+          <h2
+            id="khac-gi"
+            className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]"
+          >
             Khác gì những chỗ bạn đang dùng
           </h2>
           <ul className="mt-6 flex flex-col gap-3 md:hidden">
             {DIFF.map((d) => (
-              <li key={d.vs} className="rounded-xl border border-line bg-white p-5">
+              <li
+                key={d.vs}
+                className="rounded-xl border border-line bg-white p-5"
+              >
                 <p className="font-semibold">So với {d.vs.toLowerCase()}</p>
                 <p className="mt-1.5 text-[15px] text-ink/80">{d.vi}</p>
                 <p className="mt-3 text-[15px]">
-                  <span className="font-semibold text-leaf-deep">Grovelyn: </span>
+                  <span className="font-semibold text-leaf-deep">
+                    Grovelyn:{" "}
+                  </span>
                   {d.us}
                 </p>
                 <p lang="en" className="mt-1.5 text-[13px] text-moss">
@@ -217,14 +383,20 @@ export default async function DemoPage() {
               </thead>
               <tbody>
                 {DIFF.map((d) => (
-                  <tr key={d.vs} className="border-b border-line align-top last:border-b-0">
+                  <tr
+                    key={d.vs}
+                    className="border-b border-line align-top last:border-b-0"
+                  >
                     <th scope="row" className="w-44 p-4 font-semibold">
                       {d.vs}
                     </th>
                     <td className="p-4 text-ink/80">{d.vi}</td>
                     <td className="p-4">
                       {d.us}
-                      <span lang="en" className="mt-1.5 block text-[13px] text-moss">
+                      <span
+                        lang="en"
+                        className="mt-1.5 block text-[13px] text-moss"
+                      >
                         {d.en}
                       </span>
                     </td>
@@ -236,13 +408,21 @@ export default async function DemoPage() {
         </section>
 
         <section aria-labelledby="cach-dung">
-          <h2 id="cach-dung" className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]">
+          <h2
+            id="cach-dung"
+            className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]"
+          >
             Cách dùng
           </h2>
           <ol className="mt-6 grid gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
-              <li key={s.vi} className="rounded-xl border border-line bg-white p-5">
-                <span className="font-display text-sm font-bold text-leaf-deep">Bước {i + 1}</span>
+              <li
+                key={s.vi}
+                className="rounded-xl border border-line bg-white p-5"
+              >
+                <span className="font-display text-sm font-bold text-leaf-deep">
+                  Bước {i + 1}
+                </span>
                 <p className="mt-2 font-semibold leading-snug">{s.vi}</p>
                 <p lang="en" className="mt-1.5 text-sm text-moss">
                   {s.en}
@@ -252,8 +432,15 @@ export default async function DemoPage() {
           </ol>
         </section>
 
-        <section id="trang-thai" aria-labelledby="trang-thai-title" className="scroll-mt-6">
-          <h2 id="trang-thai-title" className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]">
+        <section
+          id="trang-thai"
+          aria-labelledby="trang-thai-title"
+          className="scroll-mt-6"
+        >
+          <h2
+            id="trang-thai-title"
+            className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]"
+          >
             Phần nào đã chạy thật
           </h2>
           <p lang="en" className="mt-1 text-[15px] text-moss">
@@ -261,7 +448,11 @@ export default async function DemoPage() {
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {STATUS.map((s) => (
-              <section key={s.title} aria-label={s.title} className="rounded-xl border border-line bg-white p-5">
+              <section
+                key={s.title}
+                aria-label={s.title}
+                className="rounded-xl border border-line bg-white p-5"
+              >
                 <h3 className="font-bold">
                   {s.title}{" "}
                   <span lang="en" className="font-normal text-moss">
