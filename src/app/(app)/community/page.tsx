@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Bookmark, BriefcaseBusiness, CalendarDays, Flag, Newspaper, Users, type LucideIcon } from "lucide-react";
+import { Bookmark, CalendarDays, Flag, Newspaper, Users, type LucideIcon } from "lucide-react";
 import { MY_GROUPS, ME, userOf } from "@/lib/data";
 import { Avatar } from "@/components/Avatar";
 import { Feed } from "./Feed";
@@ -14,7 +14,6 @@ const SHORTCUTS: { href: string; label: string; icon: LucideIcon; count?: number
   { href: "/community", label: "Bản tin", icon: Newspaper },
   { href: "/events", label: "Sự kiện", icon: CalendarDays, count: 2 },
   { href: "/community", label: "Thử thách", icon: Flag },
-  { href: "/explore", label: "Cơ hội", icon: BriefcaseBusiness },
 ];
 
 /** Trang chủ sau khi đăng nhập: lối tắt và nhóm bên trái, bảng tin ở giữa, người online và sự kiện bên phải. */

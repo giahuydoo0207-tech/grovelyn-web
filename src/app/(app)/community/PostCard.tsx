@@ -13,7 +13,7 @@ import { REACTIONS } from "./reactions";
 
 const KIND_STYLE: Record<Post["kind"], string> = {
   "Chia sẻ": "bg-mist text-ink",
-  "Khoe dự án": "bg-leaf text-ink",
+  "Công bố": "bg-leaf text-ink",
   "Tìm cộng sự": "bg-ink text-white",
   "Cơ hội": "bg-sap text-leaf-deep",
 };
@@ -61,10 +61,12 @@ export function PostCard({ post }: { post: Post }) {
             {author.name}
           </Link>
           <p className="truncate text-sm text-moss">
-            {author.role}, {post.when}
+            {author.intro}, {post.when}
           </p>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${KIND_STYLE[post.kind]}`}>{post.kind}</span>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${KIND_STYLE[post.kind]}`}>
+          {post.kind === "Công bố" && post.version ? `Công bố bản ${post.version}` : post.kind}
+        </span>
         <button aria-label="Tùy chọn bài viết" className="flex h-10 w-10 items-center justify-center rounded-xl text-moss hover:bg-mist">
           <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -92,7 +94,7 @@ export function PostCard({ post }: { post: Post }) {
           </div>
           <div className="min-w-0 p-4">
             <p className="text-[13px] font-semibold text-leaf-deep">
-              {project.field}, {project.versions[0]?.tag}, {project.files.length} tệp
+              {project.output}, {project.context.toLowerCase()}
             </p>
             <p className="mt-1 font-display text-lg font-bold leading-tight tracking-[-0.02em]">{project.title}</p>
             <p className="mt-1 line-clamp-2 text-sm text-moss">{project.summary}</p>
@@ -100,6 +102,7 @@ export function PostCard({ post }: { post: Post }) {
         </Link>
       )}
       {project && <Credit slug={project.slug} />}
+      {post.kind === "Công bố" && <p className="mt-2 text-xs text-moss">Công bố bởi tác giả. Grovelyn không kiểm định nội dung.</p>}
 
       <div className="mt-4 flex items-center justify-between text-sm text-moss">
         <span className="flex items-center gap-1.5">

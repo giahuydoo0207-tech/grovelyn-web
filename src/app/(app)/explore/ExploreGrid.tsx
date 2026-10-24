@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { FIELDS, PROJECTS, userOf } from "@/lib/data";
 import { showcaseOf } from "@/lib/showcase";
+import { OUTPUTS, type Output } from "@/lib/model";
 import { ProjectCard } from "@/components/ProjectCard";
 
 const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").toLowerCase();
@@ -18,14 +19,18 @@ export function ExploreGrid() {
     FIELDS.find((f) => f === fromLink) ?? "Tất cả",
   );
 
-  const list = useMemo(() => {
+  const [output, setOutput] = useState<Output | "Tất cả">("Tất cả");
+  // Chỉ hiện dạng đầu ra có ít nhất một dự án, để bộ lọc không có lựa chọn rỗng.
+  const outputs = OUTPUTS.map((o) => o.id).filter((o) => PROJECTS.some((p) => p.output === o));
+
+  const list = (() => {
     const needle = norm(q.trim());
-    return PROJECTS.filter((p) => field === "Tất cả" || p.field === field).filter((p) => {
+    return PROJECTS.filter((p) => (field === "Tất cả" || p.field === field) && (output === "Tất cả" || p.output === output)).filter((p) => {
       if (!needle) return true;
       const owner = userOf(p.owner)?.name ?? "";
-      return norm([p.title, p.summary, p.field, owner, ...p.tools, ...showcaseOf(p).tags].join(" ")).includes(needle);
+      return norm([p.title, p.summary, p.field, p.output, p.context, owner, ...p.tools, ...showcaseOf(p).tags].join(" ")).includes(needle);
     });
-  }, [field, q]);
+  })();
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,6 +58,16 @@ export function ExploreGrid() {
         })}
       </div>
 
+      <label className="-mt-2 flex items-center gap-2.5 text-sm text-moss">
+        Dạng đầu ra
+        <select value={output} onChange={(e) => setOutput(e.target.value as Output | "Tất cả")} className="h-10 rounded-lg border border-line bg-white px-3 text-sm font-semibold text-ink outline-none focus:border-ink">
+          <option value="Tất cả">Tất cả</option>
+          {outputs.map((o) => (
+            <option key={o}>{o}</option>
+          ))}
+        </select>
+      </label>
+
       {q && (
         <p className="text-[15px] text-moss">
           Kết quả cho <strong className="text-ink">“{q}”</strong>.{" "}
@@ -74,7 +89,7 @@ export function ExploreGrid() {
         <motion.ul layout className="grid auto-rows-auto grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <AnimatePresence mode="popLayout" initial={true}>
             {list.map((p, i) => {
-              const featured = i === 0 && field === "Tất cả" && !q;
+              const featured = i === 0 && field === "Tất cả" && output === "Tất cả" && !q;
               return (
                 <motion.li
                   key={p.slug}

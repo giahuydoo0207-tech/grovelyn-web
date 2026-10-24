@@ -193,7 +193,7 @@ function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; i
                           {role && <p className="mt-0.5 text-sm font-semibold text-leaf-deep">{role}</p>}
                         </div>
                         <span
-                          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${phase === "final" ? "bg-ink text-sap" : phase === "draft" ? "bg-[#fff4e0] text-[#8a5300]" : "bg-mist text-moss"}`}
+                          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${phase === "final" || phase === "shipped" ? "bg-ink text-sap" : phase === "draft" ? "bg-[#fff4e0] text-[#8a5300]" : "bg-mist text-moss"}`}
                         >
                           {phaseLabel(phase)}
                         </span>
@@ -201,14 +201,14 @@ function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; i
                       <p className="mt-2 line-clamp-2 text-[15px] leading-relaxed text-ink/80">{p.summary}</p>
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-2.5">
                         <ul className="flex flex-wrap gap-1.5">
-                          {p.tools.slice(0, 4).map((t) => (
+                          {[p.output, p.context].map((t) => (
                             <li key={t} className="rounded-lg border border-line px-2.5 py-1 text-[13px] font-semibold">
                               {t}
                             </li>
                           ))}
                         </ul>
                         <Link href={`/p/${p.slug}`} className="inline-flex items-center gap-1.5 text-sm font-bold text-leaf-deep hover:underline">
-                          <ArrowUpRight className="h-4 w-4" aria-hidden="true" /> Xem sản phẩm
+                          <ArrowUpRight className="h-4 w-4" aria-hidden="true" /> Xem dự án
                         </Link>
                       </div>
                     </div>
@@ -273,7 +273,7 @@ function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; i
             {missing.map((c) => (
               <li key={c.label} className="flex items-center gap-2 text-moss">
                 <Circle className="h-4 w-4 text-line" aria-hidden="true" />
-                {c.label === "Chứng chỉ" ? "Thêm chứng chỉ để doanh nghiệp có thêm cơ sở đánh giá" : `Thêm ${c.label.toLowerCase()}`}
+                {c.label === "Chứng chỉ" ? "Thêm chứng chỉ để người xem hiểu thêm về bạn" : `Thêm ${c.label.toLowerCase()}`}
               </li>
             ))}
           </ul>

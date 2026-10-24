@@ -22,7 +22,7 @@ import type { Project, ProjectFile } from "@/lib/data";
 import { userOf } from "@/lib/data";
 import { currentPhase, PHASES, type ProjectLink, type Resources, type Showcase } from "@/lib/showcase";
 import { toEmbed } from "@/lib/embed";
-import { TEMPLATES } from "@/lib/templates";
+import { LAYOUTS, layoutOf, levelHint, levelsFor } from "@/lib/model";
 import { Avatar } from "@/components/Avatar";
 import { BeforeAfter } from "@/components/project/BeforeAfter";
 import { Embed } from "@/components/project/Embed";
@@ -31,9 +31,9 @@ import { Journey } from "@/components/project/Journey";
 import { ProjectExchange } from "@/components/exchange/ProjectExchange";
 import { contributorsOf, topicsOf } from "@/lib/exchange";
 
-type View = "story" | "exchange" | "resources" | "discussion";
+type View = "story" | "exchange" | "resources";
 
-const VIEW_HASH: Record<Exclude<View, "story">, string> = { exchange: "trao-doi", resources: "tai-nguyen", discussion: "thao-luan" };
+const VIEW_HASH: Record<Exclude<View, "story">, string> = { exchange: "trao-doi", resources: "tai-nguyen" };
 
 const FILE_ICON: Record<ProjectFile["kind"], LucideIcon> = {
   folder: Folder,
@@ -70,13 +70,19 @@ interface Chapter {
 
 /**
  * Trang dự án kiểu "câu chuyện theo chương": mục lục bên trái, nội dung đọc như một bài kể ở giữa,
- * tài nguyên và giai đoạn ở cột phải. Tài nguyên và Thảo luận mở thay cho phần câu chuyện.
+ * tài nguyên và mức thực hiện ở cột phải. Trao đổi và Tài nguyên mở thay cho phần câu chuyện; bình luận ở cuối câu chuyện.
  */
 export function ProjectStory({ project, showcase, canEdit }: { project: Project; showcase: Showcase; canEdit: boolean }) {
   const [view, setView] = useState<View>("story");
   const [active, setActive] = useState<string | null>(null);
-  const template = TEMPLATES[project.field];
-  const facts = template.facts.filter((f) => showcase.facts[f.key]);
+  const phase = currentPhase(showcase.milestones);
+  const role = project.members.find((m) => m.handle === project.owner)?.part;
+  const facts = [
+    { key: "output", label: "Dạng đầu ra", value: project.output },
+    { key: "context", label: "Bối cảnh", value: project.context },
+    { key: "level", label: "Mức thực hiện", value: levelHint(project.output, phase) },
+    ...(role ? [{ key: "role", label: "Vai trò tác giả", value: role }] : []),
+  ];
   const resources = showcase.resources ?? {};
   const resourceCount = RESOURCE_META.filter((r) => resources[r.key]).length + showcase.links.length + project.files.length;
 
@@ -86,7 +92,12 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
       title: s.heading,
       body: <p className="text-[17px] leading-[1.8] text-ink/90">{s.body}</p>,
     }));
-    if (showcase.gallery.length > 0) list.push({ id: "hinh-anh", title: "Hình ảnh", body: <Gallery shots={showcase.gallery} label="Ảnh chụp dự án" /> });
+    // Mẫu Trưng bày trực quan: ảnh đi trước chữ.
+    if (showcase.gallery.length > 0) {
+      const gallery = { id: "hinh-anh", title: "Hình ảnh", body: <Gallery shots={showcase.gallery} label="Ảnh chụp dự án" /> };
+      if (layoutOf(project.output) === "visual") list.unshift(gallery);
+      else list.push(gallery);
+    }
     if (showcase.beforeAfter)
       list.push({ id: "truoc-sau", title: "Trước và sau", body: <BeforeAfter before={showcase.beforeAfter.before} after={showcase.beforeAfter.after} /> });
     list.push({ id: "hanh-trinh", title: "Hành trình", body: <Journey slug={project.slug} seed={showcase.milestones} canEdit={canEdit} /> });
@@ -111,7 +122,10 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
       const h = window.location.hash.slice(1);
       if (h === "trao-doi") setView("exchange");
       else if (h === "tai-nguyen" || h === "tep") setView("resources");
-      else if (h === "thao-luan") setView("discussion");
+      else if (h === "thao-luan" || h === "binh-luan") {
+        setView("story");
+        requestAnimationFrame(() => document.getElementById("binh-luan")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      }
       else if (chapters.some((c) => c.id === h)) {
         setView("story");
         setActive(h);
@@ -178,10 +192,10 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
             </li>
           ))}
           <li className="shrink-0 lg:mt-4 lg:shrink lg:border-t lg:border-line lg:pt-3">
-            {navItem(`Trao đổi (${topicsOf(project.slug).filter((t) => t.status !== "done").length})`, view === "exchange", () => goView("exchange"))}
+            {navItem(`Trao đổi (${topicsOf(project.slug).filter((t) => t.status === "open").length})`, view === "exchange", () => goView("exchange"))}
           </li>
           <li className="shrink-0 lg:shrink">{navItem(`Tài nguyên (${resourceCount})`, view === "resources", () => goView("resources"))}</li>
-          <li className="shrink-0 lg:shrink">{navItem(`Thảo luận (${project.comments})`, view === "discussion", () => goView("discussion"))}</li>
+          <li className="shrink-0 lg:shrink">{navItem(`Bình luận (${project.comments})`, false, () => goChapter("binh-luan"))}</li>
         </ol>
       </nav>
 
@@ -201,7 +215,7 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
                   {facts.map((f) => (
                     <div key={f.key} className="bg-white p-4">
                       <dt className="text-xs font-semibold uppercase tracking-[0.06em] text-moss">{f.label}</dt>
-                      <dd className="mt-1.5 font-display text-[16px] font-bold leading-snug">{showcase.facts[f.key]}</dd>
+                      <dd className="mt-1.5 font-display text-[16px] font-bold leading-snug">{f.value}</dd>
                     </div>
                   ))}
                 </dl>
@@ -215,6 +229,38 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
                   {c.body}
                 </section>
               ))}
+              <section id="binh-luan" aria-labelledby="binh-luan-title" className="flex max-w-2xl scroll-mt-24 flex-col gap-5 border-t border-line pt-10">
+              <div>
+                <h2 id="binh-luan-title" className="font-display text-[clamp(1.6rem,2.6vw,2.1rem)] font-bold tracking-[-0.03em]">Bình luận</h2>
+                <p className="mt-1 text-sm text-moss">Nhận xét chung về bản đã công bố. Muốn hỏi một điều cụ thể, chủ dự án mở Trao đổi.</p>
+              </div>
+              {SAMPLE_THREAD.map((c) => {
+                const u = userOf(c.author);
+                if (!u) return null;
+                return (
+                  <div key={c.text} className="flex gap-3">
+                    <Avatar initials={u.initials} tone={u.tone} size={36} />
+                    <div className="rounded-2xl rounded-tl-md bg-mist px-4 py-3">
+                      <p className="text-sm">
+                        <Link href={`/u/${u.handle}`} className="font-semibold hover:text-leaf-deep">
+                          {u.name}
+                        </Link>{" "}
+                        <span className="text-moss">{c.when}</span>
+                      </p>
+                      <p className="mt-1 text-[15px] leading-relaxed">{c.text}</p>
+                    </div>
+                  </div>
+                );
+              })}
+              <label className="flex gap-3">
+                <span className="sr-only">Viết bình luận</span>
+                <textarea
+                  rows={2}
+                  placeholder="Viết bình luận"
+                  className="min-h-[52px] flex-1 resize-y rounded-2xl border border-line px-4 py-3 text-[15px] outline-none focus:border-ink"
+                />
+              </label>
+            </section>
             </>
           )}
 
@@ -273,37 +319,6 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
             </div>
           )}
 
-          {view === "discussion" && (
-            <section className="flex max-w-2xl flex-col gap-5">
-              <h2 className="font-display text-[clamp(1.6rem,2.6vw,2.1rem)] font-bold tracking-[-0.03em]">Thảo luận</h2>
-              {SAMPLE_THREAD.map((c) => {
-                const u = userOf(c.author);
-                if (!u) return null;
-                return (
-                  <div key={c.text} className="flex gap-3">
-                    <Avatar initials={u.initials} tone={u.tone} size={36} />
-                    <div className="rounded-2xl rounded-tl-md bg-mist px-4 py-3">
-                      <p className="text-sm">
-                        <Link href={`/u/${u.handle}`} className="font-semibold hover:text-leaf-deep">
-                          {u.name}
-                        </Link>{" "}
-                        <span className="text-moss">{c.when}</span>
-                      </p>
-                      <p className="mt-1 text-[15px] leading-relaxed">{c.text}</p>
-                    </div>
-                  </div>
-                );
-              })}
-              <label className="flex gap-3">
-                <span className="sr-only">Viết góp ý</span>
-                <textarea
-                  rows={2}
-                  placeholder="Góp ý cho dự án này"
-                  className="min-h-[52px] flex-1 resize-y rounded-2xl border border-line px-4 py-3 text-[15px] outline-none focus:border-ink"
-                />
-              </label>
-            </section>
-          )}
         </motion.article>
       </AnimatePresence>
 
@@ -338,7 +353,8 @@ function ResourceRow({ icon: Icon, label, url }: { icon: LucideIcon; label: stri
 function ProjectAside({ project, showcase, onTimeline }: { project: Project; showcase: Showcase; onTimeline: () => void }) {
   const resources = showcase.resources ?? {};
   const present = RESOURCE_META.filter((r) => resources[r.key]);
-  const reached = PHASES.findIndex((p) => p.id === currentPhase(showcase.milestones));
+  const levels = levelsFor(project.output);
+  const reached = levels.indexOf(currentPhase(showcase.milestones));
   return (
     <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
       {(present.length > 0 || project.updated) && (
@@ -363,18 +379,20 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
         </section>
       )}
       <section className="rounded-2xl border border-line bg-white p-5">
-        <h2 className="font-semibold">Giai đoạn</h2>
+        <h2 className="font-semibold">Mức thực hiện</h2>
         <button type="button" onClick={onTimeline} className="mt-3 block w-full text-left" aria-label="Xem hành trình dự án">
-          <ol className="grid grid-cols-3 gap-2">
-            {PHASES.map((p, i) => (
-              <li key={p.id} className="flex flex-col gap-2">
+          <ol className={`grid gap-2 ${levels.length === 4 ? "grid-cols-4" : "grid-cols-3"}`}>
+            {levels.map((id, i) => (
+              <li key={id} className="flex flex-col gap-2">
                 <span className={`h-1.5 rounded-full ${i <= reached ? "bg-leaf-deep" : "bg-line"}`} />
-                <span className={`text-[13px] font-semibold ${i <= reached ? "text-ink" : "text-moss"}`}>{p.label}</span>
+                <span className={`text-[12px] font-semibold leading-tight ${i <= reached ? "text-ink" : "text-moss"}`}>{PHASES.find((p) => p.id === id)!.label}</span>
               </li>
             ))}
           </ol>
+          <p className="mt-2.5 text-[13px] text-moss">{levelHint(project.output, levels[Math.max(0, reached)])}</p>
         </button>
-        <h2 className="mt-5 font-semibold">Công nghệ</h2>
+        <p className="mt-4 text-[13px] text-moss">Trình bày theo mẫu {LAYOUTS[layoutOf(project.output)].name.toLowerCase()}</p>
+        {project.tools.length > 0 && <h2 className="mt-5 font-semibold">Công cụ</h2>}
         <ul className="mt-2.5 flex flex-wrap gap-1.5">
           {project.tools.map((t) => (
             <li key={t} className="rounded-full bg-mist px-3 py-1 text-[13px] font-semibold">
@@ -447,7 +465,7 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
           <Link href={`/explore?nganh=${encodeURIComponent(project.field)}`} className="font-semibold text-leaf-deep hover:underline">
             {project.field}
           </Link>{" "}
-          · {project.kind}
+          · {project.context}
         </p>
       </section>
     </aside>

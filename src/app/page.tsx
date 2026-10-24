@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { GrowingTree } from "@/components/GrowingTree";
 import { CircuitBackdrop } from "@/components/CircuitBackdrop";
@@ -22,9 +23,11 @@ export default function Landing() {
             Nơi dự án của bạn lớn lên.
           </h1>
           <p className="mt-5 max-w-[52ch] text-lg leading-relaxed text-fog">
-            Lưu trữ, chia sẻ và trưng bày dự án ở mọi ngành, từ bản vẽ kiến trúc đến kế hoạch marketing. Doanh nghiệp tìm
-            thấy bạn qua những gì bạn thật sự làm ra.
+            Trưng bày dự án ở mọi ngành, từ bản vẽ kiến trúc đến kế hoạch marketing, và nhờ đúng người góp ý khi còn dang dở.
           </p>
+          <Link href="/demo" className="mt-5 inline-flex items-center gap-2 font-semibold text-leaf underline-offset-4 hover:underline">
+            Xem bản demo không cần đăng ký <span lang="en" className="font-normal text-fog">Open the demo</span>
+          </Link>
         </div>
 
         <div className="relative mt-6 h-[340px] sm:h-[420px] lg:mt-4 lg:h-auto lg:min-h-0 lg:flex-1">

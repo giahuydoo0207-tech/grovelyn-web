@@ -6,12 +6,13 @@ import type { LogoKey } from "@/components/project/ProjectLogo";
  * bản cuối. Dữ liệu mẫu; dự án chưa có phần này thì dựng tạm từ lịch sử phiên bản.
  */
 
-export type Phase = "concept" | "draft" | "final";
+export type Phase = "concept" | "draft" | "final" | "shipped";
 
 export const PHASES: { id: Phase; label: string; hint: string }[] = [
   { id: "concept", label: "Ý tưởng", hint: "Phác thảo, nghiên cứu, hướng đi" },
-  { id: "draft", label: "Bản nháp", hint: "Đang làm, nhận góp ý, chỉnh sửa" },
-  { id: "final", label: "Bản cuối", hint: "Hoàn thiện, bàn giao hoặc ra mắt" },
+  { id: "draft", label: "Đang làm", hint: "Đang làm, nhận góp ý, chỉnh sửa" },
+  { id: "final", label: "Hoàn tất", hint: "Xong bản trình bày hoặc bản dùng được" },
+  { id: "shipped", label: "Đã triển khai", hint: "Đã thi công, đã chạy hoặc đã đưa vào dùng thật" },
 ];
 
 export const phaseLabel = (p: Phase) => PHASES.find((x) => x.id === p)!.label;

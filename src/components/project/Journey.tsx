@@ -82,8 +82,8 @@ export function Journey({ slug, seed, canEdit }: { slug: string; seed: Milestone
 
   return (
     <div className="flex flex-col gap-8">
-      <section aria-label="Giai đoạn của dự án" className="rounded-2xl bg-mist p-5">
-        <ol className="grid grid-cols-3 gap-2">
+      <section aria-label="Mức thực hiện của dự án" className="rounded-2xl bg-mist p-5">
+        <ol className="grid grid-cols-2 gap-x-2 gap-y-4 sm:grid-cols-4">
           {PHASES.map((p, i) => {
             const done = i <= reached;
             return (
@@ -223,8 +223,8 @@ function Composer({ current, onCancel, onAdd }: { current: Phase; onCancel: () =
       </div>
 
       <fieldset>
-        <legend className="text-sm font-semibold">Dự án đang ở giai đoạn</legend>
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <legend className="text-sm font-semibold">Mức thực hiện</legend>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {PHASES.map((p) => (
             <label key={p.id} className={`cursor-pointer rounded-xl border px-3 py-2.5 text-center text-sm font-semibold transition-colors ${phase === p.id ? "border-ink bg-sap/50" : "border-line hover:bg-mist"}`}>
               <input type="radio" name="phase" className="sr-only" checked={phase === p.id} onChange={() => setPhase(p.id)} />

@@ -104,10 +104,10 @@ export function RegisterForm({ event, preview = false }: { event: CommunityEvent
               </label>
               <label className="flex flex-col gap-1.5 text-sm font-bold">
                 Bạn đang là
-                <select className={FIELD} defaultValue={me.role === "Doanh nghiệp" ? "Người đi làm" : me.role}>
+                <select className={FIELD} defaultValue={me.intro.startsWith("Sinh viên") ? "Sinh viên" : "Người đi làm"}>
                   <option>Sinh viên</option>
-                  <option>Freelancer</option>
                   <option>Người đi làm</option>
+                  <option>Khác</option>
                 </select>
               </label>
               {event.asks.fields && (

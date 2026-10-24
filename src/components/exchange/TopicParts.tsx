@@ -1,17 +1,11 @@
-import { STATUS_LABEL, type Topic, type TopicStatus } from "@/lib/exchange";
+import type { Topic } from "@/lib/exchange";
 
-const STATUS_STYLE: Record<TopicStatus, { box: string; dot: string }> = {
-  open: { box: "bg-sap text-leaf-deep", dot: "bg-leaf" },
-  active: { box: "bg-[#fef3c7] text-[#7a4a06]", dot: "bg-[#c2690a]" },
-  done: { box: "bg-mist text-moss", dot: "bg-moss" },
-};
-
-export function StatusPill({ status }: { status: TopicStatus }) {
-  const s = STATUS_STYLE[status];
+export function StatusPill({ topic }: { topic: Pick<Topic, "status" | "closeReason"> }) {
+  const open = topic.status === "open";
   return (
-    <span className={`inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-bold ${s.box}`}>
-      <span className={`h-[7px] w-[7px] rounded-full ${s.dot}`} aria-hidden="true" />
-      {STATUS_LABEL[status]}
+    <span className={`inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-bold ${open ? "bg-sap text-leaf-deep" : "bg-mist text-moss"}`}>
+      <span className={`h-[7px] w-[7px] rounded-full ${open ? "bg-leaf" : "bg-moss"}`} aria-hidden="true" />
+      {open ? "Đang mở" : `Đã đóng${topic.closeReason ? `: ${topic.closeReason.toLowerCase()}` : ""}`}
     </span>
   );
 }
@@ -24,13 +18,15 @@ export function Chip({ children, strong = false }: { children: React.ReactNode; 
   );
 }
 
-/** Trạng thái, kiểu trao đổi, thời gian và phiên bản của một chủ đề. */
-export function TopicMeta({ topic, status }: { topic: Topic; status?: TopicStatus }) {
+/** Trạng thái, hình thức, góc nhìn cần nhận và phiên bản của một trao đổi. */
+export function TopicMeta({ topic, status = true }: { topic: Topic; status?: boolean }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <StatusPill status={status ?? topic.status} />
+      {status && <StatusPill topic={topic} />}
       <Chip strong>{topic.kind}</Chip>
-      <Chip>{topic.time === "Một buổi" ? "Một buổi" : `Khoảng ${topic.time}`}</Chip>
+      {topic.lenses.map((l) => (
+        <Chip key={l}>{l}</Chip>
+      ))}
       <Chip>Bản {topic.version}</Chip>
     </div>
   );

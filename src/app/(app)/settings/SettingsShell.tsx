@@ -27,9 +27,7 @@ export interface Prefs {
   twoStep: boolean;
   profileAudience: "everyone" | "members" | "followers";
   showOnline: boolean;
-  showAvailable: boolean;
   findableByEmail: boolean;
-  businessSearch: boolean;
   whoCanMessage: "everyone" | "following" | "nobody";
   readReceipts: boolean;
   notify: Record<string, boolean>;
@@ -47,9 +45,7 @@ const DEFAULTS: Prefs = {
   twoStep: false,
   profileAudience: "everyone",
   showOnline: true,
-  showAvailable: true,
   findableByEmail: false,
-  businessSearch: true,
   whoCanMessage: "everyone",
   readReceipts: true,
   notify: { messages: true, comments: true, groups: true, events: true, partners: false },

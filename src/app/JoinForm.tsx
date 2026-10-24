@@ -4,14 +4,8 @@ import { useRef, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, LoaderCircle, LogOut, Mail } from "lucide-react";
-import type { Role } from "@/lib/data";
+import { LENSES, type Lens } from "@/lib/data";
 import { signIn } from "./auth-actions";
-
-const ROLES: { value: Role; hint: string }[] = [
-  { value: "Sinh viên", hint: "Lưu và khoe dự án" },
-  { value: "Freelancer", hint: "Portfolio để nhận việc" },
-  { value: "Doanh nghiệp", hint: "Tìm người qua dự án" },
-];
 
 type Step = "form" | "code" | "role" | "done";
 const STEPS: Step[] = ["form", "code", "role"];
@@ -30,7 +24,8 @@ export function JoinForm() {
   const [pending, startTransition] = useTransition();
   const enter = (to?: string) => startTransition(() => signIn(to ?? next));
   const [step, setStep] = useState<Step>("form");
-  const [role, setRole] = useState<Role>("Sinh viên");
+  const [intro, setIntro] = useState("");
+  const [lenses, setLenses] = useState<Lens[]>([]);
   const [email, setEmail] = useState("");
   const [invite, setInvite] = useState("");
   const [error, setError] = useState("");
@@ -259,51 +254,42 @@ export function JoinForm() {
             className="flex flex-col gap-5"
           >
             <div>
-              <h2 className="font-display text-[28px] font-bold leading-tight tracking-[-0.03em]">Bạn dùng Grovelyn để làm gì?</h2>
-              <p className="mt-2 text-[15px] leading-relaxed text-moss">Chọn một vai trò. Đổi lại được trong phần cài đặt.</p>
+              <h2 className="font-display text-[28px] font-bold leading-tight tracking-[-0.03em]">Giới thiệu ngắn về bạn</h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-moss">Hiện dưới tên bạn ở bài đăng và góp ý. Đổi lại được trong phần cài đặt.</p>
             </div>
-            <fieldset className="flex flex-col gap-2">
-              <legend className="sr-only">Vai trò</legend>
-              <div className="flex flex-col gap-2">
-                {ROLES.map((r) => {
-                  const on = r.value === role;
+            <label className="flex flex-col gap-1.5 text-sm font-bold">
+              Một dòng về bạn
+              <input
+                value={intro}
+                onChange={(e) => setIntro(e.target.value)}
+                maxLength={60}
+                placeholder="Ví dụ: Sinh viên Kiến trúc năm 3, Marketing tại một startup"
+                className="h-12 rounded-xl border border-line px-4 text-[15px] font-normal outline-none focus:border-ink"
+              />
+            </label>
+            <fieldset>
+              <legend className="text-sm font-bold">
+                Mình có thể góp ý về <span className="font-normal text-moss">(không bắt buộc)</span>
+              </legend>
+              <p className="mt-1 text-[13px] text-moss">Chủ đề Trao đổi cần đúng góc nhìn này sẽ được gửi tới bạn.</p>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {LENSES.map((l) => {
+                  const on = lenses.includes(l);
                   return (
                     <label
-                      key={r.value}
-                      className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
+                      key={l}
+                      className={`cursor-pointer rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
                         on ? "border-ink bg-sap/60" : "border-line hover:bg-mist"
                       }`}
                     >
-                      <input type="radio" name="role" value={r.value} checked={on} onChange={() => setRole(r.value)} className="sr-only" />
-                      <span
-                        aria-hidden="true"
-                        className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-ink" : "border-line"}`}
-                      >
-                        {on && (
-                          <motion.span
-                            layoutId="role-check"
-                            className="flex h-5 w-5 items-center justify-center rounded-full bg-ink text-leaf"
-                            transition={{ type: "spring", stiffness: 500, damping: 32 }}
-                          >
-                            <Check className="h-3 w-3" strokeWidth={3} />
-                          </motion.span>
-                        )}
-                      </span>
-                      <span className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3">
-                        <span className="text-[15px] font-semibold">{r.value}</span>
-                        <span className="text-sm text-moss">{r.hint}</span>
-                      </span>
+                      <input type="checkbox" className="sr-only" checked={on} onChange={() => setLenses((cur) => (on ? cur.filter((x) => x !== l) : [...cur, l]))} />
+                      {on && <Check className="mr-1 inline h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />}
+                      {l}
                     </label>
                   );
                 })}
               </div>
             </fieldset>
-
-            {role === "Doanh nghiệp" && (
-              <p className="rounded-xl bg-mist px-4 py-3 text-sm leading-relaxed text-moss">
-                Tài khoản doanh nghiệp được duyệt trước khi xem hồ sơ ứng viên, thường trong một ngày.
-              </p>
-            )}
             <motion.button
               whileTap={{ scale: 0.98 }}
               type="button"
@@ -334,7 +320,7 @@ export function JoinForm() {
             <div>
               <h2 className="font-display text-3xl font-bold tracking-[-0.03em]">Chào mừng tới Grovelyn</h2>
               <p className="mt-2 text-[15px] leading-relaxed text-moss">
-                Bạn tham gia với tư cách {role.toLowerCase()}. Vào xem mọi người đang làm gì, hồ sơ điền sau cũng được.
+                Vào xem mọi người đang làm gì. Hồ sơ và dự án điền sau cũng được.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">

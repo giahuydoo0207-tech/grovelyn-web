@@ -1,3 +1,4 @@
+import type { Context, Output } from "./model";
 /**
  * Dữ liệu mẫu cho bản giao diện. Chưa nối Supabase: mọi tên người, dự án và con số ở đây chỉ để minh họa.
  */
@@ -8,14 +9,16 @@ export const FIELDS = [
   "Thiết kế",
   "Kiến trúc",
   "Marketing",
-  "Kinh tế",
+  "Kinh doanh và tài chính",
   "Kỹ thuật",
   "Truyền thông",
 ] as const;
 
 export type Field = Exclude<(typeof FIELDS)[number], "Tất cả">;
 export type CoverTone = "ink" | "leaf" | "sap";
-export type Role = "Sinh viên" | "Freelancer" | "Doanh nghiệp";
+/** Góc nhìn khi góp ý trong Trao đổi; người dùng chọn những góc mình góp ý được trên hồ sơ. */
+export const LENSES = ["Nội dung và lập luận", "Hình thức trình bày", "Giải pháp chuyên môn", "Trải nghiệm sử dụng", "Phương pháp và dữ liệu"] as const;
+export type Lens = (typeof LENSES)[number];
 
 export interface ProjectFile {
   name: string;
@@ -35,7 +38,10 @@ export interface Project {
   title: string;
   summary: string;
   field: Field;
-  kind: string;
+  /** Dạng đầu ra: người dùng đang công bố thứ gì. Quyết định mẫu trình bày. */
+  output: Output;
+  /** Bối cảnh: làm trong hoàn cảnh nào. */
+  context: Context;
   owner: string;
   members: { handle: string; part: string }[];
   tools: string[];
@@ -53,11 +59,12 @@ export interface User {
   handle: string;
   name: string;
   initials: string;
-  role: Role;
+  /** Dòng tự giới thiệu ngắn, hiện dưới tên ở bài đăng và bình luận. */
+  intro: string;
   headline: string;
   location: string;
-  available: boolean;
-  hoursPerWeek?: number;
+  /** "Mình có thể góp ý về…" dùng để gửi chủ đề Trao đổi đúng người. */
+  lenses: Lens[];
   about: string;
   skills: string[];
   experience: { title: string; where: string; when: string; note?: string }[];
@@ -73,11 +80,10 @@ export const USERS: User[] = [
     handle: "quocbao",
     name: "Trần Quốc Bảo",
     initials: "QB",
-    role: "Sinh viên",
+    intro: "Sinh viên Kiến trúc năm cuối",
     headline: "Sinh viên năm cuối ngành Kiến trúc, mê nhà ở tiết kiệm năng lượng",
     location: "TP. Hồ Chí Minh",
-    available: true,
-    hoursPerWeek: 15,
+    lenses: ["Hình thức trình bày", "Giải pháp chuyên môn"],
     about:
       "Mình thích những ngôi nhà vừa túi tiền mà vẫn mát. Đang tìm chỗ thực tập ở văn phòng kiến trúc làm nhà ở đô thị.",
     skills: ["Revit", "SketchUp", "Lumion", "AutoCAD", "Diễn họa 3D", "Thiết kế bền vững"],
@@ -95,11 +101,10 @@ export const USERS: User[] = [
     handle: "thuha",
     name: "Nguyễn Thu Hà",
     initials: "TH",
-    role: "Freelancer",
+    intro: "Thiết kế nhận diện, làm tự do 3 năm",
     headline: "Thiết kế nhận diện thương hiệu cho quán nhỏ và thương hiệu Việt",
     location: "Đà Nẵng",
-    available: true,
-    hoursPerWeek: 25,
+    lenses: ["Hình thức trình bày", "Trải nghiệm sử dụng"],
     about: "Làm logo, bao bì và bộ nhận diện. Thích làm việc với chủ quán trực tiếp.",
     skills: ["Illustrator", "Figma", "Bao bì", "Typography"],
     experience: [{ title: "Thiết kế tự do", where: "Freelance", when: "2023 đến nay" }],
@@ -113,10 +118,10 @@ export const USERS: User[] = [
     handle: "minhkhoa",
     name: "Lê Minh Khoa",
     initials: "MK",
-    role: "Sinh viên",
+    intro: "Sinh viên Công nghệ thông tin",
     headline: "Sinh viên CNTT, làm web và app cho quán cà phê",
     location: "TP. Hồ Chí Minh",
-    available: false,
+    lenses: ["Trải nghiệm sử dụng", "Giải pháp chuyên môn"],
     about: "Đang làm đồ án đặt bàn cho quán cà phê và học thêm về thiết kế giao diện.",
     skills: ["Next.js", "Flutter", "PostgreSQL", "UI"],
     experience: [],
@@ -130,15 +135,14 @@ export const USERS: User[] = [
     handle: "ngocanh",
     name: "Phạm Ngọc Anh",
     initials: "NA",
-    role: "Sinh viên",
-    headline: "Sinh viên Marketing, thích làm chiến dịch cho thương hiệu nhỏ",
+    intro: "Marketing tại một chuỗi đồ uống",
+    headline: "Làm marketing cho chuỗi đồ uống, thích ra mắt thương hiệu nhỏ",
     location: "Hà Nội",
-    available: true,
-    hoursPerWeek: 10,
-    about: "Lên kế hoạch ra mắt sản phẩm và viết nội dung mạng xã hội.",
+    lenses: ["Nội dung và lập luận", "Phương pháp và dữ liệu"],
+    about: "Lên kế hoạch ra mắt sản phẩm và viết nội dung mạng xã hội. Ngoài giờ làm, tự thử các ý tưởng thương hiệu nhỏ.",
     skills: ["Lập kế hoạch", "Viết nội dung", "Canva", "Nghiên cứu thị trường"],
-    experience: [],
-    education: [{ title: "Cử nhân Marketing", where: "[Tên trường]", when: "2023 – 2027" }],
+    experience: [{ title: "Chuyên viên marketing", where: "Chuỗi đồ uống tại Hà Nội", when: "2024 đến nay" }],
+    education: [{ title: "Cử nhân Marketing", where: "[Tên trường]", when: "2019 – 2023" }],
     followers: 240,
     following: 310,
     pinned: ["ra-mat-nuoc-ep"],
@@ -148,15 +152,14 @@ export const USERS: User[] = [
     handle: "hoanglong",
     name: "Võ Hoàng Long",
     initials: "HL",
-    role: "Sinh viên",
-    headline: "Sinh viên Cơ điện tử, làm robot nhỏ phục vụ đời sống",
+    intro: "Kỹ sư cơ điện tử",
+    headline: "Kỹ sư cơ điện tử, làm robot nhỏ phục vụ đời sống",
     location: "Cần Thơ",
-    available: true,
-    hoursPerWeek: 12,
+    lenses: ["Giải pháp chuyên môn", "Phương pháp và dữ liệu"],
     about: "Thích làm ra thứ chạy được thật. Đang tìm người cùng làm phần vỏ và điện.",
     skills: ["Arduino", "SolidWorks", "Python", "In 3D"],
     experience: [],
-    education: [{ title: "Kỹ sư Cơ điện tử", where: "[Tên trường]", when: "2022 – 2027" }],
+    education: [{ title: "Kỹ sư Cơ điện tử", where: "[Tên trường]", when: "2017 – 2022" }],
     followers: 530,
     following: 88,
     pinned: ["robot-phan-loai-rac"],
@@ -166,11 +169,10 @@ export const USERS: User[] = [
     handle: "giahuy",
     name: "Gia Huy",
     initials: "GH",
-    role: "Sinh viên",
+    intro: "Sinh viên Khoa học máy tính",
     headline: "Sinh viên Khoa học máy tính, tự xây sản phẩm web từ ý tưởng đến bản chạy được",
     location: "TP. Hồ Chí Minh",
-    available: true,
-    hoursPerWeek: 20,
+    lenses: ["Trải nghiệm sử dụng", "Giải pháp chuyên môn"],
     about:
       "Sinh viên Khoa học máy tính, Đại học Văn Hiến. Tự lên kế hoạch và làm trọn vẹn sản phẩm web cá nhân, từ phân tích nghiệp vụ, thiết kế giao diện đến front-end và back-end. Đang xây Grovelyn.",
     skills: ["Next.js", "TypeScript", "React", "Tailwind CSS", "Flutter", "Dart", "Java", "Spring Boot", "PostgreSQL", "Supabase", "Solana", "Git"],
@@ -197,7 +199,8 @@ export const PROJECTS: Project[] = [
     summary:
       "Nova gom hồ sơ, portfolio, việc làm, cộng đồng, nhắn tin và thanh toán về một chỗ. Replyn là lớp niềm tin giúp hai bên chốt thỏa thuận, theo dõi tiến độ và giữ bằng chứng.",
     field: "Công nghệ thông tin",
-    kind: "Dự án dự thi",
+    output: "Ứng dụng hoặc website",
+    context: "Cuộc thi hoặc sự kiện",
     owner: "giahuy",
     members: [{ handle: "giahuy", part: "Chủ dự án, sản phẩm và lập trình" }],
     tools: ["TypeScript", "React", "Flutter", "Dart", "Java", "Spring Boot", "PostgreSQL", "Solana", "Docker", "Git"],
@@ -238,7 +241,8 @@ export const PROJECTS: Project[] = [
     summary:
       "Nhà ống 3 tầng dùng giếng trời và cửa so le giữa các tầng để gió đi xuyên nhà, giảm phụ thuộc máy lạnh.",
     field: "Kiến trúc",
-    kind: "Đồ án tốt nghiệp",
+    output: "Đồ án kiến trúc",
+    context: "Đồ án tốt nghiệp",
     owner: "quocbao",
     members: [
       { handle: "quocbao", part: "Chủ dự án, thiết kế" },
@@ -285,7 +289,8 @@ export const PROJECTS: Project[] = [
     title: "Bộ nhận diện thương hiệu Trà Mây",
     summary: "Logo, bảng màu và bao bì cho một quán trà nhỏ ở Đà Nẵng, lấy cảm hứng từ mây chiều trên biển.",
     field: "Thiết kế",
-    kind: "Dự án khách hàng",
+    output: "Bộ nhận diện",
+    context: "Công việc",
     owner: "thuha",
     members: [{ handle: "thuha", part: "Thiết kế chính" }],
     tools: ["Illustrator", "Figma"],
@@ -314,7 +319,8 @@ export const PROJECTS: Project[] = [
     title: "Ứng dụng đặt bàn cho quán cà phê",
     summary: "Web đặt bàn và gọi món trước cho quán cà phê nhỏ, có trang quản lý cho chủ quán.",
     field: "Công nghệ thông tin",
-    kind: "Đồ án môn học",
+    output: "Ứng dụng hoặc website",
+    context: "Học phần",
     owner: "minhkhoa",
     members: [
       { handle: "minhkhoa", part: "Lập trình" },
@@ -343,7 +349,8 @@ export const PROJECTS: Project[] = [
     title: "Kế hoạch ra mắt nước ép mùa hè",
     summary: "Chiến dịch 6 tuần cho một thương hiệu nước ép mới, từ nghiên cứu khách hàng đến lịch đăng bài.",
     field: "Marketing",
-    kind: "Bài tập nhóm",
+    output: "Chiến dịch",
+    context: "Dự án cá nhân",
     owner: "ngocanh",
     members: [{ handle: "ngocanh", part: "Trưởng nhóm" }],
     tools: ["Canva", "Google Sheets"],
@@ -365,7 +372,8 @@ export const PROJECTS: Project[] = [
     title: "Cánh tay robot phân loại rác mini",
     summary: "Robot nhận diện chai nhựa, lon và giấy bằng camera rồi gắp vào đúng thùng.",
     field: "Kỹ thuật",
-    kind: "Nghiên cứu khoa học",
+    output: "Nguyên mẫu kỹ thuật",
+    context: "Dự án cá nhân",
     owner: "hoanglong",
     members: [{ handle: "hoanglong", part: "Cơ khí và lập trình" }],
     tools: ["Arduino", "SolidWorks", "Python"],
@@ -390,8 +398,9 @@ export const PROJECTS: Project[] = [
     slug: "chuoi-cung-ung-ca-phe",
     title: "Chuỗi cung ứng cà phê Tây Nguyên",
     summary: "Phân tích đường đi của hạt cà phê từ nông hộ đến quán, chỉ ra chỗ người trồng bị ép giá.",
-    field: "Kinh tế",
-    kind: "Tiểu luận",
+    field: "Kinh doanh và tài chính",
+    output: "Báo cáo nghiên cứu",
+    context: "Học phần",
     owner: "hoanglong",
     members: [{ handle: "hoanglong", part: "Tác giả" }],
     tools: ["Excel", "Phỏng vấn"],
@@ -409,7 +418,8 @@ export const PROJECTS: Project[] = [
     title: "Cải tạo chung cư cũ quận 3",
     summary: "Đề xuất cải tạo hành lang và sân chung của một chung cư 40 năm tuổi.",
     field: "Kiến trúc",
-    kind: "Đồ án môn học",
+    output: "Đồ án kiến trúc",
+    context: "Học phần",
     owner: "quocbao",
     members: [{ handle: "quocbao", part: "Thiết kế" }],
     tools: ["SketchUp"],
@@ -427,7 +437,8 @@ export const PROJECTS: Project[] = [
     title: "Quán cà phê vườn 120m²",
     summary: "Thiết kế nội thất quán cà phê có vườn trong nhà cho mặt bằng thuê.",
     field: "Kiến trúc",
-    kind: "Dự án khách hàng",
+    output: "Đồ án kiến trúc",
+    context: "Công việc",
     owner: "quocbao",
     members: [{ handle: "quocbao", part: "Nội thất" }],
     tools: ["SketchUp", "Lumion"],
@@ -442,7 +453,8 @@ export const PROJECTS: Project[] = [
   },
 ];
 
-export type PostKind = "Chia sẻ" | "Khoe dự án" | "Tìm cộng sự" | "Cơ hội";
+/** Trang chủ chỉ hiện "Công bố". Chia sẻ và Tìm cộng sự còn dùng trong Nhóm, Tìm cộng sự sẽ về trang Business sau. */
+export type PostKind = "Công bố" | "Chia sẻ" | "Tìm cộng sự" | "Cơ hội";
 
 export interface Post {
   id: string;
@@ -451,6 +463,8 @@ export interface Post {
   when: string;
   text: string;
   project?: string;
+  /** Phiên bản được công bố, với bài Công bố. */
+  version?: string;
   needs?: string[];
   likes: number;
   comments: { author: string; text: string; when: string }[];
@@ -459,11 +473,24 @@ export interface Post {
 
 export const POSTS: Post[] = [
   {
+    id: "p5",
+    author: "thuha",
+    kind: "Công bố",
+    version: "v2",
+    when: "1 giờ trước",
+    text: "Bàn giao xong bộ nhận diện cho Trà Mây: logo, bảng màu lấy từ lá trà non và gói bao bì giấy kraft cho ba dòng trà.",
+    project: "nhan-dien-tra-may",
+    likes: 96,
+    comments: [{ author: "ngocanh", text: "Bảng màu lên giấy kraft đẹp hơn mình nghĩ. Có ảnh chụp thật ở quán không?", when: "30 phút trước" }],
+    reposts: 4,
+  },
+  {
     id: "p1",
     author: "quocbao",
-    kind: "Khoe dự án",
+    kind: "Công bố",
+    version: "v5",
     when: "2 giờ trước",
-    text: "Đồ án nhà phố đã bảo vệ xong. Bản cuối có thêm mặt cắt thông gió và phối cảnh ban đêm, giếng trời lùi về giữa một nhịp cột.",
+    text: "Đồ án nhà phố đã bảo vệ xong. Bản v5 có thêm mặt cắt thông gió và phối cảnh ban đêm, giếng trời lùi về giữa một nhịp cột.",
     project: "nha-pho-thong-gio",
     likes: 210,
     comments: [
@@ -482,6 +509,18 @@ export const POSTS: Post[] = [
     likes: 42,
     comments: [],
     reposts: 5,
+  },
+  {
+    id: "p4",
+    author: "giahuy",
+    kind: "Công bố",
+    version: "v3",
+    when: "3 ngày trước",
+    text: "Bản demo Nova × Replyn nộp UniHackFest 2026: hồ sơ, việc làm và hợp đồng có giữ tiền chạy trọn luồng trên mạng thử.",
+    project: "nova-replyn",
+    likes: 31,
+    comments: [],
+    reposts: 1,
   },
   {
     id: "p3",
@@ -519,12 +558,12 @@ export const NOTICES: Notice[] = [
   { id: "n2", kind: "comment", actor: "quocbao", text: "đã bình luận về dự án {p}", project: "dat-ban-ca-phe", quote: "Giao diện đặt bàn gọn quá, có bản điện thoại chưa?", when: "1 giờ", day: "today", unread: true, href: "/p/dat-ban-ca-phe#thao-luan" },
   { id: "n3", kind: "milestone", actor: "minhkhoa", text: "vừa đăng bản mới cho dự án {p} mà bạn đang theo dõi", project: "robot-phan-loai-rac", when: "3 giờ", day: "today", unread: true, href: "/p/robot-phan-loai-rac#hanh-trinh" },
   { id: "n11", kind: "exchange", actor: "minhkhoa", text: "mở trao đổi ở dự án {p}, cùng ngành Công nghệ thông tin với bạn", project: "dat-ban-ca-phe", quote: "Màn chọn bàn nên là sơ đồ quán hay danh sách giờ còn trống?", when: "2 giờ", day: "today", unread: false, href: "/p/dat-ban-ca-phe#trao-doi" },
-  { id: "n4", kind: "view", text: "Hồ sơ của bạn được 2 doanh nghiệp xem trong tuần này. Thêm chứng chỉ để hồ sơ đầy đủ hơn.", when: "5 giờ", day: "today", unread: false, href: "/u/giahuy" },
+  { id: "n4", kind: "view", text: "Hồ sơ của bạn được 18 người xem trong tuần này. Thêm \"Mình có thể góp ý về\" để nhận chủ đề Trao đổi hợp với bạn.", when: "5 giờ", day: "today", unread: false, href: "/u/giahuy" },
   { id: "n5", kind: "follow", actor: "hoanglong", text: "đã bắt đầu theo dõi bạn", when: "hôm qua", day: "week", unread: false, href: "/u/hoanglong" },
   { id: "n6", kind: "mention", actor: "ngocanh", text: "đã nhắc đến bạn trong bài Tìm cộng sự", quote: "Cần thêm một bạn làm web đặt món, @giahuy có hứng không?", when: "2 ngày", day: "week", unread: false, href: "/community" },
   { id: "n7", kind: "event", text: "Sự kiện Làm portfolio cho người trái ngành bạn quan tâm sẽ diễn ra sau 2 ngày, 19:00 tại Xưởng Lá Coworking.", when: "3 ngày", day: "week", unread: false, href: "/events" },
   { id: "n8", kind: "like", actor: "minhkhoa", others: 1, text: "đã thích dự án {p}", project: "nova-replyn", when: "5 ngày", day: "week", unread: false, href: "/p/nova-replyn" },
-  { id: "n9", kind: "milestone", text: "Dự án {p} đã đủ 3 cột mốc: Ý tưởng, Bản nháp và Bản cuối.", project: "nova-replyn", when: "2 tuần", day: "earlier", unread: false, href: "/p/nova-replyn#hanh-trinh" },
+  { id: "n9", kind: "milestone", text: "Dự án {p} đã đi từ Ý tưởng tới Hoàn tất qua 3 cột mốc.", project: "nova-replyn", when: "2 tuần", day: "earlier", unread: false, href: "/p/nova-replyn#hanh-trinh" },
   { id: "n10", kind: "comment", actor: "thuha", text: "đã trả lời bình luận của bạn trong dự án {p}", project: "nhan-dien-tra-may", quote: "Đúng rồi, bảng màu lấy từ lá trà non và gốm men lam.", when: "3 tuần", day: "earlier", unread: false, href: "/p/nhan-dien-tra-may#thao-luan" },
   { id: "n12", kind: "exchange", actor: "thuha", text: "đã áp dụng góp ý của bạn vào bản v2 của dự án {p}", project: "nhan-dien-tra-may", when: "tháng 9", day: "earlier", unread: false, href: "/p/nhan-dien-tra-may#trao-doi" },
 ];
@@ -587,7 +626,7 @@ export const GROUPS: Group[] = [
   {
     slug: "vhu-lam-du-an", mark: "VH", name: "Sinh viên VHU làm dự án", members: 312, fresh: 0, tone: "leaf",
     description: "Sinh viên Đại học Văn Hiến mọi ngành tìm nhau làm dự án, khoe đồ án và rủ nhau đi thi.",
-    privacy: "Riêng tư", fields: ["Công nghệ thông tin", "Thiết kế", "Kinh tế"], area: "TP. Hồ Chí Minh", founded: "2026-09-12", admins: ["giahuy"],
+    privacy: "Riêng tư", fields: ["Công nghệ thông tin", "Thiết kế", "Kinh doanh và tài chính"], area: "TP. Hồ Chí Minh", founded: "2026-09-12", admins: ["giahuy"],
     rules: ["Chỉ dành cho sinh viên và cựu sinh viên VHU", "Dự án nhóm thì ghi đủ tên thành viên"],
     coverSeed: 12, coverTone: "leaf", joined: true, perms: { ...DEFAULT_PERMS, approvePosts: true },
   },

@@ -34,5 +34,6 @@ export const config = {
     "/groups/:path*",
     "/events/:path*",
     "/settings/:path*",
+    "/exchange/:path*",
   ],
 };

@@ -27,3 +27,9 @@ export async function signOut() {
   jar.delete(SESSION_COOKIE);
   redirect("/?da-dang-xuat=1");
 }
+
+/** Mở bản demo từ trang giới thiệu công khai: vào bằng tài khoản mẫu, đi thẳng tới trang được chọn. */
+export async function enterDemo(form: FormData) {
+  const next = form.get("next");
+  await signIn(typeof next === "string" ? next : "/community");
+}

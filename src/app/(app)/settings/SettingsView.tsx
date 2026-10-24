@@ -301,12 +301,6 @@ function Visibility() {
       <Row label="Hiện trạng thái đang online" hint="Tắt thì bạn cũng không thấy ai đang online.">
         <Switch label="Hiện trạng thái đang online" on={prefs.showOnline} onChange={(v) => set("showOnline", v)} />
       </Row>
-      <Row label="Hiện nhãn Sẵn sàng nhận việc" hint="Hiện cạnh tên bạn trên hồ sơ và trong kết quả tìm kiếm.">
-        <Switch label="Hiện nhãn Sẵn sàng nhận việc" on={prefs.showAvailable} onChange={(v) => set("showAvailable", v)} />
-      </Row>
-      <Row label="Doanh nghiệp tìm thấy bạn" hint="Cho tài khoản doanh nghiệp đã duyệt tìm bạn theo dự án và kỹ năng.">
-        <Switch label="Doanh nghiệp tìm thấy bạn" on={prefs.businessSearch} onChange={(v) => set("businessSearch", v)} />
-      </Row>
       <Row label="Tìm thấy bạn qua email">
         <Switch label="Tìm thấy bạn qua email" on={prefs.findableByEmail} onChange={(v) => set("findableByEmail", v)} />
       </Row>
@@ -448,7 +442,7 @@ const FAQ = [
   },
   {
     q: "Dự án riêng tư thì ai xem được?",
-    a: "Chỉ bạn và những người bạn thêm làm thành viên dự án. Doanh nghiệp và người theo dõi không thấy.",
+    a: "Chỉ bạn và những người bạn thêm làm thành viên dự án. Người theo dõi và người khác không thấy.",
   },
   {
     q: "Làm sao mời bạn bè tham gia?",

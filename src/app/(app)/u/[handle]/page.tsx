@@ -41,24 +41,25 @@ export default async function ProfilePage({ params }: PageProps<"/u/[handle]">) 
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-display text-[clamp(1.8rem,3.4vw,2.6rem)] font-bold leading-none tracking-[-0.04em]">{user.name}</h1>
-              {user.available && (
-                <span className="inline-flex items-center gap-2 rounded-full bg-sap px-3 py-1 text-sm font-semibold text-leaf-deep">
-                  <span className="relative flex h-2 w-2" aria-hidden="true">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-leaf opacity-60" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-leaf-deep" />
-                  </span>
-                  Sẵn sàng nhận việc{user.hoursPerWeek ? `, ${user.hoursPerWeek} giờ mỗi tuần` : ""}
-                </span>
-              )}
             </div>
             <p className="max-w-[60ch] text-[17px] leading-relaxed text-ink/85">{user.headline}</p>
+            {user.lenses.length > 0 && (
+              <p className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-moss">Có thể góp ý về</span>
+                {user.lenses.map((l) => (
+                  <span key={l} className="rounded-full bg-sap px-3 py-1 font-semibold text-leaf-deep">
+                    {l}
+                  </span>
+                ))}
+              </p>
+            )}
             <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-moss">
               <span>@{user.handle}</span>
               <span className="flex items-center gap-1">
                 <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
                 {user.location}
               </span>
-              <span>{user.role}</span>
+              <span>{user.intro}</span>
             </p>
           </div>
           <dl className="flex flex-wrap gap-x-8 gap-y-2">

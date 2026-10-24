@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Globe2, Sprout } from "lucide-react";
 import { ME, PROJECTS, projectOf, userOf } from "@/lib/data";
 import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
+import { levelHint } from "@/lib/model";
 import { LikeButton } from "@/components/LikeButton";
 import { Embed } from "@/components/project/Embed";
 import { FolderCover } from "@/components/project/FolderCover";
@@ -46,7 +47,9 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
                 <span aria-hidden="true">·</span>
                 <span>{project.field}</span>
                 <span aria-hidden="true">·</span>
-                <span>{project.kind}</span>
+                <span>{project.output}</span>
+                <span aria-hidden="true">·</span>
+                <span>{project.context}</span>
                 <span className="inline-flex items-center gap-1 rounded-full border border-ink-line px-2.5 py-0.5 text-xs font-semibold">
                   <Globe2 className="h-3 w-3" aria-hidden="true" /> Công khai
                 </span>
@@ -68,7 +71,7 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
                 href="#hanh-trinh"
                 className="inline-flex h-11 items-center gap-2 rounded-full bg-leaf/15 px-4 text-sm font-semibold text-leaf ring-1 ring-leaf/40 hover:bg-leaf/25"
               >
-                <Sprout className="h-4 w-4" aria-hidden="true" /> {phaseLabel(phase)} · {showcase.milestones.length} cột mốc
+                <Sprout className="h-4 w-4" aria-hidden="true" /> {phaseLabel(phase)}: {levelHint(project.output, phase).toLowerCase()}
               </a>
               <LikeButton count={project.likes} dark />
               <SaveButton />
@@ -79,7 +82,7 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
               <Embed url={video} title={`Video demo ${project.title}`} />
             ) : (
               <div className="rounded-2xl bg-ink-2 px-6 pt-8">
-                <FolderCover tone="leaf" title={project.title} logo={showcase.logo} kind={project.kind} height={220} logoSize={96} />
+                <FolderCover tone="leaf" title={project.title} logo={showcase.logo} kind={project.output} height={220} logoSize={96} />
               </div>
             )}
           </div>

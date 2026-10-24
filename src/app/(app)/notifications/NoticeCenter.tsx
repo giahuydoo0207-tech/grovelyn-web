@@ -24,7 +24,7 @@ const FILTERS: { id: string; label: string; kinds: NoticeKind[] | null }[] = [
   { id: "talk", label: "Bình luận", kinds: ["comment", "mention"] },
   { id: "exchange", label: "Trao đổi", kinds: ["exchange"] },
   { id: "people", label: "Người theo dõi", kinds: ["follow"] },
-  { id: "chance", label: "Cơ hội", kinds: ["view", "event"] },
+  { id: "chance", label: "Hồ sơ và sự kiện", kinds: ["view", "event"] },
 ];
 
 const DAYS: { id: Notice["day"]; label: string }[] = [

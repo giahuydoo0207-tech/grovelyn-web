@@ -2,113 +2,108 @@
 
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, FolderGit2, ImagePlus, Users } from "lucide-react";
-import { ME, POSTS, type Post, type PostKind, userOf } from "@/lib/data";
+import Link from "next/link";
+import { ChevronDown } from "lucide-react";
+import { ME, POSTS, projectsBy, type Post, userOf } from "@/lib/data";
+import { currentPhase, showcaseOf } from "@/lib/showcase";
 import { Avatar } from "@/components/Avatar";
 import { PostCard } from "./PostCard";
 
-const ACTIONS: { kind: PostKind; label: string; short: string; icon: typeof ImagePlus; hint: string }[] = [
-  { kind: "Chia sẻ", label: "Ảnh hoặc video", short: "Ảnh", icon: ImagePlus, hint: "Chia sẻ điều bạn đang làm" },
-  { kind: "Khoe dự án", label: "Khoe dự án", short: "Dự án", icon: FolderGit2, hint: "Kể về dự án bạn vừa cập nhật" },
-  { kind: "Tìm cộng sự", label: "Tìm cộng sự", short: "Cộng sự", icon: Users, hint: "Bạn cần người làm phần nào?" },
-];
-
 const SORTS = ["Dành cho bạn", "Đang theo dõi"] as const;
 
+/**
+ * Trang chủ chỉ hiện các lần Công bố: một phiên bản đã Hoàn tất hoặc Đã triển khai của một dự án công khai.
+ * Cập nhật tiến độ nằm trong Hành trình của dự án; câu hỏi cần góp ý nằm ở tab Trao đổi.
+ */
 export function Feed() {
   const me = userOf(ME)!;
   const [posts, setPosts] = useState<Post[]>(POSTS);
-  const [kind, setKind] = useState<PostKind>("Chia sẻ");
-  const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
+  const [text, setText] = useState("");
   const [sort, setSort] = useState<(typeof SORTS)[number]>("Dành cho bạn");
+  const ready = projectsBy(ME).filter((p) => p.owner === ME && ["final", "shipped"].includes(currentPhase(showcaseOf(p).milestones)));
+  const [slug, setSlug] = useState(ready[0]?.slug ?? "");
+  const chosen = ready.find((p) => p.slug === slug);
   const box = useRef<HTMLTextAreaElement>(null);
-
-  const start = (k: PostKind) => {
-    setKind(k);
-    setOpen(true);
-    setTimeout(() => box.current?.focus(), 50);
-  };
 
   const publish = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim()) return;
-    setPosts((p) => [{ id: `new-${Date.now()}`, author: ME, kind, when: "vừa xong", text: text.trim(), likes: 0, comments: [], reposts: 0 }, ...p]);
+    if (!chosen || !text.trim()) return;
+    setPosts((p) => [
+      { id: `new-${Date.now()}`, author: ME, kind: "Công bố", version: chosen.versions[0]?.tag, project: chosen.slug, when: "vừa xong", text: text.trim(), likes: 0, comments: [], reposts: 0 },
+      ...p,
+    ]);
     setText("");
     setOpen(false);
   };
 
-  const shown = sort === "Đang theo dõi" ? posts.filter((p) => p.author === ME || p.author === "quocbao") : posts;
+  const published = posts.filter((p) => p.kind === "Công bố");
+  const shown = sort === "Đang theo dõi" ? published.filter((p) => p.author === ME || p.author === "quocbao") : published;
 
   return (
     <div className="flex min-w-0 flex-col gap-3">
-      <form onSubmit={publish} className="rounded-2xl border border-line bg-white px-4 pb-2 pt-4">
-        <div className="flex items-start gap-3">
+      <form onSubmit={publish} className="rounded-xl border border-line bg-white p-4">
+        <div className="flex items-center gap-3">
           <Avatar initials={me.initials} tone={me.tone} size={48} />
-          <label className="flex-1">
-            <span className="sr-only">Nội dung bài đăng</span>
-            <motion.textarea
-              ref={box}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onFocus={() => setOpen(true)}
-              placeholder={open ? ACTIONS.find((a) => a.kind === kind)?.hint : "Bắt đầu bài đăng"}
-              animate={{ height: open || text ? 112 : 48, borderRadius: open || text ? 16 : 999 }}
-              transition={{ duration: 0.2 }}
-              className="w-full resize-none border border-[#c9d0c4] bg-white px-5 py-3 text-[16px] font-medium leading-snug outline-none placeholder:font-semibold placeholder:text-moss hover:bg-mist focus:border-ink focus:bg-white"
-            />
-          </label>
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(true);
+              setTimeout(() => box.current?.focus(), 60);
+            }}
+            className="h-12 flex-1 rounded-full border border-[#c9d0c4] px-5 text-left text-[16px] font-semibold text-moss hover:bg-mist"
+          >
+            Công bố bản mới của dự án
+          </button>
         </div>
-
-        <div className="mt-2 flex flex-wrap items-center">
-          {ACTIONS.map((a) => {
-            const on = open && a.kind === kind;
-            return (
-              <button
-                key={a.kind}
-                type="button"
-                aria-pressed={on}
-                onClick={() => start(a.kind)}
-                className={`flex h-11 flex-1 items-center justify-center gap-2 rounded-lg px-2 text-sm font-semibold transition-colors sm:text-[15px] ${
-                  on ? "bg-sap/70 text-leaf-deep" : "text-moss hover:bg-mist hover:text-ink"
-                }`}
-              >
-                <a.icon className="h-5 w-5 text-leaf-deep" aria-hidden="true" />
-                <span className="whitespace-nowrap sm:hidden">{a.short}</span>
-                <span className="hidden whitespace-nowrap sm:inline">{a.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
         <AnimatePresence initial={false}>
           {open && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="flex items-center justify-end gap-2 border-t border-line pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    setText("");
-                  }}
-                  className="h-9 rounded-full px-4 text-sm font-semibold text-moss hover:bg-mist"
-                >
-                  Hủy
-                </button>
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  type="submit"
-                  disabled={!text.trim()}
-                  className="h-9 rounded-full bg-leaf px-5 text-sm font-bold text-ink transition-opacity disabled:opacity-40"
-                >
-                  Đăng
-                </motion.button>
-              </div>
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+              {ready.length ? (
+                <div className="mt-4 flex flex-col gap-3">
+                  <label className="flex flex-col gap-1.5 text-sm font-semibold">
+                    Dự án
+                    <select value={slug} onChange={(e) => setSlug(e.target.value)} className="h-11 rounded-lg border border-line bg-white px-3 font-semibold outline-none focus:border-ink">
+                      {ready.map((p) => (
+                        <option key={p.slug} value={p.slug}>
+                          {p.title}, bản {p.versions[0]?.tag}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="flex flex-col gap-1.5 text-sm font-semibold">
+                    Bản này có gì mới
+                    <textarea
+                      ref={box}
+                      rows={3}
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      placeholder="Hai, ba câu về điều đã thay đổi và ai đã góp ý"
+                      className="resize-none rounded-lg border border-line px-3.5 py-3 text-[15px] font-normal leading-relaxed outline-none focus:border-ink"
+                    />
+                  </label>
+                  <div className="flex items-center justify-end gap-2">
+                    <button type="button" onClick={() => (setOpen(false), setText(""))} className="h-10 rounded-lg px-4 text-sm font-semibold text-moss hover:bg-mist">
+                      Huỷ
+                    </button>
+                    <button type="submit" disabled={!text.trim()} className="h-10 rounded-lg bg-leaf px-5 text-sm font-bold text-ink disabled:opacity-40">
+                      Công bố
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-4 rounded-lg bg-mist px-4 py-3 text-sm leading-relaxed text-moss">
+                  Chỉ công bố được dự án ở mức Hoàn tất hoặc Đã triển khai. Dự án đang làm thì{" "}
+                  <Link href="/exchange" className="font-semibold text-leaf-deep hover:underline">
+                    mở Trao đổi
+                  </Link>{" "}
+                  để xin góp ý, hoặc{" "}
+                  <Link href="/new" className="font-semibold text-leaf-deep hover:underline">
+                    tạo dự án mới
+                  </Link>
+                  .
+                </p>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

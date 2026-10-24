@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { Mark } from "./Logo";
 import { NOTICES } from "@/lib/data";
-import { openForMe } from "@/lib/exchange";
 import { useChat } from "./chat/ChatProvider";
 import { UserMenu } from "./UserMenu";
 
@@ -36,7 +35,6 @@ const EXCHANGE: Item = {
   label: "Trao đổi",
   icon: HandHelping,
   match: (p) => p.startsWith("/exchange"),
-  badge: openForMe,
 };
 
 const ITEMS: Item[] = [

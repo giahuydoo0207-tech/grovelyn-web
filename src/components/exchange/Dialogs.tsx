@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Check, Link2, Paperclip } from "lucide-react";
-import { userOf, type Project } from "@/lib/data";
-import { TOPIC_DAYS, TOPIC_KINDS, TOPIC_TIMES, type Topic, type TopicKind, type TopicTime } from "@/lib/exchange";
+import { LENSES, ME, userOf, type Lens, type Project } from "@/lib/data";
+import { MAX_LENSES, TOPIC_DAYS, TOPIC_KINDS, type Topic, type TopicKind } from "@/lib/exchange";
 import { Modal } from "./Modal";
 import { Chip } from "./TopicParts";
 
@@ -14,13 +14,22 @@ const pick = (on: boolean) =>
     on ? "border-ink bg-[#eef9e7]" : "border-line bg-white hover:border-ink/40"
   }`;
 
-/** Chủ dự án mở một chủ đề trao đổi. */
+function Box({ on }: { on: boolean }) {
+  return (
+    <span
+      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[5px] border peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-leaf-deep ${on ? "border-ink bg-ink" : "border-[#c9d0c4] bg-white"}`}
+    >
+      {on && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} aria-hidden="true" />}
+    </span>
+  );
+}
+
+/** Chủ dự án hoặc thành viên mở một trao đổi: bốn ô chính, bối cảnh nằm trong phần mở rộng. */
 export function OpenTopicDialog({
   open,
   onClose,
   project: given,
   choices,
-  versionsOf,
   onCreate,
 }: {
   open: boolean;
@@ -28,23 +37,20 @@ export function OpenTopicDialog({
   project: Project;
   /** Khi mở từ tab Trao đổi: cho chọn dự án nào. */
   choices?: Project[];
-  versionsOf: (p: Project) => string[];
   onCreate: (t: Topic) => void;
 }) {
   const [project, setProject] = useState(given);
-  const versions = versionsOf(project);
+  const versions = project.versions.map((v) => v.tag);
   const [question, setQuestion] = useState("");
   const [detail, setDetail] = useState("");
-  const [kind, setKind] = useState<TopicKind>("Xin ý kiến");
-  const [time, setTime] = useState<TopicTime>("15 phút");
+  const [kind, setKind] = useState<TopicKind>("Xin góp ý");
+  const [lenses, setLenses] = useState<Lens[]>([]);
+  const [outsider, setOutsider] = useState(false);
   const [version, setVersion] = useState(versions[0] ?? "v1");
-  const chooseProject = (slug: string) => {
-    const p = choices?.find((c) => c.slug === slug);
-    if (!p) return;
-    setProject(p);
-    setVersion(versionsOf(p)[0] ?? "v1");
-  };
   const [error, setError] = useState(false);
+
+  const toggleLens = (l: Lens) =>
+    setLenses((cur) => (cur.includes(l) ? cur.filter((x) => x !== l) : cur.length < MAX_LENSES ? [...cur, l] : cur));
 
   const submit = () => {
     if (!question.trim()) return setError(true);
@@ -52,17 +58,21 @@ export function OpenTopicDialog({
       id: `t-${Date.now()}`,
       project: project.slug,
       kind,
-      time,
+      lenses,
+      outsider,
       version,
       question: question.trim(),
       detail: detail.trim(),
+      lead: ME,
       opened: "vừa xong",
       daysLeft: TOPIC_DAYS,
+      extended: false,
       status: "open",
       replies: [],
     });
     setQuestion("");
     setDetail("");
+    setLenses([]);
     setError(false);
     onClose();
   };
@@ -76,7 +86,7 @@ export function OpenTopicDialog({
       footer={
         <>
           <span className="min-w-[12rem] flex-1 text-[13px] leading-snug text-moss">
-            Hiện ở tab Trao đổi và gửi tới người cùng ngành. Tự đóng sau {TOPIC_DAYS} ngày nếu chưa giải quyết.
+            Gửi tới người chọn đúng góc nhìn. Tự đóng sau {TOPIC_DAYS} ngày, gia hạn được một lần.
           </span>
           <button type="button" onClick={onClose} className="h-11 rounded-lg border border-line bg-white px-4 font-bold hover:bg-mist">
             Huỷ
@@ -90,7 +100,16 @@ export function OpenTopicDialog({
       {choices && choices.length > 1 && (
         <label className="block">
           <span className={lab}>Dự án</span>
-          <select value={project.slug} onChange={(e) => chooseProject(e.target.value)} className="h-[46px] w-full rounded-lg border border-[#c9d0c4] bg-white px-3 font-semibold outline-none focus:border-ink">
+          <select
+            value={project.slug}
+            onChange={(e) => {
+              const p = choices.find((c) => c.slug === e.target.value);
+              if (!p) return;
+              setProject(p);
+              setVersion(p.versions[0]?.tag ?? "v1");
+            }}
+            className="h-[46px] w-full rounded-lg border border-[#c9d0c4] bg-white px-3 font-semibold outline-none focus:border-ink"
+          >
             {choices.map((c) => (
               <option key={c.slug} value={c.slug}>
                 {c.title}
@@ -101,7 +120,7 @@ export function OpenTopicDialog({
       )}
       <div>
         <label htmlFor="td-cau-hoi" className={lab}>
-          Bạn muốn trao đổi điều gì?
+          Bạn muốn hỏi điều gì?
         </label>
         <textarea
           id="td-cau-hoi"
@@ -117,17 +136,11 @@ export function OpenTopicDialog({
           className={area}
         />
         <p id="td-goi-y" className={`mt-1.5 text-[13px] ${error ? "font-semibold text-[#b42318]" : "text-moss"}`}>
-          {error ? "Viết câu hỏi trước khi mở trao đổi." : "Viết thành một câu hỏi cụ thể để mọi người dễ cho ý kiến."}
+          {error ? "Viết câu hỏi trước khi mở trao đổi." : "Một câu hỏi cụ thể, trả lời được trong một lần đọc."}
         </p>
       </div>
-      <div>
-        <label htmlFor="td-chi-tiet" className={lab}>
-          Thêm bối cảnh <span className="font-normal text-moss">(không bắt buộc)</span>
-        </label>
-        <textarea id="td-chi-tiet" rows={3} value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="Bạn đã thử gì, đang phân vân giữa những phương án nào" className={area} />
-      </div>
       <fieldset>
-        <legend className={lab}>Bạn muốn nhận gì</legend>
+        <legend className={lab}>Hình thức</legend>
         <div className="grid grid-cols-2 gap-2">
           {TOPIC_KINDS.map((k) => (
             <label key={k.kind} className={pick(kind === k.kind)}>
@@ -138,48 +151,70 @@ export function OpenTopicDialog({
           ))}
         </div>
       </fieldset>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <fieldset>
-          <legend className={lab}>Mất khoảng</legend>
-          <div className="flex gap-2">
-            {TOPIC_TIMES.map((t) => (
-              <label key={t} className={`${pick(time === t)} flex-1 whitespace-nowrap text-center`}>
-                <input type="radio" name="td-thoi-gian" className="sr-only" checked={time === t} onChange={() => setTime(t)} />
-                {t}
+      <fieldset>
+        <legend className={lab}>
+          Góc nhìn cần nhận <span className="font-normal text-moss">(tối đa {MAX_LENSES})</span>
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {LENSES.map((l) => {
+            const on = lenses.includes(l);
+            const full = !on && lenses.length >= MAX_LENSES;
+            return (
+              <label
+                key={l}
+                className={`rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
+                  on ? "cursor-pointer border-ink bg-sap/60" : full ? "cursor-not-allowed border-line text-moss/60" : "cursor-pointer border-line hover:bg-mist"
+                }`}
+              >
+                <input type="checkbox" className="sr-only" checked={on} disabled={full} onChange={() => toggleLens(l)} />
+                {l}
               </label>
-            ))}
-          </div>
-        </fieldset>
-        <label className="block">
-          <span className={lab}>Gắn với bản</span>
-          <select value={version} onChange={(e) => setVersion(e.target.value)} className="h-[46px] w-full rounded-lg border border-[#c9d0c4] bg-white px-3 font-semibold outline-none focus:border-ink">
-            {versions.map((v) => (
-              <option key={v}>{v}</option>
-            ))}
-          </select>
+            );
+          })}
+        </div>
+        <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm">
+          <input type="checkbox" className="peer sr-only" checked={outsider} onChange={(e) => setOutsider(e.target.checked)} />
+          <Box on={outsider} />
+          Người ngoài ngành cũng góp được
         </label>
-      </div>
+      </fieldset>
+      <label className="block">
+        <span className={lab}>Gắn với bản</span>
+        <select value={version} onChange={(e) => setVersion(e.target.value)} className="h-[46px] w-full rounded-lg border border-[#c9d0c4] bg-white px-3 font-semibold outline-none focus:border-ink">
+          {versions.map((v) => (
+            <option key={v}>{v}</option>
+          ))}
+        </select>
+      </label>
+      <details className="rounded-lg border border-line px-4 py-3 [&_summary]:cursor-pointer">
+        <summary className="text-sm font-bold">Thêm bối cảnh và ảnh</summary>
+        <div className="mt-3 flex flex-col gap-3">
+          <textarea rows={3} value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="Bạn đã thử gì, đang phân vân giữa những phương án nào" aria-label="Bối cảnh" className={area} />
+          <button type="button" className="inline-flex h-10 w-fit items-center gap-2 rounded-lg border border-line bg-white px-3.5 text-sm font-bold hover:bg-mist">
+            <Paperclip className="h-4 w-4" aria-hidden="true" /> Đính kèm ảnh
+          </button>
+        </div>
+      </details>
     </Modal>
   );
 }
 
-/** Người tham gia gửi góp ý cho một chủ đề. */
+/** Người tham gia gửi góp ý cho một trao đổi. */
 export function ReplyDialog({
   open,
   onClose,
   topic,
-  ownerName,
   onSend,
 }: {
   open: boolean;
   onClose: () => void;
   topic: Topic;
-  ownerName: string;
   onSend: (text: string, credit: boolean) => void;
 }) {
   const [text, setText] = useState("");
   const [credit, setCredit] = useState(true);
   const [error, setError] = useState(false);
+  const lead = userOf(topic.lead);
 
   const send = () => {
     if (!text.trim()) return setError(true);
@@ -211,11 +246,13 @@ export function ReplyDialog({
       <div className="rounded-lg bg-mist px-4 py-3.5">
         <div className="flex flex-wrap gap-2">
           <Chip strong>{topic.kind}</Chip>
-          <Chip>Bản {topic.version}</Chip>
+          {topic.lenses.map((l) => (
+            <Chip key={l}>{l}</Chip>
+          ))}
         </div>
         <p className="mt-2.5 font-bold leading-snug">{topic.question}</p>
         <p className="mt-1 text-[13px] text-moss">
-          {ownerName} mở, {topic.opened}
+          {lead?.name} mở, {topic.opened}
         </p>
       </div>
       <div>
@@ -246,13 +283,9 @@ export function ReplyDialog({
       </div>
       <label className="flex cursor-pointer items-start gap-2.5 text-sm leading-relaxed">
         <input type="checkbox" checked={credit} onChange={(e) => setCredit(e.target.checked)} className="peer sr-only" />
-        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[5px] border border-[#c9d0c4] bg-white peer-checked:border-ink peer-checked:bg-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-leaf-deep">
-          {credit && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} aria-hidden="true" />}
-        </span>
-        Nếu được áp dụng, ghi tên tôi vào Người đóng góp và Hành trình của dự án
+        <Box on={credit} />
+        Nếu được áp dụng, ghi tên tôi vào Người đóng góp và Hành trình của dự án. Rút lại được bất cứ lúc nào.
       </label>
     </Modal>
   );
 }
-
-export const nameOf = (handle?: string) => (handle ? userOf(handle)?.name ?? handle : "");
