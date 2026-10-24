@@ -23,7 +23,8 @@ export default async function ProfilePage({ params }: PageProps<"/u/[handle]">) 
 
   const projects = projectsBy(user.handle);
   const pinned = user.pinned.map(projectOf).filter((p) => p !== undefined);
-  const posts = POSTS.filter((p) => p.author === user.handle);
+  // Bài trong nhóm chỉ hiện trong nhóm, không lên hồ sơ (nhóm riêng tư chỉ thành viên xem được).
+  const posts = POSTS.filter((p) => p.author === user.handle && !p.group);
   const isMe = user.handle === ME;
   const seed = [...user.handle].reduce((s, c) => s + c.charCodeAt(0), 0);
 

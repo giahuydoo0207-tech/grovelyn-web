@@ -13,7 +13,7 @@ import { MediaPicker } from "@/components/MediaGrid";
 import { PostCard } from "./PostCard";
 
 const SORTS = ["Dành cho bạn", "Đang theo dõi"] as const;
-const FILTERS = ["Tất cả", ...POST_KINDS] as const;
+type Filter = "Tất cả" | PostKind;
 
 const PLACEHOLDER: Record<PostKind, string> = {
   "Chia sẻ": "Bạn đang làm gì, vừa học được gì?",
@@ -23,21 +23,24 @@ const PLACEHOLDER: Record<PostKind, string> = {
 
 /**
  * Trang chủ là bảng tin chung: chia sẻ, công bố bản mới, tìm cộng sự, đều đăng kèm ảnh và video được.
- * Công bố chỉ dành cho dự án ở mức Hoàn tất hoặc Đã triển khai. Câu hỏi cần góp ý có chỗ riêng ở tab Trao đổi.
+ * Công bố chỉ dành cho dự án đã Hoàn tất hoặc đã dùng thực tế. Câu hỏi cần góp ý có chỗ riêng ở tab Trao đổi.
+ * Trong một nhóm (`group`), bảng tin chỉ có bài của nhóm đó, và không có Công bố.
  */
-export function Feed() {
+export function Feed({ group }: { group?: string } = {}) {
+  const kinds: PostKind[] = group ? POST_KINDS.filter((k) => k !== "Công bố") : POST_KINDS;
+  const filters: Filter[] = ["Tất cả", ...kinds];
   const me = userOf(ME)!;
   const mine = projectsBy(ME);
   const ready = mine.filter((p) => p.owner === ME && canAnnounce(currentPhase(showcaseOf(p).milestones), p.usage));
 
-  const [posts, setPosts] = useState<Post[]>(POSTS);
+  const [posts, setPosts] = useState<Post[]>(() => POSTS.filter((p) => (group ? p.group === group : !p.group)));
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<PostKind>("Chia sẻ");
   const [text, setText] = useState("");
   const [media, setMedia] = useState<Media[]>([]);
   const [slug, setSlug] = useState("");
   const [needs, setNeeds] = useState("");
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]>("Tất cả");
+  const [filter, setFilter] = useState<Filter>("Tất cả");
   const [sort, setSort] = useState<(typeof SORTS)[number]>("Dành cho bạn");
   const box = useRef<HTMLTextAreaElement>(null);
 
@@ -69,6 +72,7 @@ export function Feed() {
       {
         id: `new-${Date.now()}`,
         author: ME,
+        group,
         kind,
         version: kind === "Công bố" ? project?.versions[0]?.tag : undefined,
         project: project?.slug,
@@ -90,10 +94,10 @@ export function Feed() {
   const shown = sort === "Đang theo dõi" ? byKind.filter((p) => p.author === ME || p.author === "quocbao" || p.author === "minhkhoa") : byKind;
 
   const quick = [
-    { k: "Chia sẻ" as const, label: "Ảnh, video", icon: ImagePlus },
-    { k: "Công bố" as const, label: "Công bố bản mới", icon: Rocket },
-    { k: "Tìm cộng sự" as const, label: "Tìm cộng sự", icon: UsersRound },
-  ];
+    { k: "Chia sẻ" as const, label: "Ảnh, video", short: "Ảnh, video", icon: ImagePlus },
+    { k: "Công bố" as const, label: "Công bố bản mới", short: "Công bố", icon: Rocket },
+    { k: "Tìm cộng sự" as const, label: "Tìm cộng sự", short: "Cộng sự", icon: UsersRound },
+  ].filter((q) => kinds.includes(q.k));
 
   return (
     <div className="flex min-w-0 flex-col gap-3">
@@ -108,20 +112,22 @@ export function Feed() {
               onClick={() => start("Chia sẻ")}
               className="h-12 flex-1 rounded-full border border-[#c9d0c4] px-5 text-left text-[16px] font-semibold text-moss hover:bg-mist"
             >
-              Bạn đang làm gì?
+              {group ? "Viết gì đó cho nhóm" : "Bạn đang làm gì?"}
             </button>
           )}
         </div>
         {!open && (
           <div className="mt-2 flex">
-            {quick.map(({ k, label, icon: Icon }) => (
+            {quick.map(({ k, label, short, icon: Icon }) => (
               <button
                 key={label}
                 type="button"
                 onClick={() => start(k)}
-                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg text-[14px] font-semibold text-moss hover:bg-mist hover:text-ink sm:text-[15px]"
+                aria-label={label}
+                className="flex h-11 min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg text-[14px] font-semibold text-moss hover:bg-mist hover:text-ink sm:gap-2 sm:text-[15px]"
               >
-                <Icon className="h-5 w-5 shrink-0" aria-hidden="true" /> {label}
+                <Icon className="h-5 w-5 shrink-0" aria-hidden="true" /> <span className="sm:hidden">{short}</span>
+                <span className="hidden sm:inline">{label}</span>
               </button>
             ))}
           </div>
@@ -134,7 +140,7 @@ export function Feed() {
                 <fieldset>
                   <legend className="sr-only">Loại bài</legend>
                   <div className="flex flex-wrap gap-2">
-                    {POST_KINDS.map((k) => (
+                    {kinds.map((k) => (
                       <label
                         key={k}
                         className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
@@ -232,7 +238,7 @@ export function Feed() {
 
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <div role="group" aria-label="Lọc theo loại bài" className="-mx-1 flex max-w-full gap-1.5 overflow-x-auto px-1 [scrollbar-width:none]">
-          {FILTERS.map((f) => (
+          {filters.map((f) => (
             <button
               key={f}
               type="button"

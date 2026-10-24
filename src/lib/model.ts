@@ -9,7 +9,7 @@ import type { Phase } from "./showcase";
 export type Layout = "visual" | "case" | "report";
 
 export const OUTPUTS = [
-  { id: "Thiết kế", layout: "visual", examples: "kiến trúc, giao diện, nhận diện, sản phẩm" },
+  { id: "Bản thiết kế", layout: "visual", examples: "kiến trúc, giao diện, nhận diện, sản phẩm" },
   { id: "Phần mềm hoặc công cụ", layout: "case", examples: "website, ứng dụng, tiện ích" },
   { id: "Sản phẩm kỹ thuật", layout: "case", examples: "thiết bị, mô hình, nguyên mẫu" },
   { id: "Chiến dịch hoặc chương trình", layout: "case", examples: "marketing, truyền thông, cộng đồng" },
@@ -70,7 +70,7 @@ export const LAYOUTS: Record<Layout, { name: string; hint: string; sections: { h
 /** Giải thích tiến độ theo dạng đầu ra. */
 export function levelHint(o: Output, p: Phase): string {
   if (p === "paused") return "Đang tạm dừng";
-  if (o === "Thiết kế") return { concept: "Đang phác thảo", draft: "Đang triển khai hồ sơ", final: "Xong hồ sơ thiết kế" }[p];
+  if (o === "Bản thiết kế") return { concept: "Đang phác thảo", draft: "Đang triển khai hồ sơ", final: "Xong hồ sơ thiết kế" }[p];
   if (layoutOf(o) === "report") return { concept: "Đang xác định câu hỏi", draft: "Đang thu thập, phân tích", final: "Đã hoàn tất báo cáo" }[p];
   if (o === "Chiến dịch hoặc chương trình" || o === "Kế hoạch hoặc đề án") return { concept: "Đang lên ý tưởng", draft: "Đang chuẩn bị", final: "Xong kế hoạch" }[p];
   return { concept: "Đang lên ý tưởng", draft: "Đang làm", final: "Xong bản dùng được" }[p];

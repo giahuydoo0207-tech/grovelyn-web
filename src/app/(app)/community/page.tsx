@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Bookmark, CalendarDays, Flag, Newspaper, Users, type LucideIcon } from "lucide-react";
+import { Bookmark, CalendarDays, HandHelping, Users, type LucideIcon } from "lucide-react";
 import { MY_GROUPS, ME, userOf } from "@/lib/data";
 import { Avatar } from "@/components/Avatar";
 import { Feed } from "./Feed";
@@ -9,11 +9,10 @@ import { Suggestions } from "./Suggestions";
 export const metadata: Metadata = { title: "Trang chủ" };
 
 const SHORTCUTS: { href: string; label: string; icon: LucideIcon; count?: number; filled?: boolean }[] = [
-  { href: "/explore", label: "Đã lưu", icon: Bookmark, filled: true },
+  { href: "/saved", label: "Đã lưu", icon: Bookmark, filled: true },
   { href: "/groups", label: "Nhóm", icon: Users, count: MY_GROUPS.filter((g) => g.fresh > 0).length },
-  { href: "/community", label: "Bản tin", icon: Newspaper },
   { href: "/events", label: "Sự kiện", icon: CalendarDays, count: 2 },
-  { href: "/community", label: "Thử thách", icon: Flag },
+  { href: "/exchange", label: "Trao đổi", icon: HandHelping },
 ];
 
 /** Trang chủ sau khi đăng nhập: lối tắt và nhóm bên trái, bảng tin ở giữa, người online và sự kiện bên phải. */

@@ -190,8 +190,8 @@ export const USERS: User[] = [
     skills: ["Next.js", "TypeScript", "React", "Tailwind CSS", "Flutter", "Dart", "Java", "Spring Boot", "PostgreSQL", "Supabase", "Solana", "Git"],
     experience: [{ title: "Thiết kế đồ họa (bán thời gian)", where: "Chrome Room", when: "07/2026 – nay", note: "Thiết kế logo và bảng hiệu, tư vấn khách hàng và bán hàng." }],
     education: [{ title: "Cử nhân Khoa học máy tính", where: "Đại học Văn Hiến", when: "2023 – nay" }],
-    followers: 0,
-    following: 0,
+    followers: 38,
+    following: 52,
     pinned: ["nova-replyn"],
     tone: "leaf",
   },
@@ -255,7 +255,7 @@ export const PROJECTS: Project[] = [
     summary:
       "Nhà ống 3 tầng dùng giếng trời và cửa so le giữa các tầng để gió đi xuyên nhà, giảm phụ thuộc máy lạnh.",
     field: "Kiến trúc",
-    output: "Thiết kế",
+    output: "Bản thiết kế",
     context: "Học tập",
     contextNote: "Đồ án tốt nghiệp",
     usage: "Chưa triển khai",
@@ -305,7 +305,7 @@ export const PROJECTS: Project[] = [
     title: "Bộ nhận diện thương hiệu Trà Mây",
     summary: "Logo, bảng màu và bao bì cho một quán trà nhỏ ở Đà Nẵng, lấy cảm hứng từ mây chiều trên biển.",
     field: "Thiết kế",
-    output: "Thiết kế",
+    output: "Bản thiết kế",
     context: "Công việc",
     usage: "Đã dùng thực tế",
     owner: "thuha",
@@ -438,7 +438,7 @@ export const PROJECTS: Project[] = [
     title: "Cải tạo chung cư cũ quận 3",
     summary: "Đề xuất cải tạo hành lang và sân chung của một chung cư 40 năm tuổi.",
     field: "Kiến trúc",
-    output: "Thiết kế",
+    output: "Bản thiết kế",
     context: "Học tập",
     contextNote: "Học phần",
     owner: "quocbao",
@@ -458,7 +458,7 @@ export const PROJECTS: Project[] = [
     title: "Quán cà phê vườn 120m²",
     summary: "Thiết kế nội thất quán cà phê có vườn trong nhà cho mặt bằng thuê.",
     field: "Kiến trúc",
-    output: "Thiết kế",
+    output: "Bản thiết kế",
     context: "Công việc",
     owner: "quocbao",
     members: [{ handle: "quocbao", part: "Nội thất" }],
@@ -489,6 +489,8 @@ export interface Post {
   version?: string;
   needs?: string[];
   media?: Media[];
+  /** Bài đăng trong một nhóm (slug nhóm). Không có thì là bài trên Trang chủ. */
+  group?: string;
   likes: number;
   comments: { author: string; text: string; when: string }[];
   reposts: number;
@@ -570,6 +572,59 @@ export const POSTS: Post[] = [
     reposts: 2,
   },
 ];
+
+/** Bài trong nhóm: chỉ hiện ở tab Thảo luận và Tìm cộng sự của nhóm đó. */
+POSTS.push(
+  {
+    id: "g1",
+    author: "thuha",
+    group: "vhu-lam-du-an",
+    kind: "Chia sẻ",
+    when: "3 giờ trước",
+    text: "Ai đang làm đồ án tốt nghiệp mà cần người đọc thử bản trình bày thì để link ở đây, tối nay mình rảnh đọc 3 bản.",
+    likes: 24,
+    comments: [{ author: "quocbao", text: "Nhờ chị đọc giúp phần mặt cắt của em với.", when: "2 giờ trước" }],
+    reposts: 0,
+  },
+  {
+    id: "g2",
+    author: "minhkhoa",
+    group: "vhu-lam-du-an",
+    kind: "Tìm cộng sự",
+    when: "hôm qua",
+    text: "Nhóm mình làm web đặt bàn cho quán cà phê, cần thêm một bạn làm nội dung và ảnh chụp món. Làm 2 tuần, ghi tên vào dự án.",
+    project: "dat-ban-ca-phe",
+    needs: ["Viết nội dung", "Chụp ảnh món"],
+    likes: 11,
+    comments: [],
+    reposts: 1,
+  },
+  {
+    id: "g3",
+    author: "quocbao",
+    group: "kien-truc-nha-pho",
+    kind: "Chia sẻ",
+    when: "1 giờ trước",
+    text: "Mặt cắt thông gió bản cuối, có ghi chú đường đi của gió qua giếng trời. Cả nhà xem giúp nét chữ đã đủ đọc khi in A3 chưa.",
+    project: "nha-pho-thong-gio",
+    media: [MEDIA.nhaPhoMatCat],
+    likes: 37,
+    comments: [{ author: "thuha", text: "In A3 ổn, nhưng chữ chú thích nên đậm lên một chút.", when: "40 phút trước" }],
+    reposts: 2,
+  },
+  {
+    id: "g4",
+    author: "thuha",
+    group: "freelance-thiet-ke",
+    kind: "Chia sẻ",
+    when: "5 giờ trước",
+    text: "Mẹo nhỏ khi in bao bì giấy kraft: màu sẽ trầm xuống khoảng một bậc, nên chọn màu sáng hơn trên màn hình.",
+    media: [MEDIA.traMayBaoBi],
+    likes: 52,
+    comments: [],
+    reposts: 6,
+  },
+);
 
 export type NoticeKind = "like" | "comment" | "follow" | "mention" | "milestone" | "view" | "event" | "exchange";
 

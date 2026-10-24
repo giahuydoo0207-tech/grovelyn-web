@@ -6,18 +6,23 @@ import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
 import { FolderCover } from "./project/FolderCover";
 import { Avatar } from "./Avatar";
 
-/** Thẻ dự án: bìa hồ sơ ghi dạng đầu ra, rồi lĩnh vực, mức thực hiện, tên, bối cảnh và vai trò của người làm. */
+/** Thẻ dự án: bìa hồ sơ ghi dạng đầu ra, rồi lĩnh vực, tiến độ, tên, bối cảnh và vai trò của người làm. */
 export function ProjectCard({
   project,
   featured = false,
+  person,
 }: {
   project: Project;
   featured?: boolean;
+  /** Trên trang hồ sơ: hiện vai trò của người này, không phải của chủ dự án. */
+  person?: string;
 }) {
   const owner = userOf(project.owner);
   const showcase = showcaseOf(project);
   const phase = phaseLabel(currentPhase(showcase.milestones));
-  const role = project.members.find((m) => m.handle === project.owner)?.part;
+  const who = person ?? project.owner;
+  const role = project.members.find((m) => m.handle === who)?.part;
+  const byOther = who !== project.owner;
 
   return (
     <Link
@@ -65,7 +70,7 @@ export function ProjectCard({
           <dd className="truncate font-semibold">{contextLabel(project)}</dd>
           {owner && (
             <>
-              <dt className="text-moss">Người làm</dt>
+              <dt className="text-moss">{byOther ? "Chủ dự án" : "Người làm"}</dt>
               <dd className="flex min-w-0 items-center gap-2 font-semibold">
                 <Avatar initials={owner.initials} tone={owner.tone} size={22} />
                 <span className="truncate">{owner.name}</span>

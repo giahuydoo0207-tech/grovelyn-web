@@ -82,7 +82,7 @@ export function Journey({ slug, seed, canEdit }: { slug: string; seed: Milestone
 
   return (
     <div className="flex flex-col gap-8">
-      <section aria-label="Mức thực hiện của dự án" className="rounded-2xl bg-mist p-5">
+      <section aria-label="Tiến độ của dự án" className="rounded-2xl bg-mist p-5">
         <ol className="grid grid-cols-3 gap-x-2 gap-y-4">
           {PHASES.map((p, i) => {
             const done = i <= reached;
@@ -223,7 +223,7 @@ function Composer({ current, onCancel, onAdd }: { current: Phase; onCancel: () =
       </div>
 
       <fieldset>
-        <legend className="text-sm font-semibold">Mức thực hiện</legend>
+        <legend className="text-sm font-semibold">Tiến độ</legend>
         <div className="mt-2 grid grid-cols-3 gap-2">
           {PHASES.map((p) => (
             <label key={p.id} className={`cursor-pointer rounded-xl border px-3 py-2.5 text-center text-sm font-semibold transition-colors ${phase === p.id ? "border-ink bg-sap/50" : "border-line hover:bg-mist"}`}>

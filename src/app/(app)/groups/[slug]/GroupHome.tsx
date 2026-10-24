@@ -39,7 +39,7 @@ export function GroupHome({ group }: { group: Group }) {
   const [copied, setCopied] = useState(false);
 
   const projects = PROJECTS.filter((p) => group.fields.includes(p.field));
-  const seekers = POSTS.filter((p) => p.kind === "Tìm cộng sự");
+  const seekers = POSTS.filter((p) => p.group === group.slug && p.kind === "Tìm cộng sự");
   const events = EVENTS.filter((e) => e.group?.name === group.name);
   const admins = group.admins.map(userOf).filter((u) => u !== undefined);
   const online = ONLINE.map(userOf).filter((u) => u !== undefined);
@@ -177,7 +177,7 @@ export function GroupHome({ group }: { group: Group }) {
           ) : (
             <AnimatePresence mode="wait" initial={false}>
               <motion.div key={tab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-                {tab === "Thảo luận" && <Feed />}
+                {tab === "Thảo luận" && <Feed group={group.slug} />}
                 {tab === "Dự án của nhóm" &&
                   (projects.length ? (
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -190,6 +190,9 @@ export function GroupHome({ group }: { group: Group }) {
                   ))}
                 {tab === "Tìm cộng sự" && (
                   <div className="flex flex-col gap-3">
+                    {seekers.length === 0 && (
+                      <p className="rounded-xl border border-line bg-white px-5 py-8 text-center text-moss">Nhóm chưa có bài Tìm cộng sự nào. Đăng ở tab Thảo luận, chọn loại Tìm cộng sự.</p>
+                    )}
                     {seekers.map((p) => (
                       <PostCard key={p.id} post={p} />
                     ))}

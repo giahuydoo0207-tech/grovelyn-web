@@ -26,6 +26,7 @@ export const config = {
     "/",
     "/community/:path*",
     "/explore/:path*",
+    "/saved/:path*",
     "/new/:path*",
     "/messages/:path*",
     "/notifications/:path*",

@@ -2,4 +2,4 @@
 export const SESSION_COOKIE = "grovelyn_session";
 
 /** Các trang cần đăng nhập. Giữ đồng bộ với matcher trong src/proxy.ts. */
-export const PROTECTED = ["/community", "/explore", "/new", "/messages", "/notifications", "/u", "/p", "/groups", "/events", "/settings", "/exchange"];
+export const PROTECTED = ["/community", "/explore", "/new", "/messages", "/notifications", "/u", "/p", "/groups", "/events", "/settings", "/exchange", "/saved"];

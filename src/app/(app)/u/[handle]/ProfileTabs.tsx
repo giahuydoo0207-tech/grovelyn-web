@@ -99,7 +99,7 @@ export function ProfileTabs({
                   <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {pinned.map((p) => (
                       <li key={p.slug}>
-                        <ProjectCard project={p} />
+                        <ProjectCard project={p} person={user.handle} />
                       </li>
                     ))}
                   </ul>
@@ -111,7 +111,7 @@ export function ProfileTabs({
                   <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {others.map((p) => (
                       <li key={p.slug}>
-                        <ProjectCard project={p} />
+                        <ProjectCard project={p} person={user.handle} />
                       </li>
                     ))}
                   </ul>
