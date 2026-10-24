@@ -3,122 +3,247 @@
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { ChevronDown } from "lucide-react";
-import { ME, POSTS, projectsBy, type Post, userOf } from "@/lib/data";
+import { ChevronDown, ImagePlus, Rocket, UsersRound } from "lucide-react";
+import { ME, POSTS, POST_KINDS, projectsBy, type Post, type PostKind, userOf } from "@/lib/data";
+import type { Media } from "@/lib/media";
 import { currentPhase, showcaseOf } from "@/lib/showcase";
 import { Avatar } from "@/components/Avatar";
+import { MediaPicker } from "@/components/MediaGrid";
 import { PostCard } from "./PostCard";
 
 const SORTS = ["Dành cho bạn", "Đang theo dõi"] as const;
+const FILTERS = ["Tất cả", ...POST_KINDS] as const;
+
+const PLACEHOLDER: Record<PostKind, string> = {
+  "Chia sẻ": "Bạn đang làm gì, vừa học được gì?",
+  "Công bố": "Bản này có gì mới, ai đã góp ý",
+  "Tìm cộng sự": "Bạn đang làm gì, cần người làm phần nào, trong bao lâu",
+};
 
 /**
- * Trang chủ chỉ hiện các lần Công bố: một phiên bản đã Hoàn tất hoặc Đã triển khai của một dự án công khai.
- * Cập nhật tiến độ nằm trong Hành trình của dự án; câu hỏi cần góp ý nằm ở tab Trao đổi.
+ * Trang chủ là bảng tin chung: chia sẻ, công bố bản mới, tìm cộng sự, đều đăng kèm ảnh và video được.
+ * Công bố chỉ dành cho dự án ở mức Hoàn tất hoặc Đã triển khai. Câu hỏi cần góp ý có chỗ riêng ở tab Trao đổi.
  */
 export function Feed() {
   const me = userOf(ME)!;
+  const mine = projectsBy(ME);
+  const ready = mine.filter((p) => p.owner === ME && ["final", "shipped"].includes(currentPhase(showcaseOf(p).milestones)));
+
   const [posts, setPosts] = useState<Post[]>(POSTS);
   const [open, setOpen] = useState(false);
+  const [kind, setKind] = useState<PostKind>("Chia sẻ");
   const [text, setText] = useState("");
+  const [media, setMedia] = useState<Media[]>([]);
+  const [slug, setSlug] = useState("");
+  const [needs, setNeeds] = useState("");
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]>("Tất cả");
   const [sort, setSort] = useState<(typeof SORTS)[number]>("Dành cho bạn");
-  const ready = projectsBy(ME).filter((p) => p.owner === ME && ["final", "shipped"].includes(currentPhase(showcaseOf(p).milestones)));
-  const [slug, setSlug] = useState(ready[0]?.slug ?? "");
-  const chosen = ready.find((p) => p.slug === slug);
   const box = useRef<HTMLTextAreaElement>(null);
+
+  const start = (k: PostKind) => {
+    setKind(k);
+    setSlug(k === "Công bố" ? (ready[0]?.slug ?? "") : "");
+    setOpen(true);
+    setTimeout(() => box.current?.focus(), 60);
+  };
+  const reset = () => {
+    setOpen(false);
+    setText("");
+    setMedia([]);
+    setNeeds("");
+  };
+
+  const project = mine.find((p) => p.slug === slug);
+  const blocked = kind === "Công bố" && !ready.length;
+  const canPost = !!text.trim() && !blocked && (kind !== "Công bố" || !!project);
 
   const publish = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chosen || !text.trim()) return;
+    if (!canPost) return;
+    const list = needs
+      .split(",")
+      .map((n) => n.trim())
+      .filter(Boolean);
     setPosts((p) => [
-      { id: `new-${Date.now()}`, author: ME, kind: "Công bố", version: chosen.versions[0]?.tag, project: chosen.slug, when: "vừa xong", text: text.trim(), likes: 0, comments: [], reposts: 0 },
+      {
+        id: `new-${Date.now()}`,
+        author: ME,
+        kind,
+        version: kind === "Công bố" ? project?.versions[0]?.tag : undefined,
+        project: project?.slug,
+        needs: kind === "Tìm cộng sự" && list.length ? list : undefined,
+        media: media.length ? media : undefined,
+        when: "vừa xong",
+        text: text.trim(),
+        likes: 0,
+        comments: [],
+        reposts: 0,
+      },
       ...p,
     ]);
-    setText("");
-    setOpen(false);
+    setFilter("Tất cả");
+    reset();
   };
 
-  const published = posts.filter((p) => p.kind === "Công bố");
-  const shown = sort === "Đang theo dõi" ? published.filter((p) => p.author === ME || p.author === "quocbao") : published;
+  const byKind = filter === "Tất cả" ? posts : posts.filter((p) => p.kind === filter);
+  const shown = sort === "Đang theo dõi" ? byKind.filter((p) => p.author === ME || p.author === "quocbao" || p.author === "minhkhoa") : byKind;
+
+  const quick = [
+    { k: "Chia sẻ" as const, label: "Ảnh, video", icon: ImagePlus },
+    { k: "Công bố" as const, label: "Công bố bản mới", icon: Rocket },
+    { k: "Tìm cộng sự" as const, label: "Tìm cộng sự", icon: UsersRound },
+  ];
 
   return (
     <div className="flex min-w-0 flex-col gap-3">
       <form onSubmit={publish} className="rounded-xl border border-line bg-white p-4">
         <div className="flex items-center gap-3">
           <Avatar initials={me.initials} tone={me.tone} size={48} />
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(true);
-              setTimeout(() => box.current?.focus(), 60);
-            }}
-            className="h-12 flex-1 rounded-full border border-[#c9d0c4] px-5 text-left text-[16px] font-semibold text-moss hover:bg-mist"
-          >
-            Công bố bản mới của dự án
-          </button>
+          {open ? (
+            <p className="flex-1 font-semibold">{me.name}</p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => start("Chia sẻ")}
+              className="h-12 flex-1 rounded-full border border-[#c9d0c4] px-5 text-left text-[16px] font-semibold text-moss hover:bg-mist"
+            >
+              Bạn đang làm gì?
+            </button>
+          )}
         </div>
+        {!open && (
+          <div className="mt-2 flex">
+            {quick.map(({ k, label, icon: Icon }) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => start(k)}
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg text-[14px] font-semibold text-moss hover:bg-mist hover:text-ink sm:text-[15px]"
+              >
+                <Icon className="h-5 w-5 shrink-0" aria-hidden="true" /> {label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <AnimatePresence initial={false}>
           {open && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              {ready.length ? (
-                <div className="mt-4 flex flex-col gap-3">
-                  <label className="flex flex-col gap-1.5 text-sm font-semibold">
-                    Dự án
-                    <select value={slug} onChange={(e) => setSlug(e.target.value)} className="h-11 rounded-lg border border-line bg-white px-3 font-semibold outline-none focus:border-ink">
-                      {ready.map((p) => (
-                        <option key={p.slug} value={p.slug}>
-                          {p.title}, bản {p.versions[0]?.tag}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="flex flex-col gap-1.5 text-sm font-semibold">
-                    Bản này có gì mới
-                    <textarea
-                      ref={box}
-                      rows={3}
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      placeholder="Hai, ba câu về điều đã thay đổi và ai đã góp ý"
-                      className="resize-none rounded-lg border border-line px-3.5 py-3 text-[15px] font-normal leading-relaxed outline-none focus:border-ink"
-                    />
-                  </label>
-                  <div className="flex items-center justify-end gap-2">
-                    <button type="button" onClick={() => (setOpen(false), setText(""))} className="h-10 rounded-lg px-4 text-sm font-semibold text-moss hover:bg-mist">
-                      Huỷ
-                    </button>
-                    <button type="submit" disabled={!text.trim()} className="h-10 rounded-lg bg-leaf px-5 text-sm font-bold text-ink disabled:opacity-40">
-                      Công bố
-                    </button>
+            <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+              <div className="mt-4 flex flex-col gap-3.5">
+                <fieldset>
+                  <legend className="sr-only">Loại bài</legend>
+                  <div className="flex flex-wrap gap-2">
+                    {POST_KINDS.map((k) => (
+                      <label
+                        key={k}
+                        className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
+                          kind === k ? "border-ink bg-ink text-white" : "border-line hover:bg-mist"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="loai-bai"
+                          className="sr-only"
+                          checked={kind === k}
+                          onChange={() => {
+                            setKind(k);
+                            if (k === "Công bố" && !ready.some((p) => p.slug === slug)) setSlug(ready[0]?.slug ?? "");
+                          }}
+                        />
+                        {k}
+                      </label>
+                    ))}
                   </div>
+                </fieldset>
+
+                {blocked ? (
+                  <p className="rounded-lg bg-mist px-4 py-3 text-sm leading-relaxed text-moss">
+                    Công bố dành cho dự án ở mức Hoàn tất hoặc Đã triển khai. Dự án đang làm thì{" "}
+                    <Link href="/exchange" className="font-semibold text-leaf-deep hover:underline">
+                      mở Trao đổi
+                    </Link>{" "}
+                    để xin góp ý, hoặc đăng bài Chia sẻ.
+                  </p>
+                ) : (
+                  <>
+                    <label className="block">
+                      <span className="sr-only">Nội dung</span>
+                      <textarea
+                        ref={box}
+                        rows={3}
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder={PLACEHOLDER[kind]}
+                        className="w-full resize-none rounded-lg border border-line px-3.5 py-3 text-[15px] leading-relaxed outline-none focus:border-ink"
+                      />
+                    </label>
+
+                    {kind === "Tìm cộng sự" && (
+                      <label className="flex flex-col gap-1.5 text-sm font-semibold">
+                        Cần tìm
+                        <input
+                          value={needs}
+                          onChange={(e) => setNeeds(e.target.value)}
+                          placeholder="Ví dụ: Thiết kế bao bì, Quay dựng video"
+                          className="h-11 rounded-lg border border-line px-3.5 text-[15px] font-normal outline-none focus:border-ink"
+                        />
+                        <span className="text-[13px] font-normal text-moss">Cách nhau bằng dấu phẩy.</span>
+                      </label>
+                    )}
+
+                    <label className="flex flex-col gap-1.5 text-sm font-semibold">
+                      {kind === "Công bố" ? "Dự án công bố" : "Gắn với dự án"}
+                      <select
+                        value={slug}
+                        onChange={(e) => setSlug(e.target.value)}
+                        className="h-11 rounded-lg border border-line bg-white px-3 font-semibold outline-none focus:border-ink"
+                      >
+                        {kind !== "Công bố" && <option value="">Không gắn dự án</option>}
+                        {(kind === "Công bố" ? ready : mine).map((p) => (
+                          <option key={p.slug} value={p.slug}>
+                            {p.title}
+                            {kind === "Công bố" ? `, bản ${p.versions[0]?.tag}` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <MediaPicker value={media} onChange={setMedia} />
+                  </>
+                )}
+
+                <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
+                  <button type="button" onClick={reset} className="h-10 rounded-lg px-4 text-sm font-semibold text-moss hover:bg-mist">
+                    Huỷ
+                  </button>
+                  <button type="submit" disabled={!canPost} className="h-10 rounded-lg bg-leaf px-5 text-sm font-bold text-ink disabled:opacity-40">
+                    {kind === "Công bố" ? "Công bố" : "Đăng"}
+                  </button>
                 </div>
-              ) : (
-                <p className="mt-4 rounded-lg bg-mist px-4 py-3 text-sm leading-relaxed text-moss">
-                  Chỉ công bố được dự án ở mức Hoàn tất hoặc Đã triển khai. Dự án đang làm thì{" "}
-                  <Link href="/exchange" className="font-semibold text-leaf-deep hover:underline">
-                    mở Trao đổi
-                  </Link>{" "}
-                  để xin góp ý, hoặc{" "}
-                  <Link href="/new" className="font-semibold text-leaf-deep hover:underline">
-                    tạo dự án mới
-                  </Link>
-                  .
-                </p>
-              )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </form>
 
-      <div className="flex items-center gap-2 text-sm">
-        <span className="h-px flex-1 bg-[#cdd4c8]" />
-        <span className="text-moss">Sắp xếp theo:</span>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <div role="group" aria-label="Lọc theo loại bài" className="-mx-1 flex max-w-full gap-1.5 overflow-x-auto px-1 [scrollbar-width:none]">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              type="button"
+              aria-pressed={filter === f}
+              onClick={() => setFilter(f)}
+              className={`h-9 shrink-0 whitespace-nowrap rounded-full border px-3.5 font-semibold transition-colors ${filter === f ? "border-ink bg-ink text-white" : "border-line bg-white hover:bg-mist"}`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        <span className="flex-1" />
         <label className="relative flex items-center font-semibold">
-          <span className="sr-only">Sắp xếp bảng tin</span>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as (typeof SORTS)[number])}
-            className="cursor-pointer appearance-none bg-transparent pr-5 outline-none"
-          >
+          <span className="mr-1.5 font-normal text-moss">Sắp xếp:</span>
+          <select value={sort} onChange={(e) => setSort(e.target.value as (typeof SORTS)[number])} className="cursor-pointer appearance-none bg-transparent pr-5 outline-none">
             {SORTS.map((s) => (
               <option key={s}>{s}</option>
             ))}
@@ -126,6 +251,8 @@ export function Feed() {
           <ChevronDown className="pointer-events-none absolute right-0 h-4 w-4" aria-hidden="true" />
         </label>
       </div>
+
+      {shown.length === 0 && <p className="rounded-xl border border-line bg-white px-5 py-8 text-center text-moss">Chưa có bài {filter.toLowerCase()} nào.</p>}
 
       <motion.div layout className="flex flex-col gap-3">
         <AnimatePresence initial={false} mode="popLayout">

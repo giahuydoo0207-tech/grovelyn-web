@@ -9,13 +9,13 @@ import { ME, projectOf, userOf } from "@/lib/data";
 import { contributorsOf } from "@/lib/exchange";
 import { Avatar } from "@/components/Avatar";
 import { ProjectCover } from "@/components/ProjectCover";
+import { MediaGrid } from "@/components/MediaGrid";
 import { REACTIONS } from "./reactions";
 
 const KIND_STYLE: Record<Post["kind"], string> = {
   "Chia sẻ": "bg-mist text-ink",
   "Công bố": "bg-leaf text-ink",
   "Tìm cộng sự": "bg-ink text-white",
-  "Cơ hội": "bg-sap text-leaf-deep",
 };
 
 export function PostCard({ post }: { post: Post }) {
@@ -72,7 +72,12 @@ export function PostCard({ post }: { post: Post }) {
         </button>
       </header>
 
-      <p className="mt-4 text-[16px] leading-[1.7]">{post.text}</p>
+      <p className="mt-4 whitespace-pre-line text-[16px] leading-[1.7]">{post.text}</p>
+      {post.media && post.media.length > 0 && (
+        <div className="mt-3.5">
+          <MediaGrid media={post.media} />
+        </div>
+      )}
 
       {post.needs && (
         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Cần tìm">

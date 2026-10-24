@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { FIELDS, LENSES, ME, projectOf, projectsBy, userOf, type Lens } from "@/lib/data";
 import { MAX_OPEN_TOPICS, TOPIC_DAYS, TOPIC_KINDS, canManage, contributionsBy, fitsMe, type Topic, type TopicKind } from "@/lib/exchange";
 import { addTopic, updateTopic, useTopics } from "@/lib/topicStore";
+import { MediaGrid } from "@/components/MediaGrid";
 import { Avatar } from "@/components/Avatar";
 import { OpenTopicDialog, ReplyDialog } from "@/components/exchange/Dialogs";
 import { StatusPill, TopicMeta } from "@/components/exchange/TopicParts";
@@ -43,6 +44,11 @@ function TopicCard({ topic, onReply }: { topic: Topic; onReply: () => void }) {
         </Link>
       </h2>
       {topic.detail && <p className="mt-2 line-clamp-2 max-w-[68ch] text-[15px] leading-relaxed text-moss">{topic.detail}</p>}
+      {topic.media.length > 0 && (
+        <div className="mt-3.5">
+          <MediaGrid media={topic.media} compact />
+        </div>
+      )}
       <div className="mt-4 flex flex-wrap items-center gap-2.5 border-t border-line pt-3.5">
         <span className="text-sm text-moss">
           {topic.opened === "vừa xong" ? "Mới mở" : `Mở ${topic.opened}`}, {n ? `${n} góp ý` : "đang chờ góp ý đầu tiên"}
@@ -233,8 +239,8 @@ export function ExchangeBoard() {
           open={!!replying}
           onClose={() => setReplying(null)}
           topic={replying}
-          onSend={(text, credit) =>
-            updateTopic(replying.id, (x) => ({ ...x, replies: [...x.replies, { id: `r-${Date.now()}`, author: ME, text, when: "vừa xong", credit, answers: [] }] }))
+          onSend={(text, credit, media) =>
+            updateTopic(replying.id, (x) => ({ ...x, replies: [...x.replies, { id: `r-${Date.now()}`, author: ME, text, media, when: "vừa xong", credit, answers: [] }] }))
           }
         />
       )}

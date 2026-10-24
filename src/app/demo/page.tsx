@@ -33,7 +33,7 @@ const DIFF = [
   {
     vs: "Mạng xã hội",
     vi: "Bài đăng trôi đi sau một ngày, giá trị đo bằng lượt thích.",
-    us: "Dự án có phiên bản và hành trình. Trang chủ chỉ hiện bản đã hoàn tất.",
+    us: "Bài đăng gắn với dự án, và dự án giữ lại phiên bản cùng hành trình làm ra nó.",
     en: "Social feeds bury work in a day. Grovelyn keeps versions and the story of how a project grew.",
   },
   {
@@ -48,7 +48,7 @@ const STATUS = [
   {
     title: "Đang chạy thật",
     en: "Works today",
-    items: ["Giao diện và điều hướng", "Tạo dự án, mở trao đổi, gửi góp ý (giữ trong phiên)", "Lọc theo lĩnh vực, dạng đầu ra, góc nhìn"],
+    items: ["Giao diện và điều hướng", "Đăng bài, tạo dự án, mở trao đổi kèm ảnh và video (giữ trong phiên)", "Lọc theo lĩnh vực, dạng đầu ra, góc nhìn"],
   },
   {
     title: "Đang mô phỏng",
@@ -64,7 +64,7 @@ const STATUS = [
 
 const STEPS = [
   { vi: "Đăng dự án, chọn dạng đầu ra: đồ án, báo cáo, chiến dịch, ứng dụng…", en: "Post a project and pick what it is." },
-  { vi: "Đang làm dở thì mở Trao đổi, chọn góc nhìn cần nhận.", en: "Stuck? Open an exchange and ask for the view you need." },
+  { vi: "Đang làm dở thì mở Trao đổi kèm ảnh, video, chọn góc nhìn cần nhận.", en: "Stuck? Open an exchange and ask for the view you need." },
   { vi: "Hoàn tất thì Công bố. Người góp ý được ghi tên vào dự án.", en: "Done? Publish it. Helpers get credited." },
 ];
 

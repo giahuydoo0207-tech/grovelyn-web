@@ -1,4 +1,5 @@
 import type { Context, Output } from "./model";
+import { MEDIA, type Media } from "./media";
 /**
  * Dữ liệu mẫu cho bản giao diện. Chưa nối Supabase: mọi tên người, dự án và con số ở đây chỉ để minh họa.
  */
@@ -453,8 +454,9 @@ export const PROJECTS: Project[] = [
   },
 ];
 
-/** Trang chủ chỉ hiện "Công bố". Chia sẻ và Tìm cộng sự còn dùng trong Nhóm, Tìm cộng sự sẽ về trang Business sau. */
-export type PostKind = "Công bố" | "Chia sẻ" | "Tìm cộng sự" | "Cơ hội";
+/** Trang chủ là bảng tin chung. "Công bố" là một loại bài, chỉ dành cho bản đã Hoàn tất hoặc Đã triển khai. */
+export type PostKind = "Chia sẻ" | "Công bố" | "Tìm cộng sự";
+export const POST_KINDS: PostKind[] = ["Chia sẻ", "Công bố", "Tìm cộng sự"];
 
 export interface Post {
   id: string;
@@ -466,12 +468,25 @@ export interface Post {
   /** Phiên bản được công bố, với bài Công bố. */
   version?: string;
   needs?: string[];
+  media?: Media[];
   likes: number;
   comments: { author: string; text: string; when: string }[];
   reposts: number;
 }
 
 export const POSTS: Post[] = [
+  {
+    id: "p6",
+    author: "minhkhoa",
+    kind: "Chia sẻ",
+    when: "40 phút trước",
+    text: "Quay lại cảnh bạn mình đặt bàn trên bản v3. Sơ đồ quán phải phóng to mới bấm trúng bàn, nên mình đang mở trao đổi để chọn giữa sơ đồ và danh sách giờ trống.",
+    project: "dat-ban-ca-phe",
+    media: [MEDIA.datBanVideo],
+    likes: 18,
+    comments: [{ author: "thuha", text: "Đoạn phóng to ở giây thứ hai thấy rõ vấn đề luôn.", when: "20 phút trước" }],
+    reposts: 0,
+  },
   {
     id: "p5",
     author: "thuha",
@@ -480,6 +495,7 @@ export const POSTS: Post[] = [
     when: "1 giờ trước",
     text: "Bàn giao xong bộ nhận diện cho Trà Mây: logo, bảng màu lấy từ lá trà non và gói bao bì giấy kraft cho ba dòng trà.",
     project: "nhan-dien-tra-may",
+    media: [MEDIA.traMayBaoBi, MEDIA.traMayLogo],
     likes: 96,
     comments: [{ author: "ngocanh", text: "Bảng màu lên giấy kraft đẹp hơn mình nghĩ. Có ảnh chụp thật ở quán không?", when: "30 phút trước" }],
     reposts: 4,
@@ -492,6 +508,7 @@ export const POSTS: Post[] = [
     when: "2 giờ trước",
     text: "Đồ án nhà phố đã bảo vệ xong. Bản v5 có thêm mặt cắt thông gió và phối cảnh ban đêm, giếng trời lùi về giữa một nhịp cột.",
     project: "nha-pho-thong-gio",
+    media: [MEDIA.nhaPhoBanDem, MEDIA.nhaPhoMatCat, MEDIA.nhaPhoMatBang],
     likes: 210,
     comments: [
       { author: "thuha", text: "Phối cảnh ban đêm đẹp quá. Giếng trời có lưới chắn mưa không?", when: "1 giờ trước" },

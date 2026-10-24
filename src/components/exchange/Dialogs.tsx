@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Link2, Paperclip } from "lucide-react";
+import { Check } from "lucide-react";
 import { LENSES, ME, userOf, type Lens, type Project } from "@/lib/data";
 import { MAX_LENSES, TOPIC_DAYS, TOPIC_KINDS, type Topic, type TopicKind } from "@/lib/exchange";
+import type { Media } from "@/lib/media";
+import { MediaPicker } from "@/components/MediaGrid";
 import { Modal } from "./Modal";
 import { Chip } from "./TopicParts";
 
@@ -43,6 +45,7 @@ export function OpenTopicDialog({
   const versions = project.versions.map((v) => v.tag);
   const [question, setQuestion] = useState("");
   const [detail, setDetail] = useState("");
+  const [media, setMedia] = useState<Media[]>([]);
   const [kind, setKind] = useState<TopicKind>("Xin góp ý");
   const [lenses, setLenses] = useState<Lens[]>([]);
   const [outsider, setOutsider] = useState(false);
@@ -63,6 +66,7 @@ export function OpenTopicDialog({
       version,
       question: question.trim(),
       detail: detail.trim(),
+      media,
       lead: ME,
       opened: "vừa xong",
       daysLeft: TOPIC_DAYS,
@@ -72,6 +76,7 @@ export function OpenTopicDialog({
     });
     setQuestion("");
     setDetail("");
+    setMedia([]);
     setLenses([]);
     setError(false);
     onClose();
@@ -139,6 +144,12 @@ export function OpenTopicDialog({
           {error ? "Viết câu hỏi trước khi mở trao đổi." : "Một câu hỏi cụ thể, trả lời được trong một lần đọc."}
         </p>
       </div>
+      <div>
+        <span className={lab}>
+          Ảnh hoặc video của bản đang hỏi <span className="font-normal text-moss">(nên có)</span>
+        </span>
+        <MediaPicker value={media} onChange={setMedia} label="Thêm ảnh, video" />
+      </div>
       <fieldset>
         <legend className={lab}>Hình thức</legend>
         <div className="grid grid-cols-2 gap-2">
@@ -187,13 +198,8 @@ export function OpenTopicDialog({
         </select>
       </label>
       <details className="rounded-lg border border-line px-4 py-3 [&_summary]:cursor-pointer">
-        <summary className="text-sm font-bold">Thêm bối cảnh và ảnh</summary>
-        <div className="mt-3 flex flex-col gap-3">
-          <textarea rows={3} value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="Bạn đã thử gì, đang phân vân giữa những phương án nào" aria-label="Bối cảnh" className={area} />
-          <button type="button" className="inline-flex h-10 w-fit items-center gap-2 rounded-lg border border-line bg-white px-3.5 text-sm font-bold hover:bg-mist">
-            <Paperclip className="h-4 w-4" aria-hidden="true" /> Đính kèm ảnh
-          </button>
-        </div>
+        <summary className="text-sm font-bold">Thêm bối cảnh</summary>
+        <textarea rows={3} value={detail} onChange={(e) => setDetail(e.target.value)} placeholder="Bạn đã thử gì, đang phân vân giữa những phương án nào" aria-label="Bối cảnh" className={`${area} mt-3`} />
       </details>
     </Modal>
   );
@@ -209,17 +215,19 @@ export function ReplyDialog({
   open: boolean;
   onClose: () => void;
   topic: Topic;
-  onSend: (text: string, credit: boolean) => void;
+  onSend: (text: string, credit: boolean, media: Media[]) => void;
 }) {
   const [text, setText] = useState("");
   const [credit, setCredit] = useState(true);
+  const [media, setMedia] = useState<Media[]>([]);
   const [error, setError] = useState(false);
   const lead = userOf(topic.lead);
 
   const send = () => {
     if (!text.trim()) return setError(true);
-    onSend(text.trim(), credit);
+    onSend(text.trim(), credit, media);
     setText("");
+    setMedia([]);
     setError(false);
     onClose();
   };
@@ -273,14 +281,7 @@ export function ReplyDialog({
         />
         {error && <p className="mt-1.5 text-[13px] font-semibold text-[#b42318]">Viết góp ý trước khi gửi.</p>}
       </div>
-      <div className="flex gap-2">
-        <button type="button" className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-white px-3.5 text-sm font-bold hover:bg-mist">
-          <Paperclip className="h-4 w-4" aria-hidden="true" /> Ảnh hoặc tệp
-        </button>
-        <button type="button" className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-white px-3.5 text-sm font-bold hover:bg-mist">
-          <Link2 className="h-4 w-4" aria-hidden="true" /> Link
-        </button>
-      </div>
+      <MediaPicker value={media} onChange={setMedia} label="Ảnh hoặc video minh hoạ" />
       <label className="flex cursor-pointer items-start gap-2.5 text-sm leading-relaxed">
         <input type="checkbox" checked={credit} onChange={(e) => setCredit(e.target.checked)} className="peer sr-only" />
         <Box on={credit} />

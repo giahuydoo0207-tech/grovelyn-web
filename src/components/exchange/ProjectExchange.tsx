@@ -51,6 +51,17 @@ export function ProjectExchange({ project, canEdit }: { project: Project; canEdi
         <Link key={t.id} href={`/exchange/${t.id}`} className="group rounded-xl border border-line bg-white p-5 transition-colors hover:border-ink/30">
           <TopicMeta topic={t} />
           <h3 className="mt-3 font-display text-xl font-bold leading-snug group-hover:underline">{t.question}</h3>
+          {t.media.length > 0 && (
+            <ul className="mt-3 flex gap-2" aria-label="Ảnh và video đính kèm">
+              {t.media.slice(0, 4).map((m) => (
+                <li key={m.src} className="relative h-16 w-24 overflow-hidden rounded-md border border-line bg-mist">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={m.poster ?? m.src} alt={m.alt} className="h-full w-full object-cover" />
+                  {m.type === "video" && <span className="absolute bottom-1 left-1 rounded bg-ink/75 px-1 text-[10px] font-bold text-white">Video</span>}
+                </li>
+              ))}
+            </ul>
+          )}
           <p className="mt-2 text-sm text-moss">
             {t.replies.length ? `${t.replies.length} góp ý` : "Chưa có góp ý"}, {t.replies.filter((r) => r.applied).length} đã áp dụng, còn {t.daysLeft} ngày
           </p>

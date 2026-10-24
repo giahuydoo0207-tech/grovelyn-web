@@ -1,4 +1,5 @@
 import { ME, projectOf, userOf, type Lens } from "./data";
+import { MEDIA, type Media } from "./media";
 
 /**
  * Trao đổi: chủ dự án hỏi một câu cụ thể, có thời hạn, có kết quả. Khác bình luận (nhận xét tự do về bản đã công bố)
@@ -31,6 +32,8 @@ export interface Reply {
   author: string;
   text: string;
   when: string;
+  /** Ảnh hoặc video minh hoạ cho góp ý. */
+  media?: Media[];
   /** Phiên bản đã áp dụng góp ý này, do chủ dự án hoặc người phụ trách đánh dấu. */
   applied?: string;
   /** Người góp ý đồng ý ghi tên khi góp ý được áp dụng; rút lại được. */
@@ -50,6 +53,8 @@ export interface Topic {
   version: string;
   question: string;
   detail: string;
+  /** Ảnh, video của bản đang hỏi: để người góp ý xem trực tiếp. */
+  media: Media[];
   /** Người phụ trách: người mở trao đổi, là chủ dự án hoặc thành viên. */
   lead: string;
   opened: string;
@@ -71,6 +76,7 @@ export const TOPICS: Topic[] = [
     question: "Màn chọn bàn nên là sơ đồ quán hay danh sách giờ còn trống?",
     detail:
       "Bản v3 dùng sơ đồ quán: khách thấy vị trí bàn nhưng trên điện thoại hơi chật. Danh sách giờ trống thì nhanh hơn nhưng mất cảm giác chọn chỗ. Mình muốn nghe từ người hay đặt bàn, không cần biết code.",
+    media: [MEDIA.datBanVideo, MEDIA.datBanManHinh, MEDIA.datBanWireframe],
     lead: "minhkhoa",
     opened: "2 giờ trước",
     daysLeft: 14,
@@ -96,6 +102,7 @@ export const TOPICS: Topic[] = [
     version: "v3",
     question: "Thử cho robot phân loại 20 món rác bất kỳ, ghi lại món nào nhận sai.",
     detail: "Robot đặt ở căng tin khu B từ 11 giờ đến 13 giờ. Mang theo rác thật càng tốt: hộp sữa, ly nhựa có nắp, giấy dính dầu.",
+    media: [],
     lead: "hoanglong",
     opened: "5 giờ trước",
     daysLeft: 13,
@@ -112,6 +119,7 @@ export const TOPICS: Topic[] = [
     version: "v1",
     question: "Ba phương án nhãn chai, phương án nào dễ đọc nhất khi đặt trên quầy?",
     detail: "Chai nhựa 350 ml, nhãn quấn quanh thân. Màu chủ đạo cam và xanh lá. Mình sẽ in thử phương án được chọn và hỏi khoảng 50 khách.",
+    media: [MEDIA.nuocEpMoodboard],
     lead: "ngocanh",
     opened: "hôm qua",
     daysLeft: 12,
@@ -128,6 +136,7 @@ export const TOPICS: Topic[] = [
     version: "v3",
     question: "Dùng thử luồng tạo hợp đồng và giữ tiền trên điện thoại, chỗ nào khó hiểu thì ghi lại.",
     detail: "Bản demo dùng ví thử, không mất tiền thật. Mình muốn biết người chưa quen ví điện tử có làm hết luồng được không.",
+    media: [],
     lead: "giahuy",
     opened: "3 ngày trước",
     daysLeft: 11,
@@ -144,6 +153,7 @@ export const TOPICS: Topic[] = [
     version: "v4",
     question: "Giếng trời nên đặt giữa nhà hay cuối nhà để gió đi xuyên tốt hơn?",
     detail: "Phương án A đặt giữa, chia nhà thành hai khối. Phương án B đặt cuối nhà, gần cầu thang. A làm tối phòng khách, B thì gió có thể không tới phòng ngủ giữa.",
+    media: [MEDIA.nhaPhoMatBang, MEDIA.nhaPhoMatCat],
     lead: "quocbao",
     opened: "3 tuần trước",
     daysLeft: 0,
@@ -164,6 +174,7 @@ export const TOPICS: Topic[] = [
         id: "r4",
         author: "hoanglong",
         text: "Bên mình mô phỏng gió nhanh được. Chạy thử hai phương án thì B lùi một nhịp cột cho lưu lượng gió tầng 2 tốt hơn khoảng một phần ba.",
+        media: [MEDIA.nhaPhoMatCat],
         when: "3 tuần trước",
         applied: "v5",
         credit: true,
@@ -180,6 +191,7 @@ export const TOPICS: Topic[] = [
     version: "v1",
     question: "Chọn 1 trong 3 bảng màu cho bao bì trà.",
     detail: "Ba bảng màu lấy từ lá trà non, gốm men lam và đất nung. Bao bì giấy kraft nên màu sẽ trầm hơn trên màn hình.",
+    media: [MEDIA.traMayBaHuong],
     lead: "thuha",
     opened: "tháng 9",
     daysLeft: 0,

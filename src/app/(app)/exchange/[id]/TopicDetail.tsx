@@ -9,6 +9,7 @@ import { updateTopic, useTopics } from "@/lib/topicStore";
 import { Avatar } from "@/components/Avatar";
 import { ReplyDialog } from "@/components/exchange/Dialogs";
 import { TopicMeta } from "@/components/exchange/TopicParts";
+import { MediaGrid } from "@/components/MediaGrid";
 
 /** Chi tiết một trao đổi. Đây là bản ghi duy nhất: tab Trao đổi và trang dự án đều dẫn về đây. */
 export function TopicDetail({ id }: { id: string }) {
@@ -56,6 +57,11 @@ export function TopicDetail({ id }: { id: string }) {
           <TopicMeta topic={topic} />
         </div>
         {topic.detail && <p className="mt-4 max-w-[66ch] text-base leading-relaxed text-ink/85">{topic.detail}</p>}
+        {topic.media.length > 0 && (
+          <div className="mt-5">
+            <MediaGrid media={topic.media} />
+          </div>
+        )}
         <dl className="mt-5 grid gap-x-6 gap-y-2 border-t border-line pt-4 text-sm sm:grid-cols-3">
           <div>
             <dt className="text-moss">Người phụ trách</dt>
@@ -137,6 +143,11 @@ export function TopicDetail({ id }: { id: string }) {
                     </span>
                   </p>
                   <p className="mt-1.5 max-w-[66ch] text-base leading-relaxed">{r.text}</p>
+                  {r.media && r.media.length > 0 && (
+                    <div className="mt-3 max-w-[520px]">
+                      <MediaGrid media={r.media} compact />
+                    </div>
+                  )}
 
                   {r.applied && (
                     <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-md bg-sap px-2.5 py-1 text-[13px] font-bold text-leaf-deep">
@@ -225,8 +236,8 @@ export function TopicDetail({ id }: { id: string }) {
           open={replying}
           onClose={() => setReplying(false)}
           topic={topic}
-          onSend={(text, credit) =>
-            updateTopic(topic.id, (t) => ({ ...t, replies: [...t.replies, { id: `r-${Date.now()}`, author: ME, text, when: "vừa xong", credit, answers: [] }] }))
+          onSend={(text, credit, media) =>
+            updateTopic(topic.id, (t) => ({ ...t, replies: [...t.replies, { id: `r-${Date.now()}`, author: ME, text, media, when: "vừa xong", credit, answers: [] }] }))
           }
         />
       )}
