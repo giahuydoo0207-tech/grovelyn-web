@@ -4,7 +4,7 @@
  * Hiệu ứng "mọc chữ" của Grovelyn, dựng trên ascii-reveal của Quan Hoang (MIT, xem src/vendor/ascii-reveal/NOTICE.md).
  * Phần riêng ở đây: màu Grovelyn, kiểu ký tự "Mầm" dùng chữ tiếng Việt có dấu, và linh vật cái cây trong logo.
  */
-import { useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
 import { AsciiReveal, type AsciiRevealHandle, type AsciiRevealProps } from "@/vendor/ascii-reveal";
 import type { MascotDraw, Preset } from "@/vendor/ascii-reveal/core";
@@ -91,15 +91,20 @@ type GroveRevealProps = Omit<AsciiRevealProps, "preset"> & {
   replay?: string;
 };
 
+const noop = () => () => {};
+/** Nút "Chạy lại" chỉ hiện khi mở trang với ?trinh-chieu, để người xem thường không thấy nút lạ. */
+const usePresenting = () => useSyncExternalStore(noop, () => new URLSearchParams(location.search).has("trinh-chieu"), () => false);
+
 /** Bọc AsciiReveal với kiểu Mầm, màu Grovelyn và linh vật cái cây. */
 export function GroveReveal({ replay, style, children, mascot = sprout, ...rest }: GroveRevealProps) {
   const ref = useRef<AsciiRevealHandle>(null);
+  const presenting = usePresenting();
   return (
     <div className="relative">
       <AsciiReveal ref={ref} preset={MAM} mascot={mascot} style={{ ...GROVE_VARS, ...style }} {...rest}>
         {children}
       </AsciiReveal>
-      {replay && (
+      {replay && presenting && (
         <button
           type="button"
           onClick={() => ref.current?.reveal()}

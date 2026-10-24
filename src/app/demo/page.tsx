@@ -9,6 +9,8 @@ import { Mark } from "@/components/Logo";
 import { FolderCover } from "@/components/project/FolderCover";
 import { enterDemo } from "../auth-actions";
 import { GroveReveal, LoadingPreview } from "@/components/grove-reveal";
+import { FadeIn } from "@/components/motion/FadeIn";
+import { Halftone } from "@/components/motion/Halftone";
 
 export const metadata: Metadata = {
   title: "Giới thiệu",
@@ -226,55 +228,83 @@ export default async function DemoPage() {
           <p lang="en" className="mt-1 text-[15px] text-moss">
             Three projects from three fields, each presented its own way.
           </p>
-          <GroveReveal revealOnHydrate>
-            <ul className="mt-6 grid gap-5 md:grid-cols-3">
-              {EXAMPLES.map(({ slug, en }) => {
-                const p = projectOf(slug)!;
-                const sc = showcaseOf(p);
-                const phase = currentPhase(sc.milestones);
-                const owner = userOf(p.owner)!;
-                return (
-                  <li
-                    key={slug}
-                    data-ascii="surface"
-                    className="flex flex-col overflow-hidden rounded-xl border border-line bg-white"
-                  >
-                    <div className="bg-mist px-[18px] pt-[22px]">
-                      <FolderCover
-                        tone={p.tone}
-                        title={p.title}
-                        logo={sc.logo}
-                        kind={p.output}
-                        height={150}
-                        logoSize={66}
-                      />
+          <ul className="mt-6 grid gap-5 md:grid-cols-3">
+            {EXAMPLES.map(({ slug, en }, i) => {
+              const p = projectOf(slug)!;
+              const sc = showcaseOf(p);
+              const phase = currentPhase(sc.milestones);
+              const owner = userOf(p.owner)!;
+              return (
+                <FadeIn
+                  as="li"
+                  key={slug}
+                  delay={i * 0.07}
+                  className="flex flex-col overflow-hidden rounded-xl border border-line bg-white"
+                >
+                  <div className="bg-mist px-[18px] pt-[22px]">
+                    <FolderCover
+                      tone={p.tone}
+                      title={p.title}
+                      logo={sc.logo}
+                      kind={p.output}
+                      height={150}
+                      logoSize={66}
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col gap-2 p-5">
+                    <p className="text-[13px] font-semibold text-leaf-deep">
+                      {p.field}, {phaseLabel(phase).toLowerCase()}
+                    </p>
+                    <h3 className="font-display text-lg font-bold leading-tight">
+                      {p.title}
+                    </h3>
+                    <p className="text-sm text-moss">
+                      {contextLabel(p)}. {levelHint(p.output, phase)}
+                      {p.usage ? `, ${p.usage.toLowerCase()}` : ""}.{" "}
+                      {owner.name}, {owner.intro.toLowerCase()}.
+                    </p>
+                    <p lang="en" className="text-sm italic text-ink/70">
+                      {en}
+                    </p>
+                    <div className="mt-auto pt-3">
+                      <DemoButton next={`/p/${slug}`} light>
+                        Xem dự án
+                      </DemoButton>
                     </div>
-                    <div className="flex flex-1 flex-col gap-2 p-5">
-                      <p className="text-[13px] font-semibold text-leaf-deep">
-                        {p.field}, {phaseLabel(phase).toLowerCase()}
-                      </p>
-                      <h3 className="font-display text-lg font-bold leading-tight">
-                        {p.title}
-                      </h3>
-                      <p className="text-sm text-moss">
-                        {contextLabel(p)}. {levelHint(p.output, phase)}
-                        {p.usage ? `, ${p.usage.toLowerCase()}` : ""}.{" "}
-                        {owner.name}, {owner.intro.toLowerCase()}.
-                      </p>
-                      <p lang="en" className="text-sm italic text-ink/70">
-                        {en}
-                      </p>
-                      <div className="mt-auto pt-3">
-                        <DemoButton next={`/p/${slug}`} light>
-                          Xem dự án
-                        </DemoButton>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </GroveReveal>
+                  </div>
+                </FadeIn>
+              );
+            })}
+          </ul>
+        </section>
+
+        <section
+          aria-labelledby="nhin-gan"
+          className="grid items-center gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
+        >
+          <Halftone
+            src="/demo/projects/nha-pho-sau.svg"
+            alt="Phối cảnh nhà phố 4x16m sau khi mở giếng trời"
+          />
+          <div>
+            <h2
+              id="nhin-gan"
+              className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]"
+            >
+              Bản vẽ được trình bày đúng chất của nó
+            </h2>
+            <p className="mt-2 max-w-[46ch] text-[15px] leading-relaxed text-ink/85">
+              Đồ án kiến trúc cần ảnh lớn, báo cáo cần mục lục, ứng dụng cần bản
+              dùng thử. Mỗi dự án trên Grovelyn có mẫu trình bày hợp với ngành
+              của nó.
+            </p>
+            <p lang="en" className="mt-1.5 text-sm text-moss">
+              Drawings, reports and apps each get a layout that fits them.
+            </p>
+            <p className="mt-3 text-[13px] text-moss">
+              Đưa chuột vào ảnh, hoặc chạm trên điện thoại, để xem bản vẽ thật.
+            </p>
+          </div>
         </section>
 
         <section

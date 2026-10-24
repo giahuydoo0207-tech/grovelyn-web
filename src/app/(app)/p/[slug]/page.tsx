@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { notFound } from "next/navigation";
 import { Globe2, Sprout } from "lucide-react";
 import { ME, PROJECTS, contextLabel, projectOf, userOf } from "@/lib/data";
@@ -16,7 +17,9 @@ export function generateStaticParams() {
   return PROJECTS.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata({ params }: PageProps<"/p/[slug]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/p/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   return { title: projectOf(slug)?.title ?? "Không tìm thấy dự án" };
 }
@@ -28,7 +31,8 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
   const owner = userOf(project.owner)!;
   const showcase = showcaseOf(project);
   const phase = currentPhase(showcase.milestones);
-  const canEdit = project.owner === ME || project.members.some((m) => m.handle === ME);
+  const canEdit =
+    project.owner === ME || project.members.some((m) => m.handle === ME);
   const video = showcase.resources?.video;
 
   return (
@@ -38,9 +42,16 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
           <div className="min-w-0">
             <div className="flex items-center gap-3.5">
               <span className="shrink-0 rounded-2xl bg-white p-1">
-                <ProjectLogo title={project.title} logo={showcase.logo} size={52} />
+                <ProjectLogo
+                  title={project.title}
+                  logo={showcase.logo}
+                  size={52}
+                />
               </span>
-              <nav aria-label="Vị trí" className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-fog">
+              <nav
+                aria-label="Vị trí"
+                className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-fog"
+              >
                 <Link href={`/u/${owner.handle}`} className="hover:text-white">
                   {owner.name}
                 </Link>
@@ -55,12 +66,19 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
                 </span>
               </nav>
             </div>
-            <h1 className="mt-6 font-display text-[clamp(2rem,4.4vw,3.4rem)] font-bold leading-[1.02] tracking-[-0.045em]">{project.title}</h1>
-            <p className="mt-4 max-w-[60ch] text-[17px] leading-relaxed text-fog">{project.summary}</p>
+            <h1 className="mt-6 font-display text-[clamp(2rem,4.4vw,3.4rem)] font-bold leading-[1.02] tracking-[-0.045em]">
+              {project.title}
+            </h1>
+            <p className="mt-4 max-w-[60ch] text-[17px] leading-relaxed text-fog">
+              {project.summary}
+            </p>
             {showcase.tags.length > 0 && (
               <ul aria-label="Thẻ" className="mt-5 flex flex-wrap gap-2">
                 {showcase.tags.map((t) => (
-                  <li key={t} className="rounded-full border border-ink-line px-3 py-1 text-sm text-fog">
+                  <li
+                    key={t}
+                    className="rounded-full border border-ink-line px-3 py-1 text-sm text-fog"
+                  >
                     {t}
                   </li>
                 ))}
@@ -71,7 +89,9 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
                 href="#hanh-trinh"
                 className="inline-flex h-11 items-center gap-2 rounded-full bg-leaf/15 px-4 text-sm font-semibold text-leaf ring-1 ring-leaf/40 hover:bg-leaf/25"
               >
-                <Sprout className="h-4 w-4" aria-hidden="true" /> {phaseLabel(phase)}: {levelHint(project.output, phase).toLowerCase()}
+                <Sprout className="h-4 w-4" aria-hidden="true" />{" "}
+                {phaseLabel(phase)}:{" "}
+                {levelHint(project.output, phase).toLowerCase()}
                 {project.usage && `, ${project.usage.toLowerCase()}`}
               </a>
               <LikeButton count={project.likes} dark />
@@ -83,7 +103,20 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
               <Embed url={video} title={`Video demo ${project.title}`} />
             ) : (
               <div className="rounded-2xl bg-ink-2 px-6 pt-8">
-                <FolderCover tone="leaf" title={project.title} logo={showcase.logo} kind={project.output} height={220} logoSize={96} />
+                <ViewTransition
+                  name={`bia-${project.slug}`}
+                  share="morph"
+                  default="none"
+                >
+                  <FolderCover
+                    tone="leaf"
+                    title={project.title}
+                    logo={showcase.logo}
+                    kind={project.output}
+                    height={220}
+                    logoSize={96}
+                  />
+                </ViewTransition>
               </div>
             )}
           </div>
