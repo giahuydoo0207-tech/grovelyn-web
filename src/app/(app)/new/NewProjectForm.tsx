@@ -6,8 +6,8 @@ import { motion } from "motion/react";
 import { Check, Circle, FileText, Globe2, ImagePlus, Lock, Plus, UploadCloud, X } from "lucide-react";
 import { FIELDS, ME, QUOTA_MB, USERS, userOf, type CoverTone, type Field } from "@/lib/data";
 import { toEmbed } from "@/lib/embed";
-import { CONTEXTS, LAYOUTS, OUTPUTS, layoutOf, levelHint, levelsFor, type Context, type Layout, type Output } from "@/lib/model";
-import { PHASES, type Phase } from "@/lib/showcase";
+import { CONTEXTS, LAYOUTS, OUTPUTS, USAGES, canAnnounce, layoutOf, levelHint, sectionsFor, type Context, type Layout, type Output, type Usage } from "@/lib/model";
+import { PROGRESS, phaseLabel, type Phase } from "@/lib/showcase";
 import { Avatar } from "@/components/Avatar";
 import { FolderCover } from "@/components/project/FolderCover";
 import { ProjectLogo } from "@/components/project/ProjectLogo";
@@ -114,6 +114,8 @@ export function NewProjectForm() {
   const [field, setField] = useState<Field | "">("");
   const [output, setOutput] = useState<Output | "">("");
   const [context, setContext] = useState<Context | "">("");
+  const [contextNote, setContextNote] = useState("");
+  const [usage, setUsage] = useState<Usage | "">("");
   const [layout, setLayout] = useState<Layout | null>(null);
   const [sections, setSections] = useState<Record<string, string>>({});
   const [tone, setTone] = useState<CoverTone>("ink");
@@ -138,7 +140,6 @@ export function NewProjectForm() {
 
   const autoLayout: Layout = output ? layoutOf(output) : "case";
   const shownLayout = layout ?? autoLayout;
-  const levels = output ? levelsFor(output) : (["concept", "draft", "final", "shipped"] as Phase[]);
 
   // Thu hồi ảnh xem trước khi rời trang.
   const urls = useRef<string[]>([]);
@@ -177,26 +178,30 @@ export function NewProjectForm() {
   const filledLinks = links.filter((l) => l.url.trim() && !badUrl(l.url));
   const used = files.filter((f) => !f.tooBig).reduce((s, f) => s + f.mb, 0);
 
+  const hasContent =
+    shots.length > 0 || files.some((f) => !f.tooBig) || filledLinks.length > 0 || Object.values(sections).some((v) => v.trim().length > 0);
+  /** Đủ để lưu, để công khai và mở Trao đổi. Không cần xong 100%. */
   const required = [
     { label: "Tên dự án", ok: title.trim().length > 0 },
     { label: "Một câu giới thiệu", ok: summary.trim().length > 0 },
-    { label: "Lĩnh vực, dạng đầu ra và bối cảnh", ok: !!field && !!output && !!context },
+    { label: "Lĩnh vực và dạng đầu ra", ok: !!field && !!output },
     { label: "Vai trò của bạn", ok: myRole.trim().length > 0 },
-    { label: "Ít nhất một ảnh, tệp hoặc liên kết", ok: shots.length > 0 || files.some((f) => !f.tooBig) || filledLinks.length > 0 },
+  ];
+  /** Thêm cho lần công bố lên Trang chủ. */
+  const forPublish = [
+    { label: "Có nội dung để xem: bài viết, ảnh, tệp hoặc liên kết", ok: hasContent },
+    { label: "Hoàn tất, hoặc đã dùng thực tế", ok: canAnnounce(phase, usage || undefined) },
+    { label: "Để Công khai", ok: visibility === "public" },
   ];
   const ready = required.every((r) => r.ok);
-  const canPublish = ready && visibility === "public" && (phase === "final" || phase === "shipped");
-  const publishHint = !ready
-    ? "Điền đủ các mục bắt buộc để công bố."
-    : visibility !== "public"
-      ? "Dự án đang để Chỉ mình tôi."
-      : phase === "final" || phase === "shipped"
-        ? "Bản v1 sẽ hiện trên Trang chủ."
-        : "Chỉ công bố được khi ở mức Hoàn tất hoặc Đã triển khai. Đang làm thì mở Trao đổi để xin góp ý.";
+  const canPublish = ready && forPublish.every((r) => r.ok);
+  const publishHint = canPublish
+    ? "Bản v1 sẽ hiện trên Trang chủ. Hãy chắc bạn có quyền chia sẻ, và đã ẩn thông tin khách hàng hoặc tài liệu nội bộ."
+    : "Chưa công bố cũng được: lưu dự án rồi mở Trao đổi để xin góp ý.";
 
   const submit = (publish: boolean) => {
     setTried(true);
-    if (!ready || links.some((l) => badUrl(l.url))) {
+    if (!ready || links.some((l) => badUrl(l.url)) || (publish && !canPublish)) {
       document.querySelector("[aria-invalid='true']")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
@@ -272,24 +277,44 @@ export function NewProjectForm() {
                   Bạn đang công bố gì
                 </option>
                 {OUTPUTS.map((o) => (
-                  <option key={o.id}>{o.id}</option>
+                  <option key={o.id} value={o.id}>
+                    {o.id}
+                  </option>
                 ))}
               </select>
             </label>
             <label className={label}>
-              Bối cảnh
-              <select value={context} onChange={(e) => setContext(e.target.value as Context)} aria-invalid={miss(!!context)} className={input}>
-                <option value="" disabled>
-                  Làm trong hoàn cảnh nào
-                </option>
+              <span>Bối cảnh {optional}</span>
+              <select value={context} onChange={(e) => setContext(e.target.value as Context)} className={input}>
+                <option value="">Chưa chọn</option>
                 {CONTEXTS.map((c) => (
                   <option key={c}>{c}</option>
                 ))}
               </select>
             </label>
           </div>
-          <fieldset>
-            <legend className="text-sm font-semibold">Mẫu trình bày</legend>
+          <p className="-mt-2 text-[13px] text-moss">
+            {output ? `${output}: ${OUTPUTS.find((o) => o.id === output)!.examples}.` : "Dạng đầu ra là thứ bạn làm ra: thiết kế, phần mềm, báo cáo, chiến dịch…"}
+          </p>
+          {context && (
+            <label className={label}>
+              <span>Ghi rõ hơn {optional}</span>
+              <input
+                value={contextNote}
+                onChange={(e) => setContextNote(e.target.value)}
+                maxLength={60}
+                placeholder={context === "Học tập" ? "Ví dụ: Đồ án tốt nghiệp, Học phần Marketing căn bản" : context === "Công việc" ? "Ví dụ: Làm cho một quán cà phê ở Quận 3" : "Tên cuộc thi, tổ chức hoặc chương trình"}
+                className={input}
+              />
+            </label>
+          )}
+          <details className="rounded-lg border border-line px-4 py-3 [&_summary]:cursor-pointer">
+            <summary className="text-sm">
+              <span className="font-semibold">Mẫu trình bày: {LAYOUTS[shownLayout].name}</span>
+              <span className="text-moss"> {output && !layout ? "(tự chọn theo dạng đầu ra)" : ""}. Đổi mẫu</span>
+            </summary>
+          <fieldset className="mt-3">
+            <legend className="sr-only">Mẫu trình bày</legend>
             <p className="mt-1 text-[13px] text-moss">{output ? `Gợi ý theo dạng ${output.toLowerCase()}. Đổi được nếu không hợp.` : "Chọn dạng đầu ra để nhận gợi ý."}</p>
             <div className="mt-2 grid gap-2 sm:grid-cols-3">
               {(Object.keys(LAYOUTS) as Layout[]).map((k) => {
@@ -310,9 +335,10 @@ export function NewProjectForm() {
               })}
             </div>
           </fieldset>
+          </details>
         </Part>
 
-        <Part n={2} title="Nội dung" hint="Cần ít nhất một ảnh, tệp hoặc liên kết. Các đề mục bên dưới chỉ là gợi ý, bỏ trống phần chưa có.">
+        <Part n={2} title="Nội dung" hint="Viết thẳng ở đây hoặc thêm ảnh, tệp, liên kết. Đề mục chỉ là gợi ý, bỏ trống phần chưa có.">
           <div>
             <p className="text-sm font-semibold">Ảnh</p>
             <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -451,7 +477,7 @@ export function NewProjectForm() {
             <p className="text-sm text-moss">
               Đề mục gợi ý của mẫu <strong className="text-ink">{LAYOUTS[shownLayout].name}</strong>
             </p>
-            {LAYOUTS[shownLayout].sections.map((s) => (
+            {sectionsFor(shownLayout, phase).map((s) => (
               <label key={s.heading} className={label}>
                 <span>
                   {s.heading} {optional}
@@ -569,20 +595,31 @@ export function NewProjectForm() {
           <ChipInput id="cong-cu" title={<>Công cụ {optional}</>} value={tools} onChange={setTools} placeholder="Revit, Figma, Excel, Next.js… (Enter để thêm)" />
 
           <fieldset>
-            <legend className="text-sm font-semibold">Mức thực hiện</legend>
-            <div className={`mt-2 grid gap-2 ${levels.length === 4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
-              {levels.map((id) => {
+            <legend className="text-sm font-semibold">Tiến độ</legend>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {PROGRESS.map(({ id, label: name }) => {
                 const on = phase === id;
                 return (
                   <label key={id} className={`cursor-pointer rounded-lg border px-3 py-3 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${on ? "border-ink bg-sap/40" : "border-line hover:bg-mist"}`}>
                     <input type="radio" name="phase" className="sr-only" checked={on} onChange={() => setPhase(id)} />
-                    <span className="block font-semibold">{PHASES.find((p) => p.id === id)!.label}</span>
-                    <span className="mt-0.5 block text-xs text-moss">{output ? levelHint(output, id) : PHASES.find((p) => p.id === id)!.hint}</span>
+                    <span className="block font-semibold">{name}</span>
+                    <span className="mt-0.5 block text-xs text-moss">{output ? levelHint(output, id) : PROGRESS.find((p) => p.id === id)!.hint}</span>
                   </label>
                 );
               })}
             </div>
           </fieldset>
+
+          <label className={label}>
+            <span>Đã đưa vào dùng chưa? {optional}</span>
+            <select value={usage} onChange={(e) => setUsage(e.target.value as Usage | "")} className={input}>
+              <option value="">Không nói</option>
+              {USAGES.map((u) => (
+                <option key={u}>{u}</option>
+              ))}
+            </select>
+            <span className="text-[13px] font-normal text-moss">Ví dụ: ứng dụng đang có người dùng, nhà đã thi công, chiến dịch đã chạy.</span>
+          </label>
 
           <fieldset>
             <legend className="text-sm font-semibold">Ai xem được</legend>
@@ -619,12 +656,12 @@ export function NewProjectForm() {
           <div className="flex flex-col gap-2 p-5">
             <div className="flex justify-between gap-3 text-[13px]">
               <span className="font-semibold text-leaf-deep">{field || "Lĩnh vực"}</span>
-              <span className="font-semibold text-moss">{PHASES.find((p) => p.id === phase)!.label}</span>
+              <span className="font-semibold text-moss">{phaseLabel(phase)}</span>
             </div>
             <h3 className="font-display text-lg font-bold leading-tight tracking-[-0.02em]">{title || "Tên dự án của bạn"}</h3>
             <dl className="mt-1 grid grid-cols-[88px_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">
               <dt className="text-moss">Bối cảnh</dt>
-              <dd className="truncate font-semibold">{context || "Chưa chọn"}</dd>
+              <dd className="truncate font-semibold">{contextNote.trim() || context || "Chưa chọn"}</dd>
               <dt className="text-moss">Người làm</dt>
               <dd className="flex items-center gap-2 font-semibold">
                 <Avatar initials={me.initials} tone={me.tone} size={22} /> {me.name}
@@ -637,16 +674,11 @@ export function NewProjectForm() {
 
         <section className="rounded-xl border border-line bg-white p-5" aria-labelledby="bat-buoc">
           <p id="bat-buoc" className="font-semibold">
-            Mục bắt buộc
+            Để lưu và mở Trao đổi
           </p>
-          <ul className="mt-3 flex flex-col gap-1.5 text-sm">
-            {required.map((c) => (
-              <li key={c.label} className={`flex items-start gap-2 ${c.ok ? "" : tried ? "font-semibold text-[#b42318]" : "text-moss"}`}>
-                {c.ok ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-leaf-deep" aria-hidden="true" /> : <Circle className="mt-0.5 h-4 w-4 shrink-0 text-line" aria-hidden="true" />}
-                {c.label}
-              </li>
-            ))}
-          </ul>
+          <Checklist items={required} tried={tried} />
+          <p className="mt-4 font-semibold">Thêm để công bố lên Trang chủ</p>
+          <Checklist items={forPublish} tried={false} />
         </section>
 
         <button type="submit" className="h-12 rounded-lg bg-ink font-bold text-white hover:bg-ink-2">
@@ -674,5 +706,18 @@ export function NewProjectForm() {
         )}
       </aside>
     </form>
+  );
+}
+
+function Checklist({ items, tried }: { items: { label: string; ok: boolean }[]; tried: boolean }) {
+  return (
+    <ul className="mt-2.5 flex flex-col gap-1.5 text-sm">
+      {items.map((c) => (
+        <li key={c.label} className={`flex items-start gap-2 ${c.ok ? "" : tried ? "font-semibold text-[#b42318]" : "text-moss"}`}>
+          {c.ok ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-leaf-deep" aria-hidden="true" /> : <Circle className="mt-0.5 h-4 w-4 shrink-0 text-line" aria-hidden="true" />}
+          {c.label}
+        </li>
+      ))}
+    </ul>
   );
 }

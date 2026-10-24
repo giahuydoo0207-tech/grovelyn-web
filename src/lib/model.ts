@@ -9,22 +9,25 @@ import type { Phase } from "./showcase";
 export type Layout = "visual" | "case" | "report";
 
 export const OUTPUTS = [
-  { id: "Đồ án kiến trúc", layout: "visual" },
-  { id: "Bộ nhận diện", layout: "visual" },
-  { id: "Thiết kế giao diện", layout: "visual" },
-  { id: "Ứng dụng hoặc website", layout: "case" },
-  { id: "Nguyên mẫu kỹ thuật", layout: "case" },
-  { id: "Chiến dịch", layout: "case" },
-  { id: "Kế hoạch kinh doanh", layout: "case" },
-  { id: "Báo cáo nghiên cứu", layout: "report" },
-  { id: "Bài phân tích", layout: "report" },
-  { id: "Khác", layout: "case" },
-] as const satisfies readonly { id: string; layout: Layout }[];
+  { id: "Thiết kế", layout: "visual", examples: "kiến trúc, giao diện, nhận diện, sản phẩm" },
+  { id: "Phần mềm hoặc công cụ", layout: "case", examples: "website, ứng dụng, tiện ích" },
+  { id: "Sản phẩm kỹ thuật", layout: "case", examples: "thiết bị, mô hình, nguyên mẫu" },
+  { id: "Chiến dịch hoặc chương trình", layout: "case", examples: "marketing, truyền thông, cộng đồng" },
+  { id: "Kế hoạch hoặc đề án", layout: "case", examples: "kinh doanh, vận hành, đề xuất cải tiến" },
+  { id: "Báo cáo hoặc phân tích", layout: "report", examples: "nghiên cứu, thị trường, tài chính" },
+  { id: "Nội dung hoặc ấn phẩm", layout: "visual", examples: "bài viết, video, tài liệu hướng dẫn" },
+  { id: "Khác", layout: "case", examples: "ghi rõ ở phần giới thiệu" },
+] as const satisfies readonly { id: string; layout: Layout; examples: string }[];
 
 export type Output = (typeof OUTPUTS)[number]["id"];
 
-export const CONTEXTS = ["Học phần", "Đồ án tốt nghiệp", "Công việc", "Dự án cá nhân", "Cuộc thi hoặc sự kiện"] as const;
+/** Bối cảnh rộng để lọc; chi tiết như "Đồ án tốt nghiệp" ghi ở `contextNote`. */
+export const CONTEXTS = ["Học tập", "Công việc", "Cuộc thi hoặc sự kiện", "Dự án cá nhân", "Cộng đồng hoặc tình nguyện"] as const;
 export type Context = (typeof CONTEXTS)[number];
+
+/** Tình hình áp dụng: tách khỏi tiến độ, vì một ứng dụng đã chạy thật vẫn có thể đang làm tiếp. Không bắt buộc. */
+export const USAGES = ["Chưa triển khai", "Đang dùng thử", "Đã dùng thực tế"] as const;
+export type Usage = (typeof USAGES)[number];
 
 export const layoutOf = (o: Output): Layout => OUTPUTS.find((x) => x.id === o)?.layout ?? "case";
 
@@ -64,14 +67,20 @@ export const LAYOUTS: Record<Layout, { name: string; hint: string; sections: { h
   },
 };
 
-/** Mẫu Báo cáo không có mức "Đã triển khai". */
-export const levelsFor = (o: Output): Phase[] => (layoutOf(o) === "report" ? ["concept", "draft", "final"] : ["concept", "draft", "final", "shipped"]);
-
-/** Giải thích mức thực hiện theo dạng đầu ra, để "Hoàn tất" không bị hiểu là "đã xây" hay "đã chạy". */
+/** Giải thích tiến độ theo dạng đầu ra. */
 export function levelHint(o: Output, p: Phase): string {
-  if (o === "Đồ án kiến trúc") return { concept: "Đang phác thảo", draft: "Đang triển khai hồ sơ", final: "Xong hồ sơ thiết kế, chưa thi công", shipped: "Đã thi công" }[p];
-  if (o === "Chiến dịch") return { concept: "Đang lên ý tưởng", draft: "Đang chuẩn bị", final: "Xong kế hoạch, chưa chạy", shipped: "Đã chạy chiến dịch" }[p];
-  if (o === "Kế hoạch kinh doanh") return { concept: "Đang lên ý tưởng", draft: "Đang viết", final: "Xong kế hoạch", shipped: "Đã bắt đầu kinh doanh" }[p];
-  if (layoutOf(o) === "report") return { concept: "Đang xác định câu hỏi", draft: "Đang thu thập, phân tích", final: "Đã hoàn tất báo cáo", shipped: "Đã hoàn tất báo cáo" }[p];
-  return { concept: "Đang lên ý tưởng", draft: "Đang làm", final: "Xong bản dùng được", shipped: "Đã đưa vào dùng thật" }[p];
+  if (p === "paused") return "Đang tạm dừng";
+  if (o === "Thiết kế") return { concept: "Đang phác thảo", draft: "Đang triển khai hồ sơ", final: "Xong hồ sơ thiết kế" }[p];
+  if (layoutOf(o) === "report") return { concept: "Đang xác định câu hỏi", draft: "Đang thu thập, phân tích", final: "Đã hoàn tất báo cáo" }[p];
+  if (o === "Chiến dịch hoặc chương trình" || o === "Kế hoạch hoặc đề án") return { concept: "Đang lên ý tưởng", draft: "Đang chuẩn bị", final: "Xong kế hoạch" }[p];
+  return { concept: "Đang lên ý tưởng", draft: "Đang làm", final: "Xong bản dùng được" }[p];
 }
+
+/** Được công bố lên Trang chủ khi đã Hoàn tất, hoặc đã có người dùng thật dù vẫn đang làm tiếp. */
+export const canAnnounce = (phase: Phase, usage?: Usage) => phase === "final" || usage === "Đã dùng thực tế";
+
+/** Câu cuối của mẫu trình bày đổi theo tiến độ: dự án đang làm chưa thể "làm lại". */
+export const sectionsFor = (layout: Layout, phase: Phase) =>
+  LAYOUTS[layout].sections.map((s) =>
+    s.heading === "Nếu làm lại" && phase !== "final" ? { heading: "Muốn cải thiện điều gì", prompt: "Bạn đang muốn làm tốt hơn ở chỗ nào?" } : s,
+  );

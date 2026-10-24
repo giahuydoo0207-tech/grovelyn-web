@@ -7,6 +7,7 @@ import { ChevronDown, ImagePlus, Rocket, UsersRound } from "lucide-react";
 import { ME, POSTS, POST_KINDS, projectsBy, type Post, type PostKind, userOf } from "@/lib/data";
 import type { Media } from "@/lib/media";
 import { currentPhase, showcaseOf } from "@/lib/showcase";
+import { canAnnounce } from "@/lib/model";
 import { Avatar } from "@/components/Avatar";
 import { MediaPicker } from "@/components/MediaGrid";
 import { PostCard } from "./PostCard";
@@ -27,7 +28,7 @@ const PLACEHOLDER: Record<PostKind, string> = {
 export function Feed() {
   const me = userOf(ME)!;
   const mine = projectsBy(ME);
-  const ready = mine.filter((p) => p.owner === ME && ["final", "shipped"].includes(currentPhase(showcaseOf(p).milestones)));
+  const ready = mine.filter((p) => p.owner === ME && canAnnounce(currentPhase(showcaseOf(p).milestones), p.usage));
 
   const [posts, setPosts] = useState<Post[]>(POSTS);
   const [open, setOpen] = useState(false);
@@ -158,7 +159,7 @@ export function Feed() {
 
                 {blocked ? (
                   <p className="rounded-lg bg-mist px-4 py-3 text-sm leading-relaxed text-moss">
-                    Công bố dành cho dự án ở mức Hoàn tất hoặc Đã triển khai. Dự án đang làm thì{" "}
+                    Công bố dành cho dự án đã Hoàn tất hoặc đã có người dùng thật. Dự án đang làm thì{" "}
                     <Link href="/exchange" className="font-semibold text-leaf-deep hover:underline">
                       mở Trao đổi
                     </Link>{" "}
@@ -212,6 +213,9 @@ export function Feed() {
                   </>
                 )}
 
+                <p className="text-[13px] leading-snug text-moss">
+                  Đăng việc bạn làm hoặc có quyền chia sẻ, nói rõ phần mình làm. Không quảng cáo thuần tuý, không đăng thông tin mật. Grovelyn không kiểm định nội dung bài đăng.
+                </p>
                 <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
                   <button type="button" onClick={reset} className="h-10 rounded-lg px-4 text-sm font-semibold text-moss hover:bg-mist">
                     Huỷ

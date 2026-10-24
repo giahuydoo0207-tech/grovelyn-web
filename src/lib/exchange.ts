@@ -16,7 +16,7 @@ export const TOPIC_KINDS: { kind: TopicKind; hint: string }[] = [
 
 export const CLOSE_REASONS: CloseReason[] = ["Đã giải quyết", "Tạm dừng"];
 
-/** Mỗi dự án mở tối đa chừng này trao đổi cùng lúc; trao đổi tự đóng sau 14 ngày, gia hạn được một lần. */
+/** Mỗi dự án mở tối đa chừng này trao đổi cùng lúc; trao đổi tự đóng sau 14 ngày; người phụ trách mở lại được. */
 export const MAX_OPEN_TOPICS = 2;
 export const TOPIC_DAYS = 14;
 export const MAX_LENSES = 2;
@@ -48,7 +48,7 @@ export interface Topic {
   kind: TopicKind;
   /** Góc nhìn cần nhận, tối đa 2. */
   lenses: Lens[];
-  /** Người ngoài ngành cũng góp được. */
+  /** Lời mời nghe thêm góc nhìn ngoài ngành. Không phải điều kiện: ai cũng góp ý được. */
   outsider: boolean;
   version: string;
   question: string;
@@ -59,7 +59,6 @@ export interface Topic {
   lead: string;
   opened: string;
   daysLeft: number;
-  extended: boolean;
   status: TopicStatus;
   closeReason?: CloseReason;
   replies: Reply[];
@@ -80,7 +79,6 @@ export const TOPICS: Topic[] = [
     lead: "minhkhoa",
     opened: "2 giờ trước",
     daysLeft: 14,
-    extended: false,
     status: "open",
     replies: [
       {
@@ -106,7 +104,6 @@ export const TOPICS: Topic[] = [
     lead: "hoanglong",
     opened: "5 giờ trước",
     daysLeft: 13,
-    extended: false,
     status: "open",
     replies: [{ id: "r2", author: "minhkhoa", text: "Chiều mai mình ghé thử với 20 món, sẽ gửi bảng kết quả kèm ảnh.", when: "3 giờ trước", credit: true, answers: [] }],
   },
@@ -114,7 +111,7 @@ export const TOPICS: Topic[] = [
     id: "t3",
     project: "ra-mat-nuoc-ep",
     kind: "Xin góp ý",
-    lenses: ["Hình thức trình bày"],
+    lenses: ["Cách trình bày"],
     outsider: false,
     version: "v1",
     question: "Ba phương án nhãn chai, phương án nào dễ đọc nhất khi đặt trên quầy?",
@@ -123,7 +120,6 @@ export const TOPICS: Topic[] = [
     lead: "ngocanh",
     opened: "hôm qua",
     daysLeft: 12,
-    extended: false,
     status: "open",
     replies: [],
   },
@@ -140,7 +136,6 @@ export const TOPICS: Topic[] = [
     lead: "giahuy",
     opened: "3 ngày trước",
     daysLeft: 11,
-    extended: false,
     status: "open",
     replies: [],
   },
@@ -148,7 +143,7 @@ export const TOPICS: Topic[] = [
     id: "t5",
     project: "nha-pho-thong-gio",
     kind: "Xin góp ý",
-    lenses: ["Giải pháp chuyên môn", "Hình thức trình bày"],
+    lenses: ["Giải pháp và tính khả thi", "Cách trình bày"],
     outsider: false,
     version: "v4",
     question: "Giếng trời nên đặt giữa nhà hay cuối nhà để gió đi xuyên tốt hơn?",
@@ -157,7 +152,6 @@ export const TOPICS: Topic[] = [
     lead: "quocbao",
     opened: "3 tuần trước",
     daysLeft: 0,
-    extended: false,
     status: "closed",
     closeReason: "Đã giải quyết",
     replies: [
@@ -186,7 +180,7 @@ export const TOPICS: Topic[] = [
     id: "t6",
     project: "nhan-dien-tra-may",
     kind: "Xin góp ý",
-    lenses: ["Hình thức trình bày"],
+    lenses: ["Cách trình bày"],
     outsider: true,
     version: "v1",
     question: "Chọn 1 trong 3 bảng màu cho bao bì trà.",
@@ -195,7 +189,6 @@ export const TOPICS: Topic[] = [
     lead: "thuha",
     opened: "tháng 9",
     daysLeft: 0,
-    extended: false,
     status: "closed",
     closeReason: "Đã giải quyết",
     replies: [

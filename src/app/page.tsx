@@ -23,7 +23,7 @@ export default function Landing() {
             Nơi dự án của bạn lớn lên.
           </h1>
           <p className="mt-5 max-w-[52ch] text-lg leading-relaxed text-fog">
-            Trưng bày dự án ở mọi ngành, từ bản vẽ kiến trúc đến kế hoạch marketing, và nhờ đúng người góp ý khi còn dang dở.
+            Trưng bày việc bạn làm. Cùng nhau làm tốt hơn. Từ bản vẽ kiến trúc, báo cáo thị trường đến một ứng dụng, ngành nào cũng đăng và nhận góp ý được.
           </p>
           <Link href="/demo" className="mt-5 inline-flex items-center gap-2 font-semibold text-leaf underline-offset-4 hover:underline">
             Xem bản demo không cần đăng ký <span lang="en" className="font-normal text-fog">Open the demo</span>

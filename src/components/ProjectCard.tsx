@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Project } from "@/lib/data";
-import { userOf } from "@/lib/data";
+import { contextLabel, userOf } from "@/lib/data";
 import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
 import { FolderCover } from "./project/FolderCover";
 import { Avatar } from "./Avatar";
@@ -40,7 +40,7 @@ export function ProjectCard({ project, featured = false }: { project: Project; f
         {featured && <p className="max-w-[60ch] text-[15px] leading-relaxed text-moss">{project.summary}</p>}
         <dl className="mt-1 grid grid-cols-[88px_minmax(0,1fr)] gap-x-3 gap-y-2 text-sm">
           <dt className="text-moss">Bối cảnh</dt>
-          <dd className="truncate font-semibold">{project.context}</dd>
+          <dd className="truncate font-semibold">{contextLabel(project)}</dd>
           {owner && (
             <>
               <dt className="text-moss">Người làm</dt>

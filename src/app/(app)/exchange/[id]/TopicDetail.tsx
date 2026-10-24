@@ -78,21 +78,12 @@ export function TopicDetail({ id }: { id: string }) {
             <dd className="mt-1 font-semibold">{open ? `${topic.daysLeft} ngày` : topic.closeReason}</dd>
           </div>
         </dl>
-        {topic.outsider && <p className="mt-3 text-sm text-moss">Người ngoài ngành cũng góp được.</p>}
+        {topic.outsider && <p className="mt-3 text-sm text-moss">Người mở muốn nghe cả góc nhìn ngoài ngành.</p>}
       </article>
 
       {managed && open && (
         <section aria-label="Quản lý trao đổi" className="flex flex-wrap items-center gap-2.5 rounded-xl border border-line bg-white px-5 py-4">
           <p className="mr-auto text-sm text-moss">Bạn là người phụ trách. Áp dụng từng góp ý riêng, đóng khi xong.</p>
-          {!topic.extended && topic.daysLeft <= 7 && (
-            <button
-              type="button"
-              onClick={() => updateTopic(topic.id, (t) => ({ ...t, daysLeft: t.daysLeft + TOPIC_DAYS, extended: true }))}
-              className="h-10 rounded-lg border border-line px-3.5 text-sm font-bold hover:bg-mist"
-            >
-              Gia hạn {TOPIC_DAYS} ngày
-            </button>
-          )}
           <label className="flex items-center gap-2 text-sm font-semibold">
             <span className="sr-only">Lý do đóng</span>
             <select value={reason} onChange={(e) => setReason(e.target.value as CloseReason)} className="h-10 rounded-lg border border-line bg-white px-3 outline-none focus:border-ink">
@@ -107,6 +98,19 @@ export function TopicDetail({ id }: { id: string }) {
             className="h-10 rounded-lg bg-ink px-4 text-sm font-bold text-white hover:bg-ink-2"
           >
             Đóng trao đổi
+          </button>
+        </section>
+      )}
+
+      {managed && !open && (
+        <section aria-label="Mở lại trao đổi" className="flex flex-wrap items-center gap-2.5 rounded-xl border border-line bg-white px-5 py-4">
+          <p className="mr-auto text-sm text-moss">Trao đổi đã đóng. Bạn là người phụ trách, mở lại được nếu cần thêm góp ý.</p>
+          <button
+            type="button"
+            onClick={() => updateTopic(topic.id, (t) => ({ ...t, status: "open", closeReason: undefined, daysLeft: TOPIC_DAYS }))}
+            className="h-10 rounded-lg border border-line px-4 text-sm font-bold hover:bg-mist"
+          >
+            Mở lại {TOPIC_DAYS} ngày
           </button>
         </section>
       )}

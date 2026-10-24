@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check } from "lucide-react";
-import { LENSES, ME, userOf, type Lens, type Project } from "@/lib/data";
+import { LENSES, LENS_HINT, ME, userOf, type Lens, type Project } from "@/lib/data";
 import { MAX_LENSES, TOPIC_DAYS, TOPIC_KINDS, type Topic, type TopicKind } from "@/lib/exchange";
 import type { Media } from "@/lib/media";
 import { MediaPicker } from "@/components/MediaGrid";
@@ -70,7 +70,6 @@ export function OpenTopicDialog({
       lead: ME,
       opened: "vừa xong",
       daysLeft: TOPIC_DAYS,
-      extended: false,
       status: "open",
       replies: [],
     });
@@ -91,7 +90,7 @@ export function OpenTopicDialog({
       footer={
         <>
           <span className="min-w-[12rem] flex-1 text-[13px] leading-snug text-moss">
-            Gửi tới người chọn đúng góc nhìn. Tự đóng sau {TOPIC_DAYS} ngày, gia hạn được một lần.
+            Gửi tới người chọn đúng góc nhìn. Tự đóng sau {TOPIC_DAYS} ngày, mở lại được.
           </span>
           <button type="button" onClick={onClose} className="h-11 rounded-lg border border-line bg-white px-4 font-bold hover:bg-mist">
             Huỷ
@@ -166,19 +165,20 @@ export function OpenTopicDialog({
         <legend className={lab}>
           Góc nhìn cần nhận <span className="font-normal text-moss">(tối đa {MAX_LENSES})</span>
         </legend>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-1.5">
           {LENSES.map((l) => {
             const on = lenses.includes(l);
             const full = !on && lenses.length >= MAX_LENSES;
             return (
               <label
                 key={l}
-                className={`rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
+                className={`rounded-lg border px-3.5 py-2 text-sm font-semibold transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-leaf-deep ${
                   on ? "cursor-pointer border-ink bg-sap/60" : full ? "cursor-not-allowed border-line text-moss/60" : "cursor-pointer border-line hover:bg-mist"
                 }`}
               >
                 <input type="checkbox" className="sr-only" checked={on} disabled={full} onChange={() => toggleLens(l)} />
                 {l}
+                <span className="block text-xs font-normal text-moss">{LENS_HINT[l]}</span>
               </label>
             );
           })}
@@ -186,7 +186,7 @@ export function OpenTopicDialog({
         <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm">
           <input type="checkbox" className="peer sr-only" checked={outsider} onChange={(e) => setOutsider(e.target.checked)} />
           <Box on={outsider} />
-          Người ngoài ngành cũng góp được
+          Mình muốn nghe cả góc nhìn ngoài ngành
         </label>
       </fieldset>
       <label className="block">
@@ -279,6 +279,7 @@ export function ReplyDialog({
           className={area}
           placeholder="Nói rõ bạn đề xuất gì và vì sao"
         />
+        {!error && <p className="mt-1.5 text-[13px] text-moss">Nêu điều bạn thấy, lý do và đề xuất cụ thể. Nếu dựa trên giả định, hãy nói rõ.</p>}
         {error && <p className="mt-1.5 text-[13px] font-semibold text-[#b42318]">Viết góp ý trước khi gửi.</p>}
       </div>
       <MediaPicker value={media} onChange={setMedia} label="Ảnh hoặc video minh hoạ" />

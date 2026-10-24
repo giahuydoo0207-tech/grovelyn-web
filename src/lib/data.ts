@@ -1,4 +1,4 @@
-import type { Context, Output } from "./model";
+import type { Context, Output, Usage } from "./model";
 import { MEDIA, type Media } from "./media";
 /**
  * Dữ liệu mẫu cho bản giao diện. Chưa nối Supabase: mọi tên người, dự án và con số ở đây chỉ để minh họa.
@@ -18,8 +18,16 @@ export const FIELDS = [
 export type Field = Exclude<(typeof FIELDS)[number], "Tất cả">;
 export type CoverTone = "ink" | "leaf" | "sap";
 /** Góc nhìn khi góp ý trong Trao đổi; người dùng chọn những góc mình góp ý được trên hồ sơ. */
-export const LENSES = ["Nội dung và lập luận", "Hình thức trình bày", "Giải pháp chuyên môn", "Trải nghiệm sử dụng", "Phương pháp và dữ liệu"] as const;
+export const LENSES = ["Nội dung và lập luận", "Cách trình bày", "Giải pháp và tính khả thi", "Trải nghiệm sử dụng", "Phương pháp và dữ liệu"] as const;
 export type Lens = (typeof LENSES)[number];
+/** Mỗi góc nhìn một câu hỏi, để người chọn phân biệt được các góc nhìn gần nhau. */
+export const LENS_HINT: Record<Lens, string> = {
+  "Nội dung và lập luận": "Ý có rõ, có thuyết phục không?",
+  "Cách trình bày": "Bố cục, hình ảnh và cách diễn đạt có dễ hiểu không?",
+  "Giải pháp và tính khả thi": "Cách giải quyết có phù hợp và làm được không?",
+  "Trải nghiệm sử dụng": "Người dùng có làm xong việc cần làm không?",
+  "Phương pháp và dữ liệu": "Cách thu thập, phân tích và kết luận có hợp lý không?",
+};
 
 export interface ProjectFile {
   name: string;
@@ -43,6 +51,9 @@ export interface Project {
   output: Output;
   /** Bối cảnh: làm trong hoàn cảnh nào. */
   context: Context;
+  /** Chi tiết bối cảnh, ví dụ "Đồ án tốt nghiệp". */
+  contextNote?: string;
+  usage?: Usage;
   owner: string;
   members: { handle: string; part: string }[];
   tools: string[];
@@ -84,7 +95,7 @@ export const USERS: User[] = [
     intro: "Sinh viên Kiến trúc năm cuối",
     headline: "Sinh viên năm cuối ngành Kiến trúc, mê nhà ở tiết kiệm năng lượng",
     location: "TP. Hồ Chí Minh",
-    lenses: ["Hình thức trình bày", "Giải pháp chuyên môn"],
+    lenses: ["Cách trình bày", "Giải pháp và tính khả thi"],
     about:
       "Mình thích những ngôi nhà vừa túi tiền mà vẫn mát. Đang tìm chỗ thực tập ở văn phòng kiến trúc làm nhà ở đô thị.",
     skills: ["Revit", "SketchUp", "Lumion", "AutoCAD", "Diễn họa 3D", "Thiết kế bền vững"],
@@ -105,7 +116,7 @@ export const USERS: User[] = [
     intro: "Thiết kế nhận diện, làm tự do 3 năm",
     headline: "Thiết kế nhận diện thương hiệu cho quán nhỏ và thương hiệu Việt",
     location: "Đà Nẵng",
-    lenses: ["Hình thức trình bày", "Trải nghiệm sử dụng"],
+    lenses: ["Cách trình bày", "Trải nghiệm sử dụng"],
     about: "Làm logo, bao bì và bộ nhận diện. Thích làm việc với chủ quán trực tiếp.",
     skills: ["Illustrator", "Figma", "Bao bì", "Typography"],
     experience: [{ title: "Thiết kế tự do", where: "Freelance", when: "2023 đến nay" }],
@@ -122,7 +133,7 @@ export const USERS: User[] = [
     intro: "Sinh viên Công nghệ thông tin",
     headline: "Sinh viên CNTT, làm web và app cho quán cà phê",
     location: "TP. Hồ Chí Minh",
-    lenses: ["Trải nghiệm sử dụng", "Giải pháp chuyên môn"],
+    lenses: ["Trải nghiệm sử dụng", "Giải pháp và tính khả thi"],
     about: "Đang làm đồ án đặt bàn cho quán cà phê và học thêm về thiết kế giao diện.",
     skills: ["Next.js", "Flutter", "PostgreSQL", "UI"],
     experience: [],
@@ -156,7 +167,7 @@ export const USERS: User[] = [
     intro: "Kỹ sư cơ điện tử",
     headline: "Kỹ sư cơ điện tử, làm robot nhỏ phục vụ đời sống",
     location: "Cần Thơ",
-    lenses: ["Giải pháp chuyên môn", "Phương pháp và dữ liệu"],
+    lenses: ["Giải pháp và tính khả thi", "Phương pháp và dữ liệu"],
     about: "Thích làm ra thứ chạy được thật. Đang tìm người cùng làm phần vỏ và điện.",
     skills: ["Arduino", "SolidWorks", "Python", "In 3D"],
     experience: [],
@@ -173,7 +184,7 @@ export const USERS: User[] = [
     intro: "Sinh viên Khoa học máy tính",
     headline: "Sinh viên Khoa học máy tính, tự xây sản phẩm web từ ý tưởng đến bản chạy được",
     location: "TP. Hồ Chí Minh",
-    lenses: ["Trải nghiệm sử dụng", "Giải pháp chuyên môn"],
+    lenses: ["Trải nghiệm sử dụng", "Giải pháp và tính khả thi"],
     about:
       "Sinh viên Khoa học máy tính, Đại học Văn Hiến. Tự lên kế hoạch và làm trọn vẹn sản phẩm web cá nhân, từ phân tích nghiệp vụ, thiết kế giao diện đến front-end và back-end. Đang xây Grovelyn.",
     skills: ["Next.js", "TypeScript", "React", "Tailwind CSS", "Flutter", "Dart", "Java", "Spring Boot", "PostgreSQL", "Supabase", "Solana", "Git"],
@@ -200,8 +211,10 @@ export const PROJECTS: Project[] = [
     summary:
       "Nova gom hồ sơ, portfolio, việc làm, cộng đồng, nhắn tin và thanh toán về một chỗ. Replyn là lớp niềm tin giúp hai bên chốt thỏa thuận, theo dõi tiến độ và giữ bằng chứng.",
     field: "Công nghệ thông tin",
-    output: "Ứng dụng hoặc website",
+    output: "Phần mềm hoặc công cụ",
     context: "Cuộc thi hoặc sự kiện",
+    contextNote: "UniHackFest 2026",
+    usage: "Đang dùng thử",
     owner: "giahuy",
     members: [{ handle: "giahuy", part: "Chủ dự án, sản phẩm và lập trình" }],
     tools: ["TypeScript", "React", "Flutter", "Dart", "Java", "Spring Boot", "PostgreSQL", "Solana", "Docker", "Git"],
@@ -242,8 +255,10 @@ export const PROJECTS: Project[] = [
     summary:
       "Nhà ống 3 tầng dùng giếng trời và cửa so le giữa các tầng để gió đi xuyên nhà, giảm phụ thuộc máy lạnh.",
     field: "Kiến trúc",
-    output: "Đồ án kiến trúc",
-    context: "Đồ án tốt nghiệp",
+    output: "Thiết kế",
+    context: "Học tập",
+    contextNote: "Đồ án tốt nghiệp",
+    usage: "Chưa triển khai",
     owner: "quocbao",
     members: [
       { handle: "quocbao", part: "Chủ dự án, thiết kế" },
@@ -290,8 +305,9 @@ export const PROJECTS: Project[] = [
     title: "Bộ nhận diện thương hiệu Trà Mây",
     summary: "Logo, bảng màu và bao bì cho một quán trà nhỏ ở Đà Nẵng, lấy cảm hứng từ mây chiều trên biển.",
     field: "Thiết kế",
-    output: "Bộ nhận diện",
+    output: "Thiết kế",
     context: "Công việc",
+    usage: "Đã dùng thực tế",
     owner: "thuha",
     members: [{ handle: "thuha", part: "Thiết kế chính" }],
     tools: ["Illustrator", "Figma"],
@@ -320,8 +336,9 @@ export const PROJECTS: Project[] = [
     title: "Ứng dụng đặt bàn cho quán cà phê",
     summary: "Web đặt bàn và gọi món trước cho quán cà phê nhỏ, có trang quản lý cho chủ quán.",
     field: "Công nghệ thông tin",
-    output: "Ứng dụng hoặc website",
-    context: "Học phần",
+    output: "Phần mềm hoặc công cụ",
+    context: "Học tập",
+    contextNote: "Học phần",
     owner: "minhkhoa",
     members: [
       { handle: "minhkhoa", part: "Lập trình" },
@@ -350,7 +367,7 @@ export const PROJECTS: Project[] = [
     title: "Kế hoạch ra mắt nước ép mùa hè",
     summary: "Chiến dịch 6 tuần cho một thương hiệu nước ép mới, từ nghiên cứu khách hàng đến lịch đăng bài.",
     field: "Marketing",
-    output: "Chiến dịch",
+    output: "Chiến dịch hoặc chương trình",
     context: "Dự án cá nhân",
     owner: "ngocanh",
     members: [{ handle: "ngocanh", part: "Trưởng nhóm" }],
@@ -373,8 +390,9 @@ export const PROJECTS: Project[] = [
     title: "Cánh tay robot phân loại rác mini",
     summary: "Robot nhận diện chai nhựa, lon và giấy bằng camera rồi gắp vào đúng thùng.",
     field: "Kỹ thuật",
-    output: "Nguyên mẫu kỹ thuật",
+    output: "Sản phẩm kỹ thuật",
     context: "Dự án cá nhân",
+    usage: "Đang dùng thử",
     owner: "hoanglong",
     members: [{ handle: "hoanglong", part: "Cơ khí và lập trình" }],
     tools: ["Arduino", "SolidWorks", "Python"],
@@ -400,8 +418,9 @@ export const PROJECTS: Project[] = [
     title: "Chuỗi cung ứng cà phê Tây Nguyên",
     summary: "Phân tích đường đi của hạt cà phê từ nông hộ đến quán, chỉ ra chỗ người trồng bị ép giá.",
     field: "Kinh doanh và tài chính",
-    output: "Báo cáo nghiên cứu",
-    context: "Học phần",
+    output: "Báo cáo hoặc phân tích",
+    context: "Học tập",
+    contextNote: "Học phần",
     owner: "hoanglong",
     members: [{ handle: "hoanglong", part: "Tác giả" }],
     tools: ["Excel", "Phỏng vấn"],
@@ -419,8 +438,9 @@ export const PROJECTS: Project[] = [
     title: "Cải tạo chung cư cũ quận 3",
     summary: "Đề xuất cải tạo hành lang và sân chung của một chung cư 40 năm tuổi.",
     field: "Kiến trúc",
-    output: "Đồ án kiến trúc",
-    context: "Học phần",
+    output: "Thiết kế",
+    context: "Học tập",
+    contextNote: "Học phần",
     owner: "quocbao",
     members: [{ handle: "quocbao", part: "Thiết kế" }],
     tools: ["SketchUp"],
@@ -438,7 +458,7 @@ export const PROJECTS: Project[] = [
     title: "Quán cà phê vườn 120m²",
     summary: "Thiết kế nội thất quán cà phê có vườn trong nhà cho mặt bằng thuê.",
     field: "Kiến trúc",
-    output: "Đồ án kiến trúc",
+    output: "Thiết kế",
     context: "Công việc",
     owner: "quocbao",
     members: [{ handle: "quocbao", part: "Nội thất" }],
@@ -681,3 +701,6 @@ export const groupOf = (slug: string) => GROUPS.find((g) => g.slug === slug);
 /** Người đang online, hiện tối đa vài avatar và đếm phần còn lại. */
 export const ONLINE = ["quocbao", "thuha", "minhkhoa", "ngocanh", "hoanglong"];
 export const ONLINE_TOTAL = 14;
+
+/** Nhãn bối cảnh ngắn để hiện trên thẻ: ưu tiên chi tiết ("Đồ án tốt nghiệp") hơn nhóm rộng ("Học tập"). */
+export const contextLabel = (p: Pick<Project, "context" | "contextNote">) => p.contextNote || p.context;

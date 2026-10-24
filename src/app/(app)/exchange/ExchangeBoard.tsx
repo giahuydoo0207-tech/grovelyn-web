@@ -52,7 +52,7 @@ function TopicCard({ topic, onReply }: { topic: Topic; onReply: () => void }) {
       <div className="mt-4 flex flex-wrap items-center gap-2.5 border-t border-line pt-3.5">
         <span className="text-sm text-moss">
           {topic.opened === "vừa xong" ? "Mới mở" : `Mở ${topic.opened}`}, {n ? `${n} góp ý` : "đang chờ góp ý đầu tiên"}
-          {topic.outsider && ", người ngoài ngành góp được"}
+          {topic.outsider && ", mời cả góc nhìn ngoài ngành"}
         </span>
         <span className="flex-1" />
         <Link href={`/exchange/${topic.id}`} className="inline-flex h-10 items-center rounded-lg border border-line bg-white px-4 text-[15px] font-bold hover:bg-mist">

@@ -6,16 +6,20 @@ import type { LogoKey } from "@/components/project/ProjectLogo";
  * bản cuối. Dữ liệu mẫu; dự án chưa có phần này thì dựng tạm từ lịch sử phiên bản.
  */
 
-export type Phase = "concept" | "draft" | "final" | "shipped";
+/** Tiến độ. "Đã dùng thật" không nằm ở đây mà ở Tình hình áp dụng (model.ts). */
+export type Phase = "concept" | "draft" | "final" | "paused";
 
+/** Ba bước của hành trình. */
 export const PHASES: { id: Phase; label: string; hint: string }[] = [
   { id: "concept", label: "Ý tưởng", hint: "Phác thảo, nghiên cứu, hướng đi" },
   { id: "draft", label: "Đang làm", hint: "Đang làm, nhận góp ý, chỉnh sửa" },
   { id: "final", label: "Hoàn tất", hint: "Xong bản trình bày hoặc bản dùng được" },
-  { id: "shipped", label: "Đã triển khai", hint: "Đã thi công, đã chạy hoặc đã đưa vào dùng thật" },
 ];
 
-export const phaseLabel = (p: Phase) => PHASES.find((x) => x.id === p)!.label;
+/** Các lựa chọn tiến độ, thêm Tạm dừng. */
+export const PROGRESS: { id: Phase; label: string; hint: string }[] = [...PHASES, { id: "paused", label: "Tạm dừng", hint: "Chưa làm tiếp lúc này" }];
+
+export const phaseLabel = (p: Phase) => PROGRESS.find((x) => x.id === p)!.label;
 
 /** Một ảnh trong dự án. `src` là ảnh thật (đường dẫn hoặc ảnh người dùng tải lên). */
 export interface Shot {

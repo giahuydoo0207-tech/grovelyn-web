@@ -81,7 +81,7 @@ export function ProjectExchange({ project, canEdit }: { project: Project; canEdi
 
       {canEdit && <OpenTopicDialog open={opening} onClose={() => setOpening(false)} project={project} onCreate={addTopic} />}
       <p className="text-[13px] text-moss">
-        Mỗi dự án mở tối đa {MAX_OPEN_TOPICS} trao đổi cùng lúc, tự đóng sau {TOPIC_DAYS} ngày, gia hạn được một lần.
+        Mỗi dự án mở tối đa {MAX_OPEN_TOPICS} trao đổi cùng lúc, tự đóng sau {TOPIC_DAYS} ngày, mở lại được.
       </p>
     </section>
   );

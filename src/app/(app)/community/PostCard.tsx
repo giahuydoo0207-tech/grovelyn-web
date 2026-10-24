@@ -107,7 +107,6 @@ export function PostCard({ post }: { post: Post }) {
         </Link>
       )}
       {project && <Credit slug={project.slug} />}
-      {post.kind === "Công bố" && <p className="mt-2 text-xs text-moss">Công bố bởi tác giả. Grovelyn không kiểm định nội dung.</p>}
 
       <div className="mt-4 flex items-center justify-between text-sm text-moss">
         <span className="flex items-center gap-1.5">

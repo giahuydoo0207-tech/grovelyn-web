@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { ArrowRight } from "lucide-react";
-import { projectOf, userOf } from "@/lib/data";
+import { contextLabel, projectOf, userOf } from "@/lib/data";
 import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
 import { levelHint } from "@/lib/model";
 import { Mark } from "@/components/Logo";
@@ -11,7 +11,7 @@ import { enterDemo } from "../auth-actions";
 
 export const metadata: Metadata = {
   title: "Giới thiệu",
-  description: "Grovelyn: nơi trưng bày dự án của mọi ngành, và nơi người làm nghề giúp nhau làm tiếp phần còn dang dở.",
+  description: "Grovelyn giúp bạn trưng bày việc mình làm và nhận góp ý để làm tốt hơn, dù bạn làm trong lĩnh vực nào.",
 };
 
 const DEMO_URL = "https://grovelyn-web.vercel.app/demo";
@@ -109,14 +109,14 @@ export default async function DemoPage() {
         <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div>
             <h1 className="max-w-[18ch] font-display text-[clamp(2.2rem,5vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.045em] [text-wrap:balance]">
-              Dự án của mọi ngành, và người giúp bạn làm tiếp.
+              Trưng bày việc bạn làm. Cùng nhau làm tốt hơn.
             </h1>
             <p className="mt-5 max-w-[56ch] text-lg leading-relaxed text-ink/85">
-              Grovelyn là nơi trưng bày đồ án, báo cáo, chiến dịch và sản phẩm, kèm vai trò của từng người. Khi dự án còn dang dở, bạn hỏi đúng người có góc
-              nhìn mình cần.
+              Grovelyn giúp bạn trưng bày việc mình làm và nhận góp ý để làm tốt hơn, dù bạn làm trong lĩnh vực nào: đồ án kiến trúc, báo cáo thị trường hay một
+              ứng dụng.
             </p>
             <p lang="en" className="mt-3 max-w-[56ch] text-[15px] leading-relaxed text-moss">
-              A place to show projects from every field, not just code, and to get the right people to help finish what is still unfinished.
+              Show your work. Make it better together. Grovelyn helps people showcase their work and get feedback to make it better, across disciplines.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <DemoButton>
@@ -126,7 +126,7 @@ export default async function DemoPage() {
                 Xem tab Trao đổi
               </DemoButton>
             </div>
-            <p className="mt-3 text-[13px] text-moss">Không cần đăng ký. Bạn vào bằng một tài khoản mẫu.</p>
+            <p className="mt-3 text-[13px] text-moss">Không cần đăng ký. Bạn vào bằng một tài khoản mẫu. Bài đăng do người dùng tự đăng, Grovelyn không kiểm định nội dung.</p>
           </div>
           <figure className="mx-auto w-full max-w-[300px] rounded-2xl border border-line bg-white p-5">
             <div className="aspect-square w-full [&_svg]:h-full [&_svg]:w-full" role="img" aria-label={`Mã QR mở ${DEMO_URL}`} dangerouslySetInnerHTML={{ __html: qr }} />
@@ -164,7 +164,7 @@ export default async function DemoPage() {
                     </p>
                     <h3 className="font-display text-lg font-bold leading-tight">{p.title}</h3>
                     <p className="text-sm text-moss">
-                      {p.context}. {levelHint(p.output, phase)}. {owner.name}, {owner.intro.toLowerCase()}.
+                      {contextLabel(p)}. {levelHint(p.output, phase)}{p.usage ? `, ${p.usage.toLowerCase()}` : ""}. {owner.name}, {owner.intro.toLowerCase()}.
                     </p>
                     <p lang="en" className="text-sm italic text-ink/70">
                       {en}

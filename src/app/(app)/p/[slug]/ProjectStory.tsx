@@ -19,10 +19,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { Project, ProjectFile } from "@/lib/data";
-import { userOf } from "@/lib/data";
+import { contextLabel, userOf } from "@/lib/data";
 import { currentPhase, PHASES, type ProjectLink, type Resources, type Showcase } from "@/lib/showcase";
 import { toEmbed } from "@/lib/embed";
-import { LAYOUTS, layoutOf, levelHint, levelsFor } from "@/lib/model";
+import { LAYOUTS, layoutOf, levelHint } from "@/lib/model";
 import { Avatar } from "@/components/Avatar";
 import { BeforeAfter } from "@/components/project/BeforeAfter";
 import { Embed } from "@/components/project/Embed";
@@ -79,8 +79,8 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
   const role = project.members.find((m) => m.handle === project.owner)?.part;
   const facts = [
     { key: "output", label: "Dạng đầu ra", value: project.output },
-    { key: "context", label: "Bối cảnh", value: project.context },
-    { key: "level", label: "Mức thực hiện", value: levelHint(project.output, phase) },
+    { key: "context", label: "Bối cảnh", value: contextLabel(project) },
+    { key: "level", label: "Tiến độ", value: project.usage ? `${levelHint(project.output, phase)}, ${project.usage.toLowerCase()}` : levelHint(project.output, phase) },
     ...(role ? [{ key: "role", label: "Vai trò tác giả", value: role }] : []),
   ];
   const resources = showcase.resources ?? {};
@@ -353,8 +353,8 @@ function ResourceRow({ icon: Icon, label, url }: { icon: LucideIcon; label: stri
 function ProjectAside({ project, showcase, onTimeline }: { project: Project; showcase: Showcase; onTimeline: () => void }) {
   const resources = showcase.resources ?? {};
   const present = RESOURCE_META.filter((r) => resources[r.key]);
-  const levels = levelsFor(project.output);
-  const reached = levels.indexOf(currentPhase(showcase.milestones));
+  const now = currentPhase(showcase.milestones);
+  const reached = PHASES.findIndex((p) => p.id === now);
   return (
     <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
       {(present.length > 0 || project.updated) && (
@@ -379,17 +379,18 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
         </section>
       )}
       <section className="rounded-2xl border border-line bg-white p-5">
-        <h2 className="font-semibold">Mức thực hiện</h2>
+        <h2 className="font-semibold">Tiến độ</h2>
         <button type="button" onClick={onTimeline} className="mt-3 block w-full text-left" aria-label="Xem hành trình dự án">
-          <ol className={`grid gap-2 ${levels.length === 4 ? "grid-cols-4" : "grid-cols-3"}`}>
-            {levels.map((id, i) => (
+          <ol className="grid grid-cols-3 gap-2">
+            {PHASES.map(({ id }, i) => (
               <li key={id} className="flex flex-col gap-2">
                 <span className={`h-1.5 rounded-full ${i <= reached ? "bg-leaf-deep" : "bg-line"}`} />
                 <span className={`text-[12px] font-semibold leading-tight ${i <= reached ? "text-ink" : "text-moss"}`}>{PHASES.find((p) => p.id === id)!.label}</span>
               </li>
             ))}
           </ol>
-          <p className="mt-2.5 text-[13px] text-moss">{levelHint(project.output, levels[Math.max(0, reached)])}</p>
+          <p className="mt-2.5 text-[13px] text-moss">{levelHint(project.output, now)}</p>
+          {project.usage && <p className="mt-1 text-[13px] font-semibold text-ink">{project.usage}</p>}
         </button>
         <p className="mt-4 text-[13px] text-moss">Trình bày theo mẫu {LAYOUTS[layoutOf(project.output)].name.toLowerCase()}</p>
         {project.tools.length > 0 && <h2 className="mt-5 font-semibold">Công cụ</h2>}
@@ -465,7 +466,7 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
           <Link href={`/explore?nganh=${encodeURIComponent(project.field)}`} className="font-semibold text-leaf-deep hover:underline">
             {project.field}
           </Link>{" "}
-          · {project.context}
+          · {contextLabel(project)}
         </p>
       </section>
     </aside>
