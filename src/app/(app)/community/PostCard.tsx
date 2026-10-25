@@ -10,6 +10,7 @@ import { contributorsOf } from "@/lib/exchange";
 import { useTopics } from "@/lib/topicStore";
 import { Avatar } from "@/components/Avatar";
 import { MediaGrid } from "@/components/MediaGrid";
+import { useLook } from "@/lib/look";
 import { REACTIONS } from "./reactions";
 import { joinRequests, repostedPosts, savedPosts, useProject, useUser, reactionsStore, setReaction as saveReaction, updatePost } from "@/lib/stores";
 
@@ -45,6 +46,7 @@ function KindTag({ kind, look, version }: { kind: Post["kind"]; look: Look; vers
 
 export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: boolean }) {
   const author = useUser(post.author)!;
+  const authorStatus = useLook(post.author).status;
   const project = useProject(post.project);
   const topics = useTopics();
   const topic = project ? topics.find((t) => t.project === project.slug && t.status === "open") : undefined;
@@ -140,7 +142,7 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
   const header = (withTag: boolean) => (
     <header className="flex items-center gap-3">
       <Link href={`/u/${author.handle}`} aria-hidden="true" tabIndex={-1} className={`rounded-full ${look === "dark" ? "ring-2 ring-[#33433a]" : ""}`}>
-        <Avatar initials={author.initials} tone={author.tone} size={44} />
+        <Avatar initials={author.initials} tone={author.tone} handle={author.handle} size={44} />
       </Link>
       <div className="min-w-0 flex-1">
         <p className="truncate text-[15px]">
@@ -157,7 +159,7 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
           )}
         </p>
         <p className={`truncate text-[13px] ${t.sub}`}>
-          {author.intro}, {post.when}
+          {authorStatus !== "Không hiện" ? authorStatus : author.intro}, {post.when}
         </p>
       </div>
       {withTag && <KindTag kind={post.kind} look={look} version={post.version} />}
@@ -188,7 +190,7 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
             </div>
             <p className="mt-3 font-display text-[24px] font-bold leading-[1.22] tracking-[-0.02em] sm:text-[28px]">“{post.text}”</p>
             <p className="mt-4 flex items-center gap-2.5 text-sm">
-              <Avatar initials={author.initials} tone={author.tone} size={32} />
+              <Avatar initials={author.initials} tone={author.tone} handle={author.handle} size={32} />
               <span>
                 <Link href={`/u/${author.handle}`} className="font-bold hover:underline">
                   {author.name}
@@ -434,7 +436,7 @@ function Thread({ post, look, open, onReply, input }: { post: Post; look: Look; 
           return (
             <motion.div key={`${c.author}-${c.when}-${i}-${c.text.slice(0, 12)}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="relative mt-3.5 flex gap-3">
               <span className={`h-9 rounded-full ring-[3px] ${t.ring}`}>
-                <Avatar initials={u.initials} tone={u.tone} size={36} />
+                <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={36} />
               </span>
               <div className="min-w-0 flex-1">
                 <p className={`text-sm ${t.sub}`}>
@@ -461,7 +463,7 @@ function Thread({ post, look, open, onReply, input }: { post: Post; look: Look; 
       </AnimatePresence>
       <form onSubmit={send} className="relative mt-3.5 flex items-center gap-3">
         <span className={`h-9 rounded-full ring-[3px] ${t.ring}`}>
-          <Avatar initials={me.initials} tone={me.tone} size={36} />
+          <Avatar initials={me.initials} tone={me.tone} handle={me.handle} size={36} />
         </span>
         <label className="relative flex-1">
           <span className="sr-only">Trả lời trong luồng</span>
@@ -515,7 +517,7 @@ function Credit({ slug, dark }: { slug: string; dark: boolean }) {
       <span className="flex -space-x-1.5" aria-hidden="true">
         {people.slice(0, 3).map((u) => (
           <span key={u.handle} className={`rounded-full ring-2 ${dark ? "ring-ink" : "ring-white"}`}>
-            <Avatar initials={u.initials} tone={u.tone} size={22} />
+            <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={22} />
           </span>
         ))}
       </span>

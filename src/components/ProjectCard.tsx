@@ -71,7 +71,7 @@ export function ProjectCard({
                 {byOther ? "Chủ dự án" : "Người làm"}
               </dt>
               <dd className="flex min-w-0 items-center gap-2 font-semibold">
-                <Avatar initials={owner.initials} tone={owner.tone} size={22} />
+                <Avatar initials={owner.initials} tone={owner.tone} handle={owner.handle} size={22} />
                 <span className="truncate">{owner.name}</span>
               </dd>
             </>

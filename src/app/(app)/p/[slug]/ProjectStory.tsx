@@ -240,7 +240,7 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
                 if (!u) return null;
                 return (
                   <div key={c.text} className="flex gap-3">
-                    <Avatar initials={u.initials} tone={u.tone} size={36} />
+                    <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={36} />
                     <div className="rounded-2xl rounded-tl-md bg-mist px-4 py-3">
                       <p className="text-sm">
                         <Link href={`/u/${u.handle}`} className="font-semibold hover:text-leaf-deep">
@@ -436,7 +436,7 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
             if (!u) return null;
             return (
               <li key={m.handle} className="flex items-center gap-3">
-                <Avatar initials={u.initials} tone={u.tone} size={38} />
+                <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={38} />
                 <div className="min-w-0">
                   <Link href={`/u/${u.handle}`} className="block truncate font-semibold hover:text-leaf-deep">
                     {u.name}
@@ -453,7 +453,7 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
               if (!u) return null;
               return (
                 <li key={h} className="flex items-center gap-3">
-                  <Avatar initials={u.initials} tone={u.tone} size={38} />
+                  <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={38} />
                   <div className="min-w-0">
                     <Link href={`/u/${u.handle}`} className="block truncate font-semibold hover:text-leaf-deep">
                       {u.name}

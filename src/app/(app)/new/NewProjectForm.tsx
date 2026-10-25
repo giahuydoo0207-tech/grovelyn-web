@@ -728,7 +728,7 @@ export function NewProjectForm() {
                   return (
                     <li key={m.handle} className="grid items-center gap-2 sm:grid-cols-[200px_minmax(0,1fr)_44px]">
                       <span className="flex items-center gap-2.5 font-semibold">
-                        <Avatar initials={u.initials} tone={u.tone} size={32} /> {u.name}
+                        <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={32} /> {u.name}
                       </span>
                       <input
                         aria-label={`Phần ${u.name} làm`}
@@ -841,7 +841,7 @@ export function NewProjectForm() {
               <dd className="truncate font-semibold">{contextNote.trim() || context || "Chưa chọn"}</dd>
               <dt className="text-moss">Người làm</dt>
               <dd className="flex items-center gap-2 font-semibold">
-                <Avatar initials={me.initials} tone={me.tone} size={22} /> {me.name}
+                <Avatar initials={me.initials} tone={me.tone} handle={me.handle} size={22} /> {me.name}
               </dd>
               <dt className="text-moss">Vai trò</dt>
               <dd className="truncate font-semibold">{myRole || "Chưa điền"}</dd>

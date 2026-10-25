@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MapPin } from "lucide-react";
+import Link from "next/link";
+import { MapPin, PencilLine } from "lucide-react";
 import { ME, USERS, projectOf, projectsBy, userOf } from "@/lib/data";
 import { Avatar } from "@/components/Avatar";
-import { GardenCover } from "@/components/GardenCover";
+import { ProfileCover } from "./ProfileCover";
 import { ProfileActions } from "./ProfileActions";
 import { ProfileTabs } from "./ProfileTabs";
 import { ProfileStats } from "./ProfileStats";
 import { ProfileSide } from "./ProfileSide";
 import { MyText } from "./MyText";
+import { ProfileStatus } from "./ProfileStatus";
 
 export function generateStaticParams() {
   return USERS.map((u) => ({ handle: u.handle }));
@@ -36,18 +38,30 @@ export default async function ProfilePage({ params }: PageProps<"/u/[handle]">) 
   return (
     <div className="flex flex-col gap-6">
       <section className="overflow-hidden rounded-3xl border border-line bg-white">
-        <div className="relative h-32 sm:h-44">
-          <GardenCover seed={seed} className="absolute inset-0 h-full w-full" />
-        </div>
+        <ProfileCover handle={user.handle} seed={seed} />
         <div className="flex flex-col gap-4 px-5 pb-6 sm:px-8">
-          <div className="relative z-10 -mt-12 flex flex-wrap items-end justify-between gap-4">
-            <Avatar initials={user.initials} tone={user.tone} size={104} ring />
+          <div className="relative z-10 -mt-14 flex flex-wrap items-end justify-between gap-4">
+            <span className="relative">
+              <Avatar initials={user.initials} tone={user.tone} handle={user.handle} size={112} ring />
+              {isMe && (
+                <Link
+                  href="/settings/account#anh-dai-dien"
+                  aria-label="Sửa ảnh đại diện"
+                  className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-ink text-white ring-[3px] ring-white hover:bg-ink-2"
+                >
+                  <PencilLine className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              )}
+            </span>
             <ProfileActions isMe={isMe} name={user.name} handle={user.handle} />
           </div>
           <div className="flex flex-col gap-2">
-            <h1 className="font-display text-[clamp(1.8rem,3.4vw,2.5rem)] font-bold leading-none tracking-[-0.04em]">
-              <MyText handle={user.handle} field="name" />
-            </h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-display text-[clamp(1.8rem,3.4vw,2.5rem)] font-bold leading-none tracking-[-0.04em]">
+                <MyText handle={user.handle} field="name" />
+              </h1>
+              <ProfileStatus handle={user.handle} />
+            </div>
             <p className="max-w-[62ch] text-[17px] leading-relaxed text-ink/85">
               <MyText handle={user.handle} field="headline" />
             </p>

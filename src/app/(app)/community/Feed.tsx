@@ -126,7 +126,7 @@ export function Feed({ group }: { group?: string } = {}) {
         <Leaves className="pointer-events-none absolute -right-4 top-0 h-full w-[300px] opacity-90" />
         <div className="relative flex items-center gap-3">
           <span className="rounded-full ring-[3px] ring-ink-2">
-            <Avatar initials={me.initials} tone={me.tone} size={48} />
+            <Avatar initials={me.initials} tone={me.tone} handle={me.handle} size={48} />
           </span>
           {open ? (
             <p className="flex-1 font-semibold">{me.name}</p>
@@ -337,7 +337,7 @@ export function Feed({ group }: { group?: string } = {}) {
                           const u = userOf(h);
                           return u ? (
                             <span key={h} className="rounded-full ring-2 ring-white">
-                              <Avatar initials={u.initials} tone={u.tone} size={32} />
+                              <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={32} />
                             </span>
                           ) : null;
                         })}

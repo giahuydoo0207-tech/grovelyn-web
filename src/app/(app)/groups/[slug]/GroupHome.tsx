@@ -158,7 +158,7 @@ export function GroupHome({ group }: { group: Group }) {
               <span className="flex">
                 {admins.map((u, i) => (
                   <span key={u.handle} className={`rounded-full ring-2 ring-white ${i ? "-ml-3" : ""}`}>
-                    <Avatar initials={u.initials} tone={u.tone} size={30} />
+                    <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={30} />
                   </span>
                 ))}
               </span>
@@ -225,7 +225,7 @@ export function GroupHome({ group }: { group: Group }) {
                     {USERS.map((u) => (
                       <li key={u.handle}>
                         <Link href={`/u/${u.handle}`} className="flex items-center gap-3 rounded-xl p-2 hover:bg-mist">
-                          <Avatar initials={u.initials} tone={u.tone} size={44} />
+                          <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={44} />
                           <span className="min-w-0">
                             <span className="block font-bold">
                               {u.name}
@@ -254,7 +254,7 @@ export function GroupHome({ group }: { group: Group }) {
               {online.map((u) => (
                 <li key={u.handle} className="-mr-1">
                   <Link href={`/u/${u.handle}`} className="relative block rounded-full ring-[3px] ring-white" aria-label={`${u.name}, đang online`}>
-                    <Avatar initials={u.initials} tone={u.tone} size={40} />
+                    <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={40} />
                     <span className="absolute bottom-0 right-0 h-[11px] w-[11px] rounded-full bg-leaf ring-2 ring-white" />
                   </Link>
                 </li>

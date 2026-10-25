@@ -56,7 +56,7 @@ function Online() {
         {people.map((u) => (
           <li key={u.handle} className="flex items-center gap-2.5">
             <Link href={`/u/${u.handle}`} className="relative shrink-0" aria-hidden="true" tabIndex={-1}>
-              <Avatar initials={u.initials} tone={u.tone} size={38} />
+              <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={38} />
               <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-leaf ring-2 ring-white" />
             </Link>
             <span className="min-w-0 flex-1">
@@ -190,7 +190,7 @@ export function HomeStrip() {
         <span className="flex -space-x-2" aria-hidden="true">
           {people.map((u) => (
             <span key={u.handle} className="rounded-full ring-2 ring-white">
-              <Avatar initials={u.initials} tone={u.tone} size={30} />
+              <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={30} />
             </span>
           ))}
         </span>

@@ -42,7 +42,7 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
       <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[272px_minmax(0,1fr)] lg:items-start">
         <aside className="min-w-0 lg:sticky lg:top-[88px]">
           <div className="flex items-center gap-3 px-1 pb-4">
-            <Avatar initials={me.initials} tone={me.tone} size={44} />
+            <Avatar initials={me.initials} tone={me.tone} handle={me.handle} size={44} />
             <div className="min-w-0">
               <h1 className="font-display text-[26px] font-bold leading-none tracking-[-0.03em]">Cài đặt</h1>
               <p className="mt-1 truncate text-sm text-moss">{prefs.name}</p>

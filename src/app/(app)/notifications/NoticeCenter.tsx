@@ -48,7 +48,7 @@ const ACTION: Partial<Record<NoticeKind, string>> = {
 /** Người gửi: ảnh đại diện. Thông báo từ Grovelyn: vòng tròn trung tính với icon một màu. */
 function Sender({ n }: { n: Notice }) {
   const u = n.actor ? userOf(n.actor) : undefined;
-  if (u) return <Avatar initials={u.initials} tone={u.tone} size={44} />;
+  if (u) return <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={44} />;
   const Icon = KIND[n.kind].icon;
   return (
     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-mist text-moss">

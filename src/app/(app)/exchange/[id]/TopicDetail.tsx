@@ -99,7 +99,7 @@ export function TopicDetail({ id }: { id: string }) {
           <div>
             <dt className="text-moss">Người phụ trách</dt>
             <dd className="mt-1 flex items-center gap-2 font-semibold">
-              <Avatar initials={lead.initials} tone={lead.tone} size={24} />{" "}
+              <Avatar initials={lead.initials} tone={lead.tone} handle={lead.handle} size={24} />{" "}
               {lead.handle === ME ? "Bạn" : lead.name}
             </dd>
           </div>
@@ -224,7 +224,7 @@ export function TopicDetail({ id }: { id: string }) {
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   className="flex gap-3 border-t border-line py-5 first:border-t-0"
                 >
-                  <Avatar initials={u.initials} tone={u.tone} size={38} />
+                  <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={38} />
                   <div className="min-w-0 flex-1">
                     <p className="text-[15px]">
                       <Link

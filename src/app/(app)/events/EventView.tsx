@@ -90,7 +90,7 @@ export function EventView({ event, preview = false }: { event: CommunityEvent; p
               )}
               {host && (
                 <Link href={`/u/${host.handle}`} className="flex h-10 items-center gap-2 rounded-full border border-line bg-white pl-1.5 pr-3.5 text-sm font-bold hover:bg-mist">
-                  <Avatar initials={host.initials} tone={host.tone} size={28} />
+                  <Avatar initials={host.initials} tone={host.tone} handle={host.handle} size={28} />
                   {host.name}
                 </Link>
               )}

@@ -147,7 +147,7 @@ export function Journey({ slug, seed, canEdit }: { slug: string; seed: Milestone
               {m.note && <p className="mt-1.5 max-w-[64ch] text-[15px] leading-relaxed text-ink/85">{m.note}</p>}
               {author && (
                 <p className="mt-2 flex items-center gap-2 text-sm text-moss">
-                  <Avatar initials={author.initials} tone={author.tone} size={22} /> {author.name}
+                  <Avatar initials={author.initials} tone={author.tone} handle={author.handle} size={22} /> {author.name}
                 </p>
               )}
               {m.shots && m.shots.length > 0 && (

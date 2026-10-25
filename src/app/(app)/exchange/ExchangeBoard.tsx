@@ -41,7 +41,7 @@ function TopicCard({ topic, onReply }: { topic: Topic; onReply: () => void }) {
   return (
     <article className="rounded-xl border border-line bg-white p-4 sm:p-5">
       <div className="flex items-center gap-3">
-        <Avatar initials={lead.initials} tone={lead.tone} size={40} />
+        <Avatar initials={lead.initials} tone={lead.tone} handle={lead.handle} size={40} />
         <div className="min-w-0 flex-1">
           <p className="text-[15px]">
             <Link

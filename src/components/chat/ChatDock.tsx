@@ -96,7 +96,7 @@ export function ChatDock() {
           className="flex h-[54px] shrink-0 items-center gap-2.5 border-b border-line px-3.5 text-left"
         >
           <span className="relative">
-            <Avatar initials={me.initials} tone={me.tone} size={32} />
+            <Avatar initials={me.initials} tone={me.tone} handle={me.handle} size={32} />
             <span className="absolute -bottom-px -right-px h-2.5 w-2.5 rounded-full bg-leaf ring-2 ring-white" aria-hidden="true" />
           </span>
           <span className="flex-1 text-[15px] font-bold">Tin nhắn</span>

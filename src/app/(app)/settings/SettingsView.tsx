@@ -9,6 +9,7 @@ import { usePrefs, type Prefs } from "./SettingsShell";
 import { resetAll } from "@/lib/persist";
 import { useRouter } from "next/navigation";
 import { clearMedia } from "@/lib/localMedia";
+import { AvatarCard, CoverCard } from "./LookEditor";
 
 /* ---------- Khối dựng dùng chung ---------- */
 
@@ -129,6 +130,8 @@ function Account({ toast }: { toast: (m: string) => void }) {
 
   return (
     <>
+      <AvatarCard toast={toast} />
+      <CoverCard toast={toast} />
       <Card title="Thông tin hồ sơ" desc="Tên và giới thiệu ngắn hiện trên hồ sơ, bài đăng và tin nhắn.">
         <form
           className="grid gap-4 py-4"

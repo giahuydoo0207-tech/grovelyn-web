@@ -100,7 +100,7 @@ export function UserMenu({ compact = false }: { compact?: boolean }) {
         }
       >
         <span className="flex items-center">
-          <Avatar initials={me.initials} tone={me.tone} size={compact ? 34 : 24} />
+          <Avatar initials={me.initials} tone={me.tone} handle={me.handle} size={compact ? 34 : 24} />
           {compact && <ChevronDown className={`h-4 w-4 text-moss transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />}
         </span>
         {!compact && (
@@ -135,7 +135,7 @@ export function UserMenu({ compact = false }: { compact?: boolean }) {
               </div>
               <div className="px-4 pb-3.5">
                 <div className="-mt-6">
-                  <Avatar initials={me.initials} tone={me.tone} size={52} ring />
+                  <Avatar initials={me.initials} tone={me.tone} handle={me.handle} size={52} ring />
                 </div>
                 <p className="mt-1.5 text-base font-bold leading-tight">{me.name}</p>
                 <p className="mt-0.5 line-clamp-2 text-[13px] leading-snug text-moss">{me.headline}</p>

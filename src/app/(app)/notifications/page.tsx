@@ -16,7 +16,7 @@ export default function NotificationsPage() {
     <div className="grid items-start gap-6 md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[225px_minmax(0,1fr)_300px]">
       <aside className="hidden flex-col gap-3 md:flex md:sticky md:top-[88px]">
         <Link href={`/u/${me.handle}`} className="flex items-center gap-2.5 rounded-2xl border border-line bg-white p-3 transition-colors hover:bg-mist">
-          <Avatar initials={me.initials} tone={me.tone} size={40} />
+          <Avatar initials={me.initials} tone={me.tone} handle={me.handle} size={40} />
           <span className="min-w-0">
             <span className="block truncate text-[15px] font-bold">{me.name}</span>
             <span className="text-[13px] text-moss">Xem hồ sơ của bạn</span>

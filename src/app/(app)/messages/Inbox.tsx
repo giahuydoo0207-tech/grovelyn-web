@@ -70,7 +70,7 @@ function InfoPanel({ conv, onClose }: { conv: Conversation; onClose: () => void 
               return (
                 <li key={h}>
                   <Link href={`/u/${h}`} className="flex items-center gap-2.5 rounded-lg hover:underline">
-                    <Avatar initials={u.initials} tone={u.tone} size={32} />
+                    <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={32} />
                     <span className="flex-1 truncate text-sm font-semibold">{h === ME ? "Bạn" : u.name}</span>
                     {i === 0 && <span className="text-[11px] text-moss">Tạo nhóm</span>}
                   </Link>
@@ -166,7 +166,7 @@ function NewChat({ onPick, onClose }: { onPick: (handle: string) => void; onClos
           {people.map((u) => (
             <li key={u.handle}>
               <button type="button" onClick={() => onPick(u.handle)} className="flex w-full items-center gap-3 rounded-xl p-2 text-left hover:bg-mist">
-                <Avatar initials={u.initials} tone={u.tone} size={40} />
+                <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={40} />
                 <span className="min-w-0">
                   <span className="block text-sm font-bold">{u.name}</span>
                   <span className="block truncate text-xs text-moss">{u.headline}</span>

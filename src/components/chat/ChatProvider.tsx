@@ -21,6 +21,8 @@ export interface ConvLook {
   name: string;
   initials: string;
   tone: CoverTone;
+  /** Tài khoản của người kia (chat riêng), để hiện đúng ảnh đại diện họ chọn. */
+  handle?: string;
   square: boolean;
   online: boolean;
   status: string;
@@ -47,6 +49,7 @@ export function lookOf(c: Conversation): ConvLook {
     name: u?.name ?? "Người dùng",
     initials: u?.initials ?? "?",
     tone: u?.tone ?? "sap",
+    handle: u?.handle,
     square: false,
     online,
     status: online ? "Đang hoạt động" : (c.lastSeen ?? "Không hoạt động"),

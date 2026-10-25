@@ -462,7 +462,7 @@ export function GroupForm() {
                 const on = invited.includes(u.handle);
                 return (
                   <li key={u.handle} className="flex items-center gap-3 px-1 py-2">
-                    <Avatar initials={u.initials} tone={u.tone} size={40} />
+                    <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={40} />
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold">{u.name}</span>
                       <span className="line-clamp-1 text-[13px] text-moss">{u.headline}</span>

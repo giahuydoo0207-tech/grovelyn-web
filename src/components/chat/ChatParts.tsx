@@ -36,6 +36,7 @@ export function ConvAvatar({
       <Avatar
         initials={l.initials}
         tone={l.tone}
+        handle={l.handle}
         size={size}
         square={l.square}
       />
@@ -153,7 +154,7 @@ export function MessageList({
             >
               {!mine &&
                 (lastOfRun && u ? (
-                  <Avatar initials={u.initials} tone={u.tone} size={avSize} />
+                  <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={avSize} />
                 ) : (
                   <span
                     style={{ width: avSize }}

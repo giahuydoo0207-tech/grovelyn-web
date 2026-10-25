@@ -1,4 +1,5 @@
 import type { CoverTone } from "@/lib/data";
+import { PersonAvatar } from "./PersonAvatar";
 
 const STYLE: Record<CoverTone, string> = {
   ink: "bg-ink text-leaf",
@@ -12,6 +13,8 @@ export function Avatar({
   size = 40,
   ring = false,
   square = false,
+  handle,
+  showStatus = true,
 }: {
   initials: string;
   tone: CoverTone;
@@ -19,7 +22,11 @@ export function Avatar({
   ring?: boolean;
   /** Ô bo góc thay cho hình tròn, dùng cho nhóm. */
   square?: boolean;
+  /** Có tài khoản thì hiện ảnh đại diện người đó chọn (nhân vật, ảnh thật hoặc chữ cái đầu) và trạng thái. */
+  handle?: string;
+  showStatus?: boolean;
 }) {
+  if (handle && !square) return <PersonAvatar handle={handle} initials={initials} size={size} ring={ring} showStatus={showStatus} />;
   return (
     <span
       aria-hidden="true"

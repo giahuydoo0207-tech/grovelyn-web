@@ -38,7 +38,7 @@ export function AppRail() {
     >
       <nav aria-label="Lối tắt" className="flex flex-col items-stretch gap-1">
         <Link href={`/u/${me.handle}`} aria-label="Hồ sơ của bạn" aria-current={path === `/u/${me.handle}` ? "page" : undefined} className={`mx-auto mb-2 rounded-full transition-transform hover:scale-105 ${path === `/u/${me.handle}` ? "ring-[3px] ring-ink ring-offset-2 ring-offset-mist" : ""}`}>
-          <Avatar initials={me.initials} tone={me.tone} size={48} />
+          <Avatar initials={me.initials} tone={me.tone} handle={me.handle} size={48} />
         </Link>
         {ITEMS.map(({ href, label, icon: Icon, count }) => {
           const here = path === href || path.startsWith(`${href}/`);
