@@ -11,6 +11,7 @@ import { canAnnounce } from "@/lib/model";
 import { Avatar } from "@/components/Avatar";
 import { MediaPicker } from "@/components/MediaGrid";
 import { PostCard } from "./PostCard";
+import { FadeIn } from "@/components/motion/FadeIn";
 
 const SORTS = ["Dành cho bạn", "Đang theo dõi"] as const;
 type Filter = "Tất cả" | PostKind;
@@ -275,7 +276,9 @@ export function Feed({ group }: { group?: string } = {}) {
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <PostCard post={p} />
+              <FadeIn>
+                <PostCard post={p} />
+              </FadeIn>
             </motion.div>
           ))}
         </AnimatePresence>

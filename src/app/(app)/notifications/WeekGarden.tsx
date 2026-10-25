@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useCalm } from "@/components/Providers";
 import { NOTICES, type NoticeKind } from "@/lib/data";
 import { KIND } from "./NoticeCenter";
 
@@ -17,7 +18,7 @@ const LEAF = "M0 -11 C7 -6 7 6 0 11 C-7 6 -7 -6 0 -11 Z";
 
 /** Cây tuần này: mỗi lượt tương tác từ người khác trong 7 ngày là một chiếc lá, màu theo loại. */
 export function WeekGarden() {
-  const reduce = useReducedMotion();
+  const reduce = useCalm();
   const week = NOTICES.filter((n) => n.day !== "earlier" && n.actor && PEOPLE.includes(n.kind));
   const leaves = week.flatMap((n) => Array.from({ length: n.kind === "like" ? 1 + (n.others ?? 0) : 1 }, () => n.kind));
   const counts = PEOPLE.map((k) => ({ k, n: leaves.filter((x) => x === k).length })).filter((c) => c.n > 0);

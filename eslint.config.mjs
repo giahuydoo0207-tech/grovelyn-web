@@ -12,8 +12,6 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Mã gốc ascii-reveal, giữ nguyên để dễ cập nhật.
-    "src/vendor/**",
   ]),
 ]);
 

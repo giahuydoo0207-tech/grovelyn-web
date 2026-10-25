@@ -8,9 +8,6 @@ import { levelHint } from "@/lib/model";
 import { Mark } from "@/components/Logo";
 import { FolderCover } from "@/components/project/FolderCover";
 import { enterDemo } from "../auth-actions";
-import { GroveReveal, LoadingPreview } from "@/components/grove-reveal";
-import { FadeIn } from "@/components/motion/FadeIn";
-import { Halftone } from "@/components/motion/Halftone";
 
 export const metadata: Metadata = {
   title: "Giới thiệu",
@@ -160,29 +157,22 @@ export default async function DemoPage() {
       <main className="mx-auto flex max-w-6xl flex-col gap-14 px-4 pb-16 sm:px-6">
         <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div>
-            <GroveReveal
-              revealOnHydrate
-              duration="cinematic"
-              origin="top-left"
-              replay="Chạy lại"
+            <h1 className="max-w-[18ch] font-display text-[clamp(2.2rem,5vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.045em] [text-wrap:balance]">
+              Trưng bày việc bạn làm. Cùng nhau làm tốt hơn.
+            </h1>
+            <p className="mt-5 max-w-[56ch] text-lg leading-relaxed text-ink/85">
+              Grovelyn giúp bạn trưng bày việc mình làm và nhận góp ý để làm tốt
+              hơn, dù bạn làm trong lĩnh vực nào: đồ án kiến trúc, báo cáo thị
+              trường hay một ứng dụng.
+            </p>
+            <p
+              lang="en"
+              className="mt-3 max-w-[56ch] text-[15px] leading-relaxed text-moss"
             >
-              <h1 className="max-w-[18ch] font-display text-[clamp(2.2rem,5vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.045em] [text-wrap:balance]">
-                Trưng bày việc bạn làm. Cùng nhau làm tốt hơn.
-              </h1>
-              <p className="mt-5 max-w-[56ch] text-lg leading-relaxed text-ink/85">
-                Grovelyn giúp bạn trưng bày việc mình làm và nhận góp ý để làm
-                tốt hơn, dù bạn làm trong lĩnh vực nào: đồ án kiến trúc, báo cáo
-                thị trường hay một ứng dụng.
-              </p>
-              <p
-                lang="en"
-                className="mt-3 max-w-[56ch] text-[15px] leading-relaxed text-moss"
-              >
-                Show your work. Make it better together. Grovelyn helps people
-                showcase their work and get feedback to make it better, across
-                disciplines.
-              </p>
-            </GroveReveal>
+              Show your work. Make it better together. Grovelyn helps people
+              showcase their work and get feedback to make it better, across
+              disciplines.
+            </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <DemoButton>
                 Mở bản demo{" "}
@@ -229,16 +219,14 @@ export default async function DemoPage() {
             Three projects from three fields, each presented its own way.
           </p>
           <ul className="mt-6 grid gap-5 md:grid-cols-3">
-            {EXAMPLES.map(({ slug, en }, i) => {
+            {EXAMPLES.map(({ slug, en }) => {
               const p = projectOf(slug)!;
               const sc = showcaseOf(p);
               const phase = currentPhase(sc.milestones);
               const owner = userOf(p.owner)!;
               return (
-                <FadeIn
-                  as="li"
+                <li
                   key={slug}
-                  delay={i * 0.07}
                   className="flex flex-col overflow-hidden rounded-xl border border-line bg-white"
                 >
                   <div className="bg-mist px-[18px] pt-[22px]">
@@ -272,7 +260,7 @@ export default async function DemoPage() {
                       </DemoButton>
                     </div>
                   </div>
-                </FadeIn>
+                </li>
               );
             })}
           </ul>
@@ -282,9 +270,11 @@ export default async function DemoPage() {
           aria-labelledby="nhin-gan"
           className="grid items-center gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
         >
-          <Halftone
+          {/* eslint-disable-next-line @next/next/no-img-element -- ảnh SVG mẫu trong public */}
+          <img
             src="/demo/projects/nha-pho-sau.svg"
             alt="Phối cảnh nhà phố 4x16m sau khi mở giếng trời"
+            className="aspect-[16/10] w-full rounded-xl border border-line bg-mist object-cover"
           />
           <div>
             <h2
@@ -301,72 +291,7 @@ export default async function DemoPage() {
             <p lang="en" className="mt-1.5 text-sm text-moss">
               Drawings, reports and apps each get a layout that fits them.
             </p>
-            <p className="mt-3 text-[13px] text-moss">
-              Đưa chuột vào ảnh, hoặc chạm trên điện thoại, để xem bản vẽ thật.
-            </p>
           </div>
-        </section>
-
-        <section
-          aria-labelledby="dang-tai"
-          className="grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]"
-        >
-          <div>
-            <h2
-              id="dang-tai"
-              className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]"
-            >
-              Lúc mạng chậm, cây mọc trước
-            </h2>
-            <p className="mt-2 max-w-[48ch] text-[15px] leading-relaxed text-ink/85">
-              Trong lúc chờ dữ liệu, cái cây trong logo Grovelyn mọc lên bằng ký
-              tự. Dữ liệu về thì chữ hiện dần vào đúng chỗ, bố cục không bị xô.
-            </p>
-            <p lang="en" className="mt-1.5 text-sm text-moss">
-              While data loads, the Grovelyn tree grows in characters, then the
-              content settles into place.
-            </p>
-            <p className="mt-3 text-[13px] text-moss">
-              Dựng trên thư viện mã nguồn mở{" "}
-              <a
-                href="https://github.com/quanhoangindex/ascii-reveal"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-leaf-deep hover:underline"
-              >
-                ascii-reveal
-              </a>{" "}
-              của Quan Hoang (MIT).
-            </p>
-          </div>
-          <LoadingPreview>
-            <article className="rounded-xl border border-line bg-white p-5">
-              <p className="text-[13px] font-semibold text-leaf-deep">
-                Kinh doanh và tài chính, đang làm
-              </p>
-              <h3 className="mt-1 font-display text-xl font-bold leading-tight">
-                Chuỗi cung ứng cà phê Tây Nguyên
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-moss">
-                Phân tích đường đi của hạt cà phê từ nông hộ đến quán, chỉ ra
-                chỗ người trồng bị ép giá.
-              </p>
-              <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4 text-sm">
-                <div>
-                  <dt className="text-moss">Nông hộ</dt>
-                  <dd className="font-display text-lg font-bold">42</dd>
-                </div>
-                <div>
-                  <dt className="text-moss">Trao đổi</dt>
-                  <dd className="font-display text-lg font-bold">3</dd>
-                </div>
-                <div>
-                  <dt className="text-moss">Bản</dt>
-                  <dd className="font-display text-lg font-bold">v2</dd>
-                </div>
-              </dl>
-            </article>
-          </LoadingPreview>
         </section>
 
         <section aria-labelledby="khac-gi">

@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useCalm } from "@/components/Providers";
 
 /**
  * Cây mạch điện. Thân là một bó đường mạch song song mọc từ mặt đất; mỗi đường tách khỏi thân ở một độ cao
@@ -190,7 +191,7 @@ const ROOTS = [-1, 1].flatMap((side) =>
 const LEAF = "M0 0C5-6 13-7 22 0C13 7 5 6 0 0Z";
 
 export function GrowingTree({ className = "" }: { className?: string }) {
-  const reduce = useReducedMotion();
+  const reduce = useCalm();
   const draw = (t: Trace) =>
     reduce
       ? { initial: false as const }

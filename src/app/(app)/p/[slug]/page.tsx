@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ViewTransition } from "react";
 import { notFound } from "next/navigation";
 import { Globe2, Sprout } from "lucide-react";
 import { ME, PROJECTS, contextLabel, projectOf, userOf } from "@/lib/data";
@@ -103,20 +102,14 @@ export default async function ProjectPage({ params }: PageProps<"/p/[slug]">) {
               <Embed url={video} title={`Video demo ${project.title}`} />
             ) : (
               <div className="rounded-2xl bg-ink-2 px-6 pt-8">
-                <ViewTransition
-                  name={`bia-${project.slug}`}
-                  share="morph"
-                  default="none"
-                >
-                  <FolderCover
-                    tone="leaf"
-                    title={project.title}
-                    logo={showcase.logo}
-                    kind={project.output}
-                    height={220}
-                    logoSize={96}
-                  />
-                </ViewTransition>
+                <FolderCover
+                  tone="leaf"
+                  title={project.title}
+                  logo={showcase.logo}
+                  kind={project.output}
+                  height={220}
+                  logoSize={96}
+                />
               </div>
             )}
           </div>

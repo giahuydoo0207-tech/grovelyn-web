@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ViewTransition } from "react";
 import type { Project } from "@/lib/data";
 import { contextLabel, userOf } from "@/lib/data";
 import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
@@ -32,23 +31,16 @@ export function ProjectCard({
       <div
         className={`bg-mist px-[18px] pt-[22px] ${featured ? "lg:flex lg:flex-1 lg:flex-col" : ""}`}
       >
-        {/* Cùng tên với bìa ở trang dự án: bấm thẻ thì bìa trượt và phóng to sang đầu trang. */}
-        <ViewTransition
-          name={`bia-${project.slug}`}
-          share="morph"
-          default="none"
-        >
-          <FolderCover
-            tone={project.tone}
-            title={project.title}
-            logo={showcase.logo}
-            kind={project.output}
-            height={featured ? 240 : 176}
-            logoSize={featured ? 104 : 78}
-            fill={featured}
-            className={featured ? "lg:flex-1" : ""}
-          />
-        </ViewTransition>
+        <FolderCover
+          tone={project.tone}
+          title={project.title}
+          logo={showcase.logo}
+          kind={project.output}
+          height={featured ? 240 : 176}
+          logoSize={featured ? 104 : 78}
+          fill={featured}
+          className={featured ? "lg:flex-1" : ""}
+        />
       </div>
       <div className={`flex flex-col gap-2.5 ${featured ? "p-6" : "p-5"}`}>
         <div className="flex items-center justify-between gap-3 text-[13px]">
@@ -70,7 +62,9 @@ export function ProjectCard({
           <dd className="truncate font-semibold">{contextLabel(project)}</dd>
           {owner && (
             <>
-              <dt className="text-moss">{byOther ? "Chủ dự án" : "Người làm"}</dt>
+              <dt className="text-moss">
+                {byOther ? "Chủ dự án" : "Người làm"}
+              </dt>
               <dd className="flex min-w-0 items-center gap-2 font-semibold">
                 <Avatar initials={owner.initials} tone={owner.tone} size={22} />
                 <span className="truncate">{owner.name}</span>

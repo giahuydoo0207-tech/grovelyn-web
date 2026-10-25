@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useCalm } from "@/components/Providers";
 
 /**
  * Lớp đường mạch mờ phía sau khung đăng ký. Màu rất gần nền tối nên không làm rối chữ trong khung trắng;
@@ -35,7 +36,7 @@ const NODES: [number, number][] = [
 ];
 
 export function CircuitBackdrop({ className = "" }: { className?: string }) {
-  const reduce = useReducedMotion();
+  const reduce = useCalm();
   return (
     <svg viewBox="0 0 760 700" preserveAspectRatio="xMidYMid slice" className={className} aria-hidden="true">
       <g stroke="#16301f" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
