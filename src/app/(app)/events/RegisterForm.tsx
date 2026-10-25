@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { interestedEvents, registeredEvents } from "@/lib/stores";
 import { AnimatePresence, motion } from "motion/react";
 import { CalendarPlus, Check, Star } from "lucide-react";
 import { ME, userOf } from "@/lib/data";
@@ -20,8 +21,10 @@ const ME_EMAIL = "giahuy@grovelyn.vn";
  */
 export function RegisterForm({ event, preview = false }: { event: CommunityEvent; preview?: boolean }) {
   const me = userOf(ME)!;
-  const [done, setDone] = useState(false);
-  const [interested, setInterested] = useState(false);
+  // Đã đăng ký và đã quan tâm lưu trên trình duyệt.
+  const done = registeredEvents.use().includes(event.slug);
+  const setDone = (v: boolean) => (v ? registeredEvents.add(event.slug) : registeredEvents.set((l) => l.filter((x) => x !== event.slug)));
+  const interested = interestedEvents.use().includes(event.slug);
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const left = Math.max(0, event.seats - event.registered - (done ? 1 : 0));
@@ -158,7 +161,7 @@ export function RegisterForm({ event, preview = false }: { event: CommunityEvent
               <button
                 type="button"
                 aria-pressed={interested}
-                onClick={() => setInterested((x) => !x)}
+                onClick={() => interestedEvents.toggle(event.slug)}
                 className={`inline-flex h-[42px] items-center justify-center gap-1.5 rounded-full border text-sm font-bold transition-colors ${
                   interested ? "border-leaf-deep bg-white text-leaf-deep" : "border-[#b9d6a9] hover:bg-white/60"
                 }`}

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, Check, CornerDownRight } from "lucide-react";
-import { ME, projectOf, userOf } from "@/lib/data";
+import { ME, userOf } from "@/lib/data";
+import { useProject } from "@/lib/stores";
 import {
   CLOSE_REASONS,
   TOPIC_DAYS,
@@ -26,6 +27,7 @@ export function TopicDetail({ id }: { id: string }) {
   const [answering, setAnswering] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
   const [reason, setReason] = useState<CloseReason>("Đã giải quyết");
+  const project = useProject(topic?.project);
 
   if (!topic) {
     return (
@@ -46,7 +48,8 @@ export function TopicDetail({ id }: { id: string }) {
     );
   }
 
-  const p = projectOf(topic.project)!;
+  const p = project;
+  if (!p) return null;
   const lead = userOf(topic.lead)!;
   const managed = canManage(topic);
   const open = topic.status === "open";

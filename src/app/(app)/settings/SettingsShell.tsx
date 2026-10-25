@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
+import { prefsStore, type Prefs } from "@/lib/stores";
 import { Bell, Eye, LifeBuoy, LockKeyhole, ShieldCheck, UserRound, type LucideIcon } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { ME, userOf } from "@/lib/data";
@@ -17,40 +18,9 @@ const ICONS: Record<SectionSlug, LucideIcon> = {
   help: LifeBuoy,
 };
 
-/** Toàn bộ lựa chọn trong Cài đặt. Bản giao diện: giữ trong bộ nhớ, chưa lưu lên server. */
-export interface Prefs {
-  name: string;
-  headline: string;
-  location: string;
-  language: "vi" | "en";
-  theme: "light" | "system";
-  twoStep: boolean;
-  profileAudience: "everyone" | "members" | "followers";
-  showOnline: boolean;
-  findableByEmail: boolean;
-  whoCanMessage: "everyone" | "following" | "nobody";
-  readReceipts: boolean;
-  notify: Record<string, boolean>;
-  digest: "daily" | "weekly" | "off";
-}
+export type { Prefs } from "@/lib/stores";
 
 const me = userOf(ME)!;
-
-const DEFAULTS: Prefs = {
-  name: me.name,
-  headline: me.headline,
-  location: me.location,
-  language: "vi",
-  theme: "light",
-  twoStep: false,
-  profileAudience: "everyone",
-  showOnline: true,
-  findableByEmail: false,
-  whoCanMessage: "everyone",
-  readReceipts: true,
-  notify: { messages: true, comments: true, groups: true, events: true, partners: false },
-  digest: "weekly",
-};
 
 const Ctx = createContext<{ prefs: Prefs; set: <K extends keyof Prefs>(k: K, v: Prefs[K]) => void } | null>(null);
 
@@ -63,8 +33,9 @@ export function usePrefs() {
 /** Khung trang Cài đặt: cột mục bên trái (thanh cuộn ngang trên điện thoại), nội dung bên phải. */
 export function SettingsShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
-  const set = <K extends keyof Prefs>(k: K, v: Prefs[K]) => setPrefs((p) => ({ ...p, [k]: v }));
+  // Cài đặt lưu trên trình duyệt, tải lại trang vẫn giữ.
+  const prefs = prefsStore.use();
+  const set = <K extends keyof Prefs>(k: K, v: Prefs[K]) => prefsStore.set((p) => ({ ...p, [k]: v }));
 
   return (
     <Ctx.Provider value={{ prefs, set }}>

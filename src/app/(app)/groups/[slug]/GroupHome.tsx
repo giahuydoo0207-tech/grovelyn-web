@@ -18,7 +18,8 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { ONLINE, ONLINE_TOTAL, POSTS, PROJECTS, USERS, userOf, type Group } from "@/lib/data";
+import { interestedEvents, postsStore, useGroupStatus } from "@/lib/stores";
+import { ONLINE, ONLINE_TOTAL, PROJECTS, USERS, userOf, type Group } from "@/lib/data";
 import { EVENTS, dateParts } from "@/lib/events";
 import { Avatar } from "@/components/Avatar";
 import { GroupCover, GroupMark } from "@/components/GroupVisual";
@@ -34,12 +35,13 @@ type Tab = "Thảo luận" | "Dự án của nhóm" | "Tìm cộng sự" | "Sự
  */
 export function GroupHome({ group }: { group: Group }) {
   const [tab, setTab] = useState<Tab>("Thảo luận");
-  const [status, setStatus] = useState<"member" | "none" | "asked">(group.joined ? "member" : "none");
-  const [going, setGoing] = useState<string[]>([]);
+  // Tham gia nhóm và sự kiện sẽ đi lưu trên trình duyệt.
+  const [status, setStatus] = useGroupStatus(group.slug, group.joined);
+  const going = interestedEvents.use();
   const [copied, setCopied] = useState(false);
 
   const projects = PROJECTS.filter((p) => group.fields.includes(p.field));
-  const seekers = POSTS.filter((p) => p.group === group.slug && p.kind === "Tìm cộng sự");
+  const seekers = postsStore.use().filter((p) => p.group === group.slug && p.kind === "Tìm cộng sự");
   const events = EVENTS.filter((e) => e.group?.name === group.name);
   const admins = group.admins.map(userOf).filter((u) => u !== undefined);
   const online = ONLINE.map(userOf).filter((u) => u !== undefined);
@@ -87,7 +89,7 @@ export function GroupHome({ group }: { group: Group }) {
               type="button"
               whileTap={{ scale: 0.96 }}
               aria-pressed={status === "member"}
-              onClick={() => setStatus((s) => (s === "member" ? "none" : s === "asked" ? "none" : group.privacy === "Riêng tư" ? "asked" : "member"))}
+              onClick={() => setStatus(status === "member" ? "none" : status === "asked" ? "none" : group.privacy === "Riêng tư" ? "asked" : "member")}
               className={`inline-flex h-[42px] items-center gap-1.5 rounded-full px-[18px] text-[15px] font-bold ${
                 status === "none" ? "bg-leaf text-ink hover:bg-[#6ee04d]" : "border border-[#c9d0c4] bg-white hover:bg-mist"
               }`}
@@ -286,7 +288,7 @@ export function GroupHome({ group }: { group: Group }) {
                         <button
                           type="button"
                           aria-pressed={on}
-                          onClick={() => setGoing((g) => (on ? g.filter((x) => x !== e.slug) : [...g, e.slug]))}
+                          onClick={() => interestedEvents.toggle(e.slug)}
                           className={`mt-1.5 inline-flex h-[30px] items-center gap-1 rounded-full border px-3 text-xs font-bold ${on ? "border-leaf-deep bg-sap text-leaf-deep" : "border-ink bg-white hover:bg-mist"}`}
                         >
                           {on && <Check className="h-3.5 w-3.5" aria-hidden="true" />}

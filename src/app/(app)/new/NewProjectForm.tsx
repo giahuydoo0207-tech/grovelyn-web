@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Check, Circle, FileText, Globe2, ImagePlus, Lock, Plus, UploadCloud, X } from "lucide-react";
-import { FIELDS, ME, QUOTA_MB, USERS, userOf, type CoverTone, type Field } from "@/lib/data";
+import { FIELDS, ME, QUOTA_MB, USERS, userOf, type CoverTone, type Field, type Project, type ProjectFile } from "@/lib/data";
+import { compressImage } from "@/lib/localMedia";
+import { slugify } from "@/lib/slug";
+import { persisted } from "@/lib/persist";
+import { myProjectsStore, postsStore } from "@/lib/stores";
 import { toEmbed } from "@/lib/embed";
 import { CONTEXTS, LAYOUTS, OUTPUTS, USAGES, canAnnounce, layoutOf, levelHint, sectionsFor, type Context, type Layout, type Output, type Usage } from "@/lib/model";
 import { PROGRESS, phaseLabel, type Phase } from "@/lib/showcase";
@@ -20,6 +24,31 @@ const input = "h-12 w-full rounded-lg border border-line bg-white px-4 text-[15p
 const area = "w-full rounded-lg border border-line bg-white px-4 py-3 text-[15px] font-normal leading-relaxed outline-none focus:border-ink";
 const label = "flex flex-col gap-1.5 text-sm font-semibold";
 const optional = <span className="font-normal text-moss">(không bắt buộc)</span>;
+
+/** Bản nháp của form, lưu trên trình duyệt để quay lại làm tiếp. */
+interface Draft {
+  title: string;
+  summary: string;
+  field: Field | "";
+  output: Output | "";
+  context: Context | "";
+  contextNote: string;
+  usage: Usage | "";
+  myRole: string;
+  tools: string[];
+  phase: Phase;
+  sections: Record<string, string>;
+}
+const draftStore = persisted<Draft | null>("project-draft", null);
+
+const fileKind = (name: string): ProjectFile["kind"] => {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  if (ext === "pdf") return "pdf";
+  if (["png", "jpg", "jpeg", "webp", "gif", "svg"].includes(ext)) return "image";
+  if (["mp4", "mov", "webm"].includes(ext)) return "video";
+  if (["skp", "rvt", "dwg", "obj", "fbx", "stl", "blend"].includes(ext)) return "model";
+  return "doc";
+};
 
 const TONES: { id: CoverTone; name: string; swatch: string }[] = [
   { id: "ink", name: "Đen", swatch: "#06110a" },
@@ -133,6 +162,8 @@ export function NewProjectForm() {
   const [tried, setTried] = useState(false);
   const [done, setDone] = useState<null | "saved" | "published">(null);
   const [draftSaved, setDraftSaved] = useState(false);
+  const [savedSlug, setSavedSlug] = useState("");
+  const draft = draftStore.use();
   const logoInput = useRef<HTMLInputElement>(null);
   const shotInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -141,19 +172,12 @@ export function NewProjectForm() {
   const autoLayout: Layout = output ? layoutOf(output) : "case";
   const shownLayout = layout ?? autoLayout;
 
-  // Thu hồi ảnh xem trước khi rời trang.
-  const urls = useRef<string[]>([]);
-  useEffect(() => () => urls.current.forEach((u) => URL.revokeObjectURL(u)), []);
-  const track = (f: File) => {
-    const u = URL.createObjectURL(f);
-    urls.current.push(u);
-    return u;
-  };
-
-  const addShots = (list: FileList | null) => {
+  // Ảnh được thu nhỏ rồi lưu dạng data URL, để dự án mở lại sau khi tải trang vẫn còn ảnh.
+  const addShots = async (list: FileList | null) => {
     if (!list) return;
     const imgs = Array.from(list).filter((f) => f.type.startsWith("image/")).slice(0, MAX_SHOTS - shots.length);
-    setShots((s) => [...s, ...imgs.map((f) => ({ url: track(f), name: f.name.replace(/\.[^.]+$/, "") }))]);
+    const next = await Promise.all(imgs.map(async (f) => ({ url: await compressImage(f), name: f.name.replace(/\.[^.]+$/, "") })));
+    setShots((s) => [...s, ...next]);
   };
   const addFiles = (list: FileList | null) => {
     if (!list) return;
@@ -205,7 +229,65 @@ export function NewProjectForm() {
       document.querySelector("[aria-invalid='true']")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    setDone(publish && canPublish ? "published" : "saved");
+    const slug = slugify(title);
+    const project: Project = {
+      slug,
+      title: title.trim(),
+      summary: summary.trim(),
+      field: field as Field,
+      output: output as Output,
+      context: context || "Dự án cá nhân",
+      contextNote: contextNote.trim() || undefined,
+      usage: usage || undefined,
+      owner: ME,
+      members: [{ handle: ME, part: myRole.trim() }, ...members.map((m) => ({ handle: m.handle, part: m.part.trim() || "Thành viên" }))],
+      tools,
+      files: files.filter((f) => !f.tooBig).map((f) => ({ name: f.name, kind: fileKind(f.name), size: `${f.mb.toFixed(1).replace(".", ",")} MB`, updated: "vừa xong" })),
+      versions: [{ tag: "v1", note: "Bản đầu tiên", when: "vừa xong" }],
+      likes: 0,
+      comments: 0,
+      tone,
+      seed: Math.floor(Math.random() * 90) + 5,
+      updated: "vừa xong",
+      readme: sectionsFor(shownLayout, phase)
+        .map((sec) => ({ heading: sec.heading, body: (sections[sec.heading] ?? "").trim() }))
+        .filter((sec) => sec.body),
+      local: {
+        phase,
+        gallery: shots.map((sh) => ({ src: sh.url, caption: sh.name })),
+        links: filledLinks.map((l) => ({ label: l.label.trim() || "Liên kết", url: l.url.trim(), kind: "other" as const })),
+        logoSrc,
+      },
+    };
+    // Lưu dự án vào trình duyệt; công bố thì thêm bài Công bố lên Trang chủ.
+    myProjectsStore.set((all) => [project, ...all]);
+    const published = publish && canPublish;
+    if (published)
+      postsStore.set((all) => [
+        { id: `cb-${slug}`, author: ME, kind: "Công bố", version: "v1", project: slug, when: "vừa xong", text: summary.trim(), likes: 0, comments: [], reposts: 0 },
+        ...all,
+      ]);
+    draftStore.set(null);
+    setSavedSlug(slug);
+    setDone(published ? "published" : "saved");
+  };
+
+  const saveDraft = () => {
+    draftStore.set({ title, summary, field, output, context, contextNote, usage, myRole, tools, phase, sections });
+    setDraftSaved(true);
+  };
+  const loadDraft = (d: Draft) => {
+    setTitle(d.title);
+    setSummary(d.summary);
+    setField(d.field);
+    setOutput(d.output);
+    setContext(d.context);
+    setContextNote(d.contextNote);
+    setUsage(d.usage);
+    setMyRole(d.myRole);
+    setTools(d.tools);
+    setPhase(d.phase);
+    setSections(d.sections);
   };
 
   if (done) {
@@ -218,11 +300,14 @@ export function NewProjectForm() {
             : "Dự án nằm trong hồ sơ của bạn. Khi xong bản trình bày, bấm Công bố để đưa lên Trang chủ, hoặc mở Trao đổi để xin góp ý ngay bây giờ."}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href={done === "published" ? "/community" : "/exchange"} className="rounded-lg bg-leaf px-5 py-3 font-bold text-ink">
+          <Link href={`/p/${savedSlug}`} className="rounded-lg bg-leaf px-5 py-3 font-bold text-ink">
+            Xem dự án
+          </Link>
+          <Link href={done === "published" ? "/community" : "/exchange"} className="rounded-lg border border-ink-line px-5 py-3 font-semibold hover:bg-white/10">
             {done === "published" ? "Xem trên Trang chủ" : "Mở trao đổi"}
           </Link>
-          <button onClick={() => setDone(null)} className="rounded-lg border border-ink-line px-5 py-3 font-semibold hover:bg-white/10">
-            Quay lại chỉnh sửa
+          <button onClick={() => window.location.reload()} className="rounded-lg px-5 py-3 font-semibold text-fog hover:bg-white/10">
+            Tạo dự án khác
           </button>
         </div>
       </motion.div>
@@ -234,6 +319,19 @@ export function NewProjectForm() {
   return (
     <form className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_340px]" onSubmit={(e) => (e.preventDefault(), submit(false))} noValidate>
       <div className="flex min-w-0 flex-col gap-5">
+        {draft && !title && !draftSaved && (
+          <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-white px-5 py-4">
+            <p className="mr-auto text-[15px]">
+              Bạn có bản nháp chưa xong{draft.title ? `: ${draft.title}` : ""}.
+            </p>
+            <button type="button" onClick={() => loadDraft(draft)} className="h-10 rounded-lg bg-ink px-4 text-sm font-bold text-white hover:bg-ink-2">
+              Mở lại bản nháp
+            </button>
+            <button type="button" onClick={() => draftStore.set(null)} className="h-10 rounded-lg px-3 text-sm font-semibold text-moss hover:bg-mist">
+              Bỏ nháp
+            </button>
+          </div>
+        )}
         <Part n={1} title="Đây là gì" hint="Ba lựa chọn dưới đây giúp người xem hiểu đúng dự án của bạn, dù họ khác ngành.">
           <label className={label}>
             Tên dự án
@@ -523,7 +621,7 @@ export function NewProjectForm() {
               aria-label="Chọn logo dự án"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) setLogoSrc(track(f));
+                if (f) void compressImage(f, 400).then(setLogoSrc);
                 e.target.value = "";
               }}
             />
@@ -696,7 +794,7 @@ export function NewProjectForm() {
         <p id="cong-bo-goi-y" className="-mt-1 text-[13px] leading-snug text-moss">
           {publishHint}
         </p>
-        <button type="button" onClick={() => setDraftSaved(true)} className="h-11 rounded-lg border border-line bg-white font-semibold hover:bg-mist">
+        <button type="button" onClick={saveDraft} className="h-11 rounded-lg border border-line bg-white font-semibold hover:bg-mist">
           Lưu nháp
         </button>
         {draftSaved && (

@@ -222,10 +222,10 @@ export interface Contribution {
 }
 
 /** Góp ý đã được áp dụng của một người, chỉ tính khi người đó đồng ý ghi tên. */
-export const contributionsBy = (handle: string): Contribution[] =>
-  TOPICS.flatMap((topic) => topic.replies.filter((r) => r.author === handle && r.applied && r.credit).map((reply) => ({ topic, reply })));
+export const contributionsBy = (handle: string, topics: Topic[] = TOPICS): Contribution[] =>
+  topics.flatMap((topic) => topic.replies.filter((r) => r.author === handle && r.applied && r.credit).map((reply) => ({ topic, reply })));
 
 /** Người có góp ý được áp dụng trong một dự án. */
-export const contributorsOf = (slug: string) => [
-  ...new Set(topicsOf(slug).flatMap((t) => t.replies.filter((r) => r.applied && r.credit).map((r) => r.author))),
+export const contributorsOf = (slug: string, topics: Topic[] = TOPICS) => [
+  ...new Set(topics.filter((t) => t.project === slug).flatMap((t) => t.replies.filter((r) => r.applied && r.credit).map((r) => r.author))),
 ];

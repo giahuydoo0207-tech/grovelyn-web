@@ -340,8 +340,22 @@ function fallback(project: Project): Showcase {
   };
 }
 
+/** Dự án người dùng tạo trong bản dùng thử: dựng phần trưng bày từ những gì đã nhập. */
+function fromLocal(project: Project, local: NonNullable<Project["local"]>): Showcase {
+  return {
+    tags: [],
+    facts: {},
+    gallery: local.gallery,
+    embeds: [],
+    links: local.links,
+    milestones: [{ id: `${project.slug}-v1`, phase: local.phase, title: "Bản đầu tiên", note: project.summary, when: project.updated, version: "v1", by: project.owner }],
+  };
+}
+
 export const showcaseOf = (project: Project): Showcase =>
-  DATA[project.slug] ?? { ...fallback(project), logo: project.slug === "robot-phan-loai-rac" ? "robot" : undefined };
+  project.local
+    ? fromLocal(project, project.local)
+    : (DATA[project.slug] ?? { ...fallback(project), logo: project.slug === "robot-phan-loai-rac" ? "robot" : undefined });
 
 /** Giai đoạn hiện tại = giai đoạn của cột mốc mới nhất. */
 export const currentPhase = (milestones: Milestone[]): Phase => milestones[0]?.phase ?? "concept";

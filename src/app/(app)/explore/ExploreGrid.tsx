@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { FIELDS, PROJECTS, userOf } from "@/lib/data";
+import { FIELDS, PROJECTS as SAMPLE, userOf } from "@/lib/data";
+import { myProjectsStore } from "@/lib/stores";
 import { showcaseOf } from "@/lib/showcase";
 import { OUTPUTS, type Output } from "@/lib/model";
 import { ProjectCard } from "@/components/ProjectCard";
@@ -14,6 +15,8 @@ const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/
 export function ExploreGrid() {
   const params = useSearchParams();
   const q = params.get("q") ?? "";
+  // Dự án bạn tạo (lưu trên trình duyệt) đứng đầu, rồi tới dự án mẫu.
+  const PROJECTS = [...myProjectsStore.use(), ...SAMPLE];
   const fromLink = params.get("nganh");
   const [field, setField] = useState<(typeof FIELDS)[number]>(() =>
     FIELDS.find((f) => f === fromLink) ?? "Tất cả",

@@ -30,6 +30,7 @@ import { Gallery } from "@/components/project/Gallery";
 import { Journey } from "@/components/project/Journey";
 import { ProjectExchange } from "@/components/exchange/ProjectExchange";
 import { contributorsOf, topicsOf } from "@/lib/exchange";
+import { useTopics } from "@/lib/topicStore";
 
 type View = "story" | "exchange" | "resources";
 
@@ -351,6 +352,7 @@ function ResourceRow({ icon: Icon, label, url }: { icon: LucideIcon; label: stri
 }
 
 function ProjectAside({ project, showcase, onTimeline }: { project: Project; showcase: Showcase; onTimeline: () => void }) {
+  const topics = useTopics();
   const resources = showcase.resources ?? {};
   const present = RESOURCE_META.filter((r) => resources[r.key]);
   const now = currentPhase(showcase.milestones);
@@ -444,7 +446,7 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
               </li>
             );
           })}
-          {contributorsOf(project.slug)
+          {contributorsOf(project.slug, topics)
             .filter((h) => !project.members.some((m) => m.handle === h))
             .map((h) => {
               const u = userOf(h);

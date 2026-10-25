@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { askedGroups, joinedGroups, leftGroups, myGroupsStore } from "@/lib/stores";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, Search } from "lucide-react";
-import { GROUPS, type Group } from "@/lib/data";
+import { GROUPS as SAMPLE, type Group } from "@/lib/data";
 import { GroupCover, GroupMark } from "@/components/GroupVisual";
 
 const TABS = ["Nhóm của bạn", "Khám phá", "Lời mời"] as const;
@@ -79,14 +80,22 @@ function SuggestCard({ g, state, onJoin }: { g: Group; state: "none" | "joined" 
 export function GroupsBoard() {
   const [tab, setTab] = useState<Tab>("Nhóm của bạn");
   const [q, setQ] = useState("");
-  const [joined, setJoined] = useState<Record<string, "joined" | "asked">>({});
+  // Nhóm bạn tạo đứng đầu; trạng thái tham gia lưu trên trình duyệt, khớp với trang chi tiết nhóm.
+  const GROUPS = [...myGroupsStore.use(), ...SAMPLE];
+  const joinedList = joinedGroups.use();
+  const askedList = askedGroups.use();
+  const leftList = leftGroups.use();
+  const joined: Record<string, "joined" | "asked"> = Object.fromEntries([
+    ...joinedList.map((s) => [s, "joined"] as const),
+    ...askedList.map((s) => [s, "asked"] as const),
+  ]);
 
   const match = (g: Group) => !q.trim() || fold(`${g.name} ${g.fields.join(" ")}`).includes(fold(q));
-  const isMember = (g: Group) => g.joined || joined[g.slug] === "joined";
+  const isMember = (g: Group) => (g.joined && !leftList.includes(g.slug)) || joined[g.slug] === "joined";
   const mine = GROUPS.filter((g) => isMember(g) && match(g));
   const others = GROUPS.filter((g) => !isMember(g) && match(g));
   const invites = GROUPS.filter((g) => INVITES.includes(g.slug) && !isMember(g));
-  const join = (g: Group) => setJoined((j) => ({ ...j, [g.slug]: g.privacy === "Riêng tư" && !INVITES.includes(g.slug) ? "asked" : "joined" }));
+  const join = (g: Group) => (g.privacy === "Riêng tư" && !INVITES.includes(g.slug) ? askedGroups.add(g.slug) : joinedGroups.add(g.slug));
 
   return (
     <>

@@ -21,6 +21,8 @@ import {
   type Speaker,
 } from "@/lib/events";
 import { ImageCropper } from "@/components/ImageCropper";
+import { myEventsStore } from "@/lib/stores";
+import { slugify } from "@/lib/slug";
 import { EventView } from "../EventView";
 
 const MAX_MB = 25;
@@ -98,6 +100,7 @@ export function EventForm() {
   const [crop, setCrop] = useState<{ src: string; target: CropTarget } | null>(null);
   const [fileError, setFileError] = useState("");
   const [view, setView] = useState<"edit" | "preview" | "done">("edit");
+  const [savedSlug, setSavedSlug] = useState("");
   const [tried, setTried] = useState(false);
 
   const coverInput = useRef<HTMLInputElement>(null);
@@ -202,6 +205,10 @@ export function EventForm() {
       setView("edit");
       return;
     }
+    // Lưu sự kiện vào trình duyệt để mở lại được ở trang Sự kiện.
+    const slug = slugify(title);
+    myEventsStore.set((all) => [{ ...event, slug }, ...all]);
+    setSavedSlug(slug);
     setView("done");
   };
 
@@ -212,11 +219,10 @@ export function EventForm() {
         <p className="mt-2 text-fog">
           {dateParts(date).long}, {from} đến {to}. Thành viên nhóm {group?.name ?? "của bạn"} sẽ nhận thông báo.
         </p>
-        <p className="mt-1 text-sm text-fog">Bản giao diện: sự kiện chưa được lưu lên máy chủ.</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <button type="button" onClick={() => setView("preview")} className="h-12 rounded-xl bg-leaf px-5 font-bold text-ink">
+          <Link href={`/events/${savedSlug}`} className="flex h-12 items-center rounded-xl bg-leaf px-5 font-bold text-ink">
             Xem trang sự kiện
-          </button>
+          </Link>
           <Link href="/events" className="flex h-12 items-center rounded-xl border border-ink-line px-5 font-semibold hover:bg-white/10">
             Về trang Sự kiện
           </Link>

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Mark } from "./Logo";
 import { NOTICES } from "@/lib/data";
+import { readNotices } from "@/lib/stores";
 import { useChat } from "./chat/ChatProvider";
 import { UserMenu } from "./UserMenu";
 
@@ -27,7 +28,6 @@ interface Item {
   badge?: number;
 }
 
-const unread = NOTICES.filter((n) => n.unread).length;
 
 /** Trao đổi đứng riêng cạnh ô tìm kiếm: nơi dự án làm dở nhận góp ý, tách khỏi Trang chủ. */
 const EXCHANGE: Item = {
@@ -67,7 +67,6 @@ const ITEMS: Item[] = [
     label: "Thông báo",
     icon: Bell,
     match: (p) => p.startsWith("/notifications"),
-    badge: unread,
   },
 ];
 
@@ -144,8 +143,10 @@ export function NavBar() {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const { unreadCount } = useChat();
+  const read = readNotices.use();
+  const noticeCount = NOTICES.filter((n) => n.unread && !read.includes(n.id)).length;
   const items = ITEMS.map((i) =>
-    i.href === "/messages" ? { ...i, badge: unreadCount } : i,
+    i.href === "/messages" ? { ...i, badge: unreadCount } : i.href === "/notifications" ? { ...i, badge: noticeCount } : i,
   );
 
   useEffect(() => {

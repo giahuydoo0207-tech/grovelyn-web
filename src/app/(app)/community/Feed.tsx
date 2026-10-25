@@ -4,7 +4,8 @@ import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { ChevronDown, ImagePlus, Rocket, UsersRound } from "lucide-react";
-import { ME, POSTS, POST_KINDS, projectsBy, type Post, type PostKind, userOf } from "@/lib/data";
+import { ME, POST_KINDS, type PostKind } from "@/lib/data";
+import { postsStore, useMyProjects, useUser } from "@/lib/stores";
 import type { Media } from "@/lib/media";
 import { currentPhase, showcaseOf } from "@/lib/showcase";
 import { canAnnounce } from "@/lib/model";
@@ -30,11 +31,14 @@ const PLACEHOLDER: Record<PostKind, string> = {
 export function Feed({ group }: { group?: string } = {}) {
   const kinds: PostKind[] = group ? POST_KINDS.filter((k) => k !== "Công bố") : POST_KINDS;
   const filters: Filter[] = ["Tất cả", ...kinds];
-  const me = userOf(ME)!;
-  const mine = projectsBy(ME);
+  const me = useUser(ME)!;
+  const mine = useMyProjects();
   const ready = mine.filter((p) => p.owner === ME && canAnnounce(currentPhase(showcaseOf(p).milestones), p.usage));
 
-  const [posts, setPosts] = useState<Post[]>(() => POSTS.filter((p) => (group ? p.group === group : !p.group)));
+  // Bài đăng lưu trong localStorage: tải lại trang vẫn còn bài bạn vừa đăng.
+  const all = postsStore.use();
+  const posts = all.filter((p) => (group ? p.group === group : !p.group));
+  const setPosts = postsStore.set;
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<PostKind>("Chia sẻ");
   const [text, setText] = useState("");

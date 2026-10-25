@@ -6,6 +6,9 @@ import { Check, ChevronDown, Download, LoaderCircle, LogOut, Monitor, Smartphone
 import { signOut } from "@/app/auth-actions";
 import { sectionOf, type SectionSlug } from "./sections";
 import { usePrefs, type Prefs } from "./SettingsShell";
+import { resetAll } from "@/lib/persist";
+import { useRouter } from "next/navigation";
+import { clearMedia } from "@/lib/localMedia";
 
 /* ---------- Khối dựng dùng chung ---------- */
 
@@ -335,6 +338,12 @@ function Privacy({ toast }: { toast: (m: string) => void }) {
         </Row>
       </Card>
 
+      <Card title="Dữ liệu dùng thử trên trình duyệt này" desc="Bài đăng, trao đổi, tin nhắn, dự án, ảnh và video bạn tạo được lưu ngay trên trình duyệt này, chưa lên máy chủ. Mở bằng máy khác sẽ không thấy.">
+        <Row label="Xoá dữ liệu dùng thử" hint="Đưa Grovelyn về nội dung mẫu ban đầu. Không hoàn tác được.">
+          <ResetDemo />
+        </Row>
+      </Card>
+
       <Card title="Dữ liệu của bạn">
         <Row label="Tải dữ liệu về máy" hint="Gồm hồ sơ, dự án, tệp, bài đăng và tin nhắn. Gửi link tải qua email trong 24 giờ.">
           <button
@@ -524,5 +533,35 @@ export function SettingsView({ section }: { section: SectionSlug }) {
       {section === "help" && <Help toast={show} />}
       {node}
     </div>
+  );
+}
+
+/** Xoá mọi thứ bản dùng thử đã lưu (localStorage và ảnh, video trong IndexedDB), rồi tải lại trang. */
+function ResetDemo() {
+  const [sure, setSure] = useState(false);
+  const router = useRouter();
+  if (!sure)
+    return (
+      <button type="button" onClick={() => setSure(true)} className="inline-flex h-9 items-center rounded-xl border border-line px-3.5 text-sm font-semibold hover:bg-mist">
+        Xoá dữ liệu
+      </button>
+    );
+  return (
+    <span className="flex flex-wrap gap-2">
+      <button type="button" onClick={() => setSure(false)} className="inline-flex h-9 items-center rounded-xl px-3 text-sm font-semibold text-moss hover:bg-mist">
+        Huỷ
+      </button>
+      <button
+        type="button"
+        onClick={async () => {
+          resetAll();
+          await clearMedia();
+          router.push("/community");
+        }}
+        className="inline-flex h-9 items-center rounded-xl bg-[#b42318] px-3.5 text-sm font-semibold text-white hover:bg-[#912018]"
+      >
+        Xoá hết
+      </button>
+    </span>
   );
 }

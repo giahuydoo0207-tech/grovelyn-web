@@ -56,28 +56,28 @@ const DIFF = [
 
 const STATUS = [
   {
-    title: "Đang chạy thật",
+    title: "Dùng được ngay",
     en: "Works today",
     items: [
-      "Giao diện và điều hướng",
-      "Đăng bài, tạo dự án, mở trao đổi kèm ảnh và video (giữ trong phiên)",
+      "Đăng bài, tạo dự án, mở trao đổi, nhắn tin, kèm ảnh và video",
+      "Mọi thứ bạn làm được lưu trên trình duyệt này, tải lại trang vẫn còn",
       "Lọc theo lĩnh vực, dạng đầu ra, góc nhìn",
     ],
   },
   {
-    title: "Đang mô phỏng",
-    en: "Simulated",
+    title: "Dữ liệu có sẵn",
+    en: "Sample content",
     items: [
-      "Đăng nhập bằng tài khoản mẫu",
-      "Mọi người dùng, dự án, lượt thích, thông báo",
-      "Người đang online, sự kiện",
+      "Bạn vào bằng tài khoản Gia Huy",
+      "Những người dùng và dự án khác là nội dung mẫu",
+      "Xoá dữ liệu của bạn trong Cài đặt, mục Quyền riêng tư dữ liệu",
     ],
   },
   {
-    title: "Mới là định hướng",
+    title: "Sắp có",
     en: "Planned",
     items: [
-      "Tài khoản thật và lưu trữ",
+      "Tài khoản riêng và lưu trên máy chủ, dùng chung giữa các máy",
       "Cộng tác nhiều người cùng lúc",
       "Trang Business cho doanh nghiệp, mở khi người dùng ổn định",
     ],
@@ -134,10 +134,6 @@ export default async function DemoPage() {
 
   return (
     <div className="min-h-dvh bg-mist text-ink">
-      <p className="bg-ink px-4 py-2 text-center text-[13px] text-fog">
-        Bản thử nghiệm. Mọi người dùng, dự án và số liệu là dữ liệu mẫu.{" "}
-        <span lang="en">Sample data.</span>
-      </p>
 
       <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
         <span className="flex items-center gap-2">
@@ -396,10 +392,10 @@ export default async function DemoPage() {
             id="trang-thai-title"
             className="font-display text-[clamp(1.6rem,3vw,2.2rem)] font-bold tracking-[-0.03em]"
           >
-            Phần nào đã chạy thật
+            Dùng thử thế nào
           </h2>
           <p lang="en" className="mt-1 text-[15px] text-moss">
-            What works today, what is simulated, and what is planned.
+            What works today, what comes with the demo, and what is planned.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {STATUS.map((s) => (

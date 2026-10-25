@@ -10,6 +10,8 @@ import { FIELDS, USERS, ME, type CoverTone, type Field, type GroupPrivacy } from
 import { Avatar } from "@/components/Avatar";
 import { ImageCropper } from "@/components/ImageCropper";
 import { GroupCover, GroupMark, groupInitials } from "@/components/GroupVisual";
+import { myGroupsStore } from "@/lib/stores";
+import { slugify } from "@/lib/slug";
 
 const MAX_MB = 25;
 const FIELD =
@@ -85,7 +87,39 @@ export function GroupForm() {
   const [who, setWho] = useState("");
   const [crop, setCrop] = useState<{ src: string; target: "cover" | "photo" } | null>(null);
   const [fileError, setFileError] = useState("");
-  const [done, setDone] = useState(false);
+  const [done, setDoneState] = useState(false);
+  const [savedSlug, setSavedSlug] = useState("");
+  // Tạo nhóm: lưu vào trình duyệt, nhóm hiện trong "Nhóm của bạn" và mở được trang riêng.
+  const setDone = (v: boolean) => {
+    if (v && !done) {
+      const slug = slugify(name);
+      myGroupsStore.set((all) => [
+        {
+          slug,
+          mark: groupInitials(name),
+          name: name.trim(),
+          members: 1 + invited.length,
+          fresh: 0,
+          tone,
+          description: desc.trim(),
+          privacy,
+          fields,
+          area,
+          founded: new Date().toLocaleDateString("vi-VN"),
+          admins: [ME],
+          rules,
+          coverSeed: 23,
+          coverTone: "ink",
+          cover: cover ?? undefined,
+          joined: true,
+          perms,
+        },
+        ...all,
+      ]);
+      setSavedSlug(slug);
+    }
+    setDoneState(v);
+  };
 
   const coverInput = useRef<HTMLInputElement>(null);
   const photoInput = useRef<HTMLInputElement>(null);
@@ -131,10 +165,9 @@ export function GroupForm() {
             <p className="mt-1 text-fog">
               Nhóm {privacy.toLowerCase()}, {fields.join(", ")}. {invited.length ? `Đã gửi ${invited.length} lời mời.` : "Bạn là quản trị viên đầu tiên."}
             </p>
-            <p className="mt-1 text-sm text-fog">Bản giao diện: nhóm chưa được lưu lên máy chủ.</p>
           </div>
-          <Link href="/groups" className="flex h-12 items-center rounded-xl bg-leaf px-5 font-bold text-ink">
-            Về trang Nhóm
+          <Link href={`/groups/${savedSlug}`} className="flex h-12 items-center rounded-xl bg-leaf px-5 font-bold text-ink">
+            Vào nhóm
           </Link>
         </div>
       </motion.div>

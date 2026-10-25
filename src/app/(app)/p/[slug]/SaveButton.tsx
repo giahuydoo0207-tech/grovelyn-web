@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "motion/react";
 import { Bookmark } from "lucide-react";
+import { savedProjects } from "@/lib/stores";
 
-export function SaveButton() {
-  const [saved, setSaved] = useState(false);
+/** Lưu dự án để xem lại ở trang Đã lưu. Lưu trên trình duyệt. */
+export function SaveButton({ slug }: { slug: string }) {
+  const saved = savedProjects.use().includes(slug);
   return (
     <button
       type="button"
       aria-pressed={saved}
-      onClick={() => setSaved((v) => !v)}
+      onClick={() => savedProjects.toggle(slug)}
       className={`inline-flex h-11 items-center gap-2 rounded-xl px-4 text-[15px] font-semibold transition-colors ${
         saved ? "bg-white text-ink" : "border border-ink-line text-white hover:bg-white/10"
       }`}

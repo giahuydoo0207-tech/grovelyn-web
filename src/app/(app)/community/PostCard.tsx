@@ -5,12 +5,14 @@ import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { MessageCircle, MoreHorizontal, Repeat2, Send, ThumbsUp } from "lucide-react";
 import type { Post } from "@/lib/data";
-import { ME, projectOf, userOf } from "@/lib/data";
+import { ME, userOf } from "@/lib/data";
 import { contributorsOf } from "@/lib/exchange";
+import { useTopics } from "@/lib/topicStore";
 import { Avatar } from "@/components/Avatar";
 import { ProjectCover } from "@/components/ProjectCover";
 import { MediaGrid } from "@/components/MediaGrid";
 import { REACTIONS } from "./reactions";
+import { joinRequests, useProject, useUser, reactionsStore, setReaction as saveReaction, updatePost } from "@/lib/stores";
 
 const KIND_STYLE: Record<Post["kind"], string> = {
   "Chia sẻ": "bg-mist text-ink",
@@ -19,14 +21,17 @@ const KIND_STYLE: Record<Post["kind"], string> = {
 };
 
 export function PostCard({ post }: { post: Post }) {
-  const author = userOf(post.author)!;
-  const project = post.project ? projectOf(post.project) : undefined;
-  const [reaction, setReaction] = useState<string | null>(null);
+  const author = useUser(post.author)!;
+  const project = useProject(post.project);
+  // Cảm xúc, bình luận và lời xin tham gia được lưu trên trình duyệt (lib/stores).
+  const reaction = reactionsStore.use()[post.id] ?? null;
+  const setReaction = (next: string | null | ((cur: string | null) => string | null)) =>
+    saveReaction(post.id, typeof next === "function" ? next(reaction) : next);
   const [picker, setPicker] = useState(false);
   const [hot, setHot] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [joined, setJoined] = useState(false);
-  const [comments, setComments] = useState(post.comments);
+  const joined = joinRequests.use().includes(post.id);
+  const comments = post.comments;
   const [draft, setDraft] = useState("");
   const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hide = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -48,7 +53,7 @@ export function PostCard({ post }: { post: Post }) {
     e.preventDefault();
     const text = draft.trim();
     if (!text) return;
-    setComments((c) => [...c, { author: ME, text, when: "vừa xong" }]);
+    updatePost(post.id, (p) => ({ ...p, comments: [...p.comments, { author: ME, text, when: "vừa xong" }] }));
     setDraft("");
   };
 
@@ -216,7 +221,7 @@ export function PostCard({ post }: { post: Post }) {
           <button
             type="button"
             aria-pressed={joined}
-            onClick={() => setJoined((v) => !v)}
+            onClick={() => joinRequests.toggle(post.id)}
             className={`flex h-11 flex-1 items-center justify-center rounded-xl text-[15px] font-semibold transition-colors ${joined ? "bg-sap text-leaf-deep" : "bg-ink text-white hover:bg-ink-2"}`}
           >
             {joined ? "Đã gửi lời xin tham gia" : "Xin tham gia"}
@@ -284,7 +289,7 @@ export function PostCard({ post }: { post: Post }) {
 
 /** Ghi công người có góp ý được áp dụng qua tab Trao đổi. */
 function Credit({ slug }: { slug: string }) {
-  const people = contributorsOf(slug)
+  const people = contributorsOf(slug, useTopics())
     .map((h) => userOf(h))
     .filter((u) => !!u);
   if (!people.length) return null;

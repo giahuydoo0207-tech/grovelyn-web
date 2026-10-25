@@ -1,8 +1,15 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import { ME, ONLINE, projectOf, userOf, type CoverTone } from "@/lib/data";
 import { CONVERSATIONS, nowLabel, type ChatMessage, type Conversation } from "@/lib/chat";
+import { persisted } from "@/lib/persist";
+
+/** Tin nhắn và cuộc trò chuyện đã tắt thông báo, lưu trên trình duyệt. */
+const convStore = persisted<Conversation[]>("conversations", CONVERSATIONS);
+const mutedStore = persisted<string[]>("muted", []);
+const setConvs = convStore.set;
+const setMuted = mutedStore.set;
 
 export interface DockWindow {
   id: string;
@@ -88,8 +95,8 @@ const Ctx = createContext<ChatState | null>(null);
 const MAX_WINDOWS = 2;
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
-  const [convs, setConvs] = useState<Conversation[]>(CONVERSATIONS);
-  const [muted, setMuted] = useState<string[]>([]);
+  const convs = convStore.use();
+  const muted = mutedStore.use();
   const [active, setActive] = useState(CONVERSATIONS[0].id);
   const [wins, setWins] = useState<DockWindow[]>([]);
   const [listOpen, setListOpen] = useState(false);
@@ -155,10 +162,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const unreadCount = convs.filter((c) => c.unread > 0 && !muted.includes(c.id)).length;
 
-  const value = useMemo<ChatState>(
-    () => ({ convs, convOf, send, markRead, muted, toggleMute, active, setActive, startDirect, unreadCount, wins, openWindow, toggleWindow, closeWindow, listOpen, setListOpen }),
-    [convs, convOf, send, markRead, muted, toggleMute, active, startDirect, unreadCount, wins, openWindow, toggleWindow, closeWindow, listOpen],
-  );
+  // React Compiler tự ghi nhớ giá trị này.
+  const value: ChatState = { convs, convOf, send, markRead, muted, toggleMute, active, setActive, startDirect, unreadCount, wins, openWindow, toggleWindow, closeWindow, listOpen, setListOpen };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

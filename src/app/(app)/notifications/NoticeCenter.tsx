@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { readNotices } from "@/lib/stores";
 import { AnimatePresence, motion } from "motion/react";
 import { AtSign, CalendarDays, CheckCheck, Eye, HandHelping, MessageCircle, Sprout, ThumbsUp, UserPlus, type LucideIcon } from "lucide-react";
 import { NOTICES, projectOf, userOf, type Notice, type NoticeKind } from "@/lib/data";
@@ -120,7 +121,8 @@ function NoticeRow({ n, unread, onRead }: { n: Notice; unread: boolean; onRead: 
 /** Danh sách thông báo: lọc theo loại, nhóm theo thời gian, đánh dấu đã đọc. */
 export function NoticeCenter() {
   const [filter, setFilter] = useState("all");
-  const [read, setRead] = useState<Set<string>>(new Set());
+  // Thông báo đã đọc lưu trên trình duyệt; số trên chuông cập nhật theo.
+  const read = new Set(readNotices.use());
   const kinds = FILTERS.find((f) => f.id === filter)!.kinds;
   const shown = NOTICES.filter((n) => !kinds || kinds.includes(n.kind));
   const isUnread = (n: Notice) => n.unread && !read.has(n.id);
@@ -139,7 +141,7 @@ export function NoticeCenter() {
           <button
             type="button"
             disabled={!unreadCount}
-            onClick={() => setRead(new Set(NOTICES.map((n) => n.id)))}
+            onClick={() => readNotices.set(NOTICES.map((n) => n.id))}
             className="inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold text-leaf-deep transition-colors hover:bg-sap/60 disabled:pointer-events-none disabled:text-moss/60"
           >
             <CheckCheck className="h-4 w-4" aria-hidden="true" /> Đánh dấu đã đọc tất cả
@@ -184,7 +186,7 @@ export function NoticeCenter() {
               <ul className="flex flex-col gap-1">
                 <AnimatePresence initial={false}>
                   {items.map((n) => (
-                    <NoticeRow key={n.id} n={n} unread={isUnread(n)} onRead={() => setRead((s) => new Set(s).add(n.id))} />
+                    <NoticeRow key={n.id} n={n} unread={isUnread(n)} onRead={() => readNotices.add(n.id)} />
                   ))}
                 </AnimatePresence>
               </ul>

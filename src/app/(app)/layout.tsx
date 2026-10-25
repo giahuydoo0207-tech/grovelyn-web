@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { NavBar } from "@/components/NavBar";
 import { ChatProvider } from "@/components/chat/ChatProvider";
 import { ChatDock } from "@/components/chat/ChatDock";
@@ -13,12 +12,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         >
           Bỏ qua để tới nội dung
         </a>
-        <p className="bg-ink px-4 py-1.5 text-center text-[13px] text-fog">
-          Bản thử nghiệm: người dùng, dự án và số liệu là dữ liệu mẫu.{" "}
-          <Link href="/demo#trang-thai" className="font-semibold text-leaf underline-offset-2 hover:underline">
-            Phần nào đã chạy thật
-          </Link>
-        </p>
         <NavBar />
         <main
           id="noi-dung"

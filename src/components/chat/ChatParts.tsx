@@ -13,9 +13,11 @@ import {
 } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { ProjectCover } from "@/components/ProjectCover";
-import { ME, projectOf, projectsBy, userOf } from "@/lib/data";
+import { ME, userOf } from "@/lib/data";
+import { useMyProjects, useProject } from "@/lib/stores";
 import type { Conversation } from "@/lib/chat";
 import { lookOf, shortName, useChat } from "./ChatProvider";
+import { compressImage } from "@/lib/localMedia";
 
 /** Avatar cuộc trò chuyện: tròn cho người, bo góc cho nhóm, chấm xanh khi đang online. */
 export function ConvAvatar({
@@ -49,7 +51,7 @@ export function ConvAvatar({
 }
 
 function ProjectBubble({ slug, compact }: { slug: string; compact?: boolean }) {
-  const p = projectOf(slug);
+  const p = useProject(slug);
   if (!p) return null;
   return (
     <Link
@@ -273,7 +275,7 @@ export function Composer({
   const imgInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const inputId = useId();
-  const mine = projectsBy(ME);
+  const mine = useMyProjects();
 
   // Đổi cuộc trò chuyện thì xoá nháp và đóng bảng chọn dự án.
   const [lastConv, setLastConv] = useState(convId);
@@ -305,7 +307,8 @@ export function Composer({
         aria-hidden="true"
         onChange={(e) => {
           const f = e.target.files?.[0];
-          if (f) send(convId, { image: URL.createObjectURL(f) });
+          // Thu nhỏ ảnh rồi lưu cùng tin nhắn, tải lại trang vẫn còn.
+          if (f) void compressImage(f, 1280).then((src) => send(convId, { image: src }));
           e.target.value = "";
         }}
       />

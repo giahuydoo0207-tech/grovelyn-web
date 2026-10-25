@@ -65,6 +65,13 @@ export interface Project {
   seed: number;
   updated: string;
   readme: { heading: string; body: string }[];
+  /** Phần riêng của dự án người dùng tạo trong bản dùng thử (lưu trên trình duyệt). */
+  local?: {
+    phase: "concept" | "draft" | "final" | "paused";
+    gallery: { src: string; caption: string }[];
+    links: { label: string; url: string; kind: "demo" | "file" | "repo" | "other" }[];
+    logoSrc?: string;
+  };
 }
 
 export interface User {

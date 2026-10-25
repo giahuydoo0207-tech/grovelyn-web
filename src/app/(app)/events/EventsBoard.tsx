@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { interestedEvents, myEventsStore } from "@/lib/stores";
 import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronLeft, ChevronRight, MapPin, X } from "lucide-react";
-import { EVENTS, TODAY, dateParts, placeLine, type CommunityEvent } from "@/lib/events";
+import { EVENTS as SAMPLE, TODAY, dateParts, placeLine, type CommunityEvent } from "@/lib/events";
 import { DateBadge, EventCoverImage } from "./EventView";
 
 const FILTERS = ["Sắp diễn ra", "Tuần này", "Trực tuyến", "Tại chỗ", "Bạn quan tâm"] as const;
@@ -98,10 +99,13 @@ function MonthCalendar({ events, picked, onPick }: { events: CommunityEvent[]; p
 export function EventsBoard() {
   const [filter, setFilter] = useState<Filter>("Sắp diễn ra");
   const [day, setDay] = useState<string | null>(null);
-  const [liked, setLiked] = useState<string[]>(["portfolio-trai-nganh"]);
-  const toggle = (slug: string) => setLiked((l) => (l.includes(slug) ? l.filter((x) => x !== slug) : [...l, slug]));
+  // Sự kiện quan tâm lưu trên trình duyệt.
+  const liked = interestedEvents.use();
+  const toggle = interestedEvents.toggle;
 
-  const upcoming = useMemo(() => EVENTS.filter((e) => e.date >= TODAY).sort((a, b) => (a.date + a.from).localeCompare(b.date + b.from)), []);
+  // Sự kiện bạn tạo (lưu trên trình duyệt) cùng sự kiện mẫu.
+  const mineEvents = myEventsStore.use();
+  const upcoming = [...mineEvents, ...SAMPLE].filter((e) => e.date >= TODAY).sort((a, b) => (a.date + a.from).localeCompare(b.date + b.from));
   const featured = upcoming.find((e) => e.featured);
 
   const shown = upcoming.filter((e) => {

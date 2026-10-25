@@ -8,7 +8,6 @@ import {
   LENSES,
   ME,
   projectOf,
-  projectsBy,
   userOf,
   type Lens,
 } from "@/lib/data";
@@ -23,6 +22,7 @@ import {
   type TopicKind,
 } from "@/lib/exchange";
 import { addTopic, updateTopic, useTopics } from "@/lib/topicStore";
+import { myProjectsStore, useMyProjects, useProject } from "@/lib/stores";
 import { MediaGrid } from "@/components/MediaGrid";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Avatar } from "@/components/Avatar";
@@ -32,7 +32,8 @@ import { StatusPill, TopicMeta } from "@/components/exchange/TopicParts";
 type LensFilter = "Tất cả" | "Hợp với bạn" | Lens;
 
 function TopicCard({ topic, onReply }: { topic: Topic; onReply: () => void }) {
-  const p = projectOf(topic.project)!;
+  const p = useProject(topic.project);
+  if (!p) return null;
   const lead = userOf(topic.lead)!;
   const managed = canManage(topic);
   const n = topic.replies.length;
@@ -113,7 +114,8 @@ export function ExchangeBoard() {
   const [field, setField] = useState<string>("Tất cả");
   const [replying, setReplying] = useState<Topic | null>(null);
   const [opening, setOpening] = useState(false);
-  const mine = projectsBy(ME);
+  const mine = useMyProjects();
+  const mineAll = myProjectsStore.use();
 
   const live = topics.filter((t) => t.status === "open");
   const shown = live.filter(
@@ -121,11 +123,11 @@ export function ExchangeBoard() {
       (kind === "Tất cả" || t.kind === kind) &&
       (lens === "Tất cả" ||
         (lens === "Hợp với bạn" ? fitsMe(t) : t.lenses.includes(lens))) &&
-      (field === "Tất cả" || projectOf(t.project)?.field === field),
+      (field === "Tất cả" || (projectOf(t.project) ?? mineAll.find((p) => p.slug === t.project))?.field === field),
   );
   const closed = topics.filter((t) => t.status === "closed").slice(0, 3);
   const myTopics = live.filter((t) => canManage(t));
-  const given = contributionsBy(ME);
+  const given = contributionsBy(ME, topics);
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">

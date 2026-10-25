@@ -5,11 +5,13 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, Building2, Handshake, Check, Circle, Code2, Eye, FolderKanban, GraduationCap, Shield, Text as TextIcon, Briefcase, ChevronRight, type LucideIcon } from "lucide-react";
 import { Pin } from "lucide-react";
-import type { Post, Project, User } from "@/lib/data";
+import type { Project, User } from "@/lib/data";
+import { myProjectsStore, postsStore } from "@/lib/stores";
 import { ProjectCard } from "@/components/ProjectCard";
 import { FolderCover } from "@/components/project/FolderCover";
 import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
 import { contributionsBy } from "@/lib/exchange";
+import { useTopics } from "@/lib/topicStore";
 import { contextLabel, projectOf, userOf } from "@/lib/data";
 import { PostCard } from "../../community/PostCard";
 
@@ -19,16 +21,18 @@ type Tab = (typeof TABS)[number];
 export function ProfileTabs({
   user,
   pinned,
-  projects,
-  posts,
+  projects: given,
   isMe,
 }: {
   user: User;
   pinned: Project[];
   projects: Project[];
-  posts: Post[];
   isMe: boolean;
 }) {
+  // Bài đăng và dự án mới của bạn lưu trên trình duyệt; bài trong nhóm không lên hồ sơ.
+  const posts = postsStore.use().filter((p) => p.author === user.handle && !p.group);
+  const mine = myProjectsStore.use();
+  const projects = isMe ? [...mine, ...given] : given;
   const [tab, setTab] = useState<Tab>("Dự án");
 
   // Liên kết "#bai-dang" (từ menu tài khoản) mở thẳng tab Bài đăng.
@@ -335,7 +339,7 @@ function Timeline({ items }: { items: User["experience"] }) {
 
 /** Góp ý của người này đã được chủ dự án khác áp dụng (lấy từ tab Trao đổi). */
 function GivenSection({ handle }: { handle: string }) {
-  const given = contributionsBy(handle);
+  const given = contributionsBy(handle, useTopics());
   if (!given.length) return null;
   return (
     <section className={card}>
