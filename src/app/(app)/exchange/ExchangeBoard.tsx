@@ -325,7 +325,7 @@ export function ExchangeBoard() {
             ý trong {new Set(given.map((g) => g.topic.project)).size} dự án.
           </p>
           <Link
-            href={`/u/${ME}#gioi-thieu`}
+            href={`/u/${ME}#dong-gop`}
             className="mt-2 inline-block text-sm font-bold text-leaf-deep hover:underline"
           >
             Xem trên hồ sơ

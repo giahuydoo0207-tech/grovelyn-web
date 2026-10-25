@@ -94,6 +94,8 @@ export interface User {
   following: number;
   pinned: string[];
   tone: CoverTone;
+  /** Website, mạng xã hội, hồ sơ ở nơi khác. */
+  links?: { label: string; url: string }[];
 }
 
 export const USERS: User[] = [
@@ -203,6 +205,10 @@ export const USERS: User[] = [
     following: 52,
     pinned: ["nova-replyn"],
     tone: "leaf",
+    links: [
+      { label: "GitHub", url: "https://github.com/giahuydoo0207-tech" },
+      { label: "Grovelyn", url: "https://grovelyn-web.vercel.app/demo" },
+    ],
   },
 ];
 

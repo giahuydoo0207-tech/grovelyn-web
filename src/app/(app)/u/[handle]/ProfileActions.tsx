@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { Check, MessageCircleMore, PencilLine } from "lucide-react";
+import { Check, Link2, MessageCircleMore, PencilLine } from "lucide-react";
 import { useChat } from "@/components/chat/ChatProvider";
 import { following as followStore } from "@/lib/stores";
 
@@ -14,9 +15,12 @@ export function ProfileActions({ isMe, name, handle }: { isMe: boolean; name: st
 
   if (isMe) {
     return (
-      <Link href="/settings/account" className="inline-flex h-11 items-center gap-2 rounded-xl border border-line px-4 text-[15px] font-semibold hover:bg-mist">
-        <PencilLine className="h-4 w-4" aria-hidden="true" /> Chỉnh sửa hồ sơ
-      </Link>
+      <div className="flex flex-wrap gap-2">
+        <Link href="/settings/account" className="inline-flex h-10 items-center gap-2 rounded-xl bg-ink px-3.5 text-[15px] font-semibold text-white hover:bg-ink-2 sm:h-11 sm:px-4">
+          <PencilLine className="h-4 w-4" aria-hidden="true" /> Chỉnh sửa hồ sơ
+        </Link>
+        <ShareButton />
+      </div>
     );
   }
 
@@ -57,6 +61,32 @@ export function ProfileActions({ isMe, name, handle }: { isMe: boolean; name: st
       >
         <MessageCircleMore className="h-4 w-4" aria-hidden="true" /> Nhắn tin
       </button>
+      <ShareButton />
     </div>
+  );
+}
+
+/** Sao chép đường dẫn hồ sơ để gửi cho người khác. */
+function ShareButton() {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(window.location.href.split("#")[0]);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1800);
+        } catch {
+          setCopied(false);
+        }
+      }}
+      className="inline-flex h-10 items-center gap-2 rounded-xl border border-line px-3.5 text-[15px] font-semibold hover:bg-mist sm:h-11 sm:px-4"
+      aria-label="Chia sẻ hồ sơ"
+    >
+      {copied ? <Check className="h-4 w-4 text-leaf-deep" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
+      <span className="hidden sm:inline">{copied ? "Đã sao chép" : "Chia sẻ hồ sơ"}</span>
+      <span className="sm:hidden">{copied ? "Đã chép" : "Chia sẻ"}</span>
+    </button>
   );
 }

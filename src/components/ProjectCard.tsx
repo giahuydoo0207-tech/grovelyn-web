@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Project } from "@/lib/data";
 import { contextLabel, userOf } from "@/lib/data";
+import { fieldColor } from "@/lib/palette";
 import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
 import { FolderCover } from "./project/FolderCover";
 import { Avatar } from "./Avatar";
@@ -46,7 +47,9 @@ export function ProjectCard({
       </div>
       <div className={`flex flex-col gap-2.5 ${featured ? "p-6" : "p-5"}`}>
         <div className="flex items-center justify-between gap-3 text-[13px]">
-          <span className="font-semibold text-leaf-deep">{project.field}</span>
+          <span className="rounded-full px-2 py-0.5 font-bold" style={{ background: fieldColor(project.field).bg, color: fieldColor(project.field).fg }}>
+            {project.field}
+          </span>
           <span className="shrink-0 font-semibold text-moss">{phase}</span>
         </div>
         <h3
