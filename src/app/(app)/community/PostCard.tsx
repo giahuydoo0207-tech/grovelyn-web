@@ -3,36 +3,71 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { MessageCircle, MoreHorizontal, Repeat2, Send, ThumbsUp } from "lucide-react";
+import { ArrowRight, Check, Folder, HandHelping, Link2, MessageCircle, MoreHorizontal, Plus, Repeat2, Rocket, SendHorizontal, ThumbsUp, UsersRound } from "lucide-react";
 import type { Post } from "@/lib/data";
-import { ME, userOf } from "@/lib/data";
+import { ME, groupOf, userOf } from "@/lib/data";
 import { contributorsOf } from "@/lib/exchange";
 import { useTopics } from "@/lib/topicStore";
 import { Avatar } from "@/components/Avatar";
-import { ProjectCover } from "@/components/ProjectCover";
 import { MediaGrid } from "@/components/MediaGrid";
 import { REACTIONS } from "./reactions";
-import { joinRequests, useProject, useUser, reactionsStore, setReaction as saveReaction, updatePost } from "@/lib/stores";
+import { joinRequests, repostedPosts, useProject, useUser, reactionsStore, setReaction as saveReaction, updatePost } from "@/lib/stores";
 
-const KIND_STYLE: Record<Post["kind"], string> = {
-  "Chia sẻ": "bg-mist text-ink",
-  "Công bố": "bg-leaf text-ink",
-  "Tìm cộng sự": "bg-ink text-white",
+/**
+ * Mỗi loại bài một dáng thẻ, chỉ dùng màu gốc Grovelyn:
+ * - Công bố có ảnh: ảnh tràn đầu thẻ, tên dự án và phiên bản làm tiêu đề lớn.
+ * - Tìm cộng sự: thẻ đen, khối "Đang cần" và nút xin tham gia.
+ * - Chia sẻ ngắn, không ảnh, không gắn dự án: câu chữ lớn trên nền xanh nhạt.
+ * - Còn lại: thẻ trắng.
+ * Bình luận hiện ngay dưới bài theo kiểu luồng: các trả lời nối bằng một đường chỉ.
+ */
+type Look = "plain" | "hero" | "dark" | "quote";
+
+const THEME: Record<Look, { card: string; sub: string; pill: string; line: string; input: string; ring: string }> = {
+  plain: { card: "border border-line bg-white", sub: "text-moss", pill: "bg-mist hover:bg-line", line: "bg-line", input: "bg-mist placeholder:text-moss", ring: "ring-white" },
+  hero: { card: "border border-line bg-white", sub: "text-moss", pill: "bg-mist hover:bg-line", line: "bg-line", input: "bg-mist placeholder:text-moss", ring: "ring-white" },
+  dark: { card: "bg-ink text-white", sub: "text-white/65", pill: "bg-white/[.08] hover:bg-white/[.14]", line: "bg-white/15", input: "bg-white/[.07] text-white placeholder:text-white/50", ring: "ring-[#33433a]" },
+  quote: { card: "bg-sap", sub: "text-leaf-deep", pill: "bg-white hover:bg-white/70", line: "bg-leaf-deep/20", input: "bg-white placeholder:text-moss", ring: "ring-white" },
 };
 
-export function PostCard({ post }: { post: Post }) {
+const KIND_ICON = { "Chia sẻ": MessageCircle, "Công bố": Rocket, "Tìm cộng sự": UsersRound } as const;
+
+function KindTag({ kind, look, version }: { kind: Post["kind"]; look: Look; version?: string }) {
+  const Icon = KIND_ICON[kind];
+  const style = kind === "Công bố" ? "bg-sap text-leaf-deep" : kind === "Tìm cộng sự" ? (look === "dark" ? "bg-leaf text-ink" : "bg-ink text-white") : look === "quote" ? "bg-white text-ink" : "bg-mist text-ink";
+  return (
+    <span className={`inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-bold ${style}`}>
+      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+      {kind === "Công bố" && version ? `Công bố bản ${version}` : kind}
+    </span>
+  );
+}
+
+export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: boolean }) {
   const author = useUser(post.author)!;
   const project = useProject(post.project);
-  // Cảm xúc, bình luận và lời xin tham gia được lưu trên trình duyệt (lib/stores).
+  const topics = useTopics();
+  const topic = project ? topics.find((t) => t.project === project.slug && t.status === "open") : undefined;
+  const group = showGroup && post.group ? groupOf(post.group) : undefined;
+
+  const look: Look =
+    post.kind === "Tìm cộng sự"
+      ? "dark"
+      : post.kind === "Công bố" && post.media?.[0]?.type === "image"
+        ? "hero"
+        : post.kind === "Chia sẻ" && !post.media?.length && !project && post.text.length <= 160
+          ? "quote"
+          : "plain";
+  const t = THEME[look];
+
+  // Cảm xúc, bình luận, lời xin tham gia và lượt đăng lại được lưu trên trình duyệt (lib/stores).
   const reaction = reactionsStore.use()[post.id] ?? null;
-  const setReaction = (next: string | null | ((cur: string | null) => string | null)) =>
-    saveReaction(post.id, typeof next === "function" ? next(reaction) : next);
+  const setReaction = (next: string | null) => saveReaction(post.id, next);
   const [picker, setPicker] = useState(false);
   const [hot, setHot] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
   const joined = joinRequests.use().includes(post.id);
-  const comments = post.comments;
-  const [draft, setDraft] = useState("");
+  const reposted = repostedPosts.use().includes(post.id);
+  const [copied, setCopied] = useState(false);
   const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hide = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -49,255 +84,405 @@ export function PostCard({ post }: { post: Post }) {
     hide.current = setTimeout(() => setPicker(false), 250);
   };
 
-  const send = (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
-    updatePost(post.id, (p) => ({ ...p, comments: [...p.comments, { author: ME, text, when: "vừa xong" }] }));
-    setDraft("");
+  const share = async () => {
+    try {
+      await navigator.clipboard.writeText(`${location.origin}/community#${post.id}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {}
   };
 
-  return (
-    <article className="rounded-2xl border border-line bg-white p-5">
-      <header className="flex items-center gap-3">
+  const [replying, setReplying] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
+  const openReply = (prefix = "") => {
+    setReplying(true);
+    setTimeout(() => {
+      if (!input.current) return;
+      if (prefix) input.current.value = prefix;
+      input.current.focus();
+    }, 30);
+  };
+
+  const pill = `inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold tabular-nums transition-colors ${t.pill}`;
+
+  const header = (withTag: boolean) => (
+    <header className="flex items-center gap-3">
+      <Link href={`/u/${author.handle}`} aria-hidden="true" tabIndex={-1} className={`rounded-full ${look === "dark" ? "ring-2 ring-[#33433a]" : ""}`}>
         <Avatar initials={author.initials} tone={author.tone} size={44} />
-        <div className="min-w-0 flex-1">
-          <Link href={`/u/${author.handle}`} className="font-semibold hover:text-leaf-deep">
+      </Link>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[15px]">
+          <Link href={`/u/${author.handle}`} className="font-bold hover:underline">
             {author.name}
           </Link>
-          <p className="truncate text-sm text-moss">
-            {author.intro}, {post.when}
-          </p>
-        </div>
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${KIND_STYLE[post.kind]}`}>
-          {post.kind === "Công bố" && post.version ? `Công bố bản ${post.version}` : post.kind}
-        </span>
-        <button aria-label="Tùy chọn bài viết" className="flex h-10 w-10 items-center justify-center rounded-xl text-moss hover:bg-mist">
-          <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
-        </button>
-      </header>
-
-      <p className="mt-4 whitespace-pre-line text-[16px] leading-[1.7]">{post.text}</p>
-      {post.media && post.media.length > 0 && (
-        <div className="mt-3.5">
-          <MediaGrid media={post.media} />
-        </div>
-      )}
-
-      {post.needs && (
-        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Cần tìm">
-          {post.needs.map((n) => (
-            <li key={n} className="rounded-full border border-line px-3 py-1 text-sm font-medium">
-              {n}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {project && (
-        <Link
-          href={`/p/${project.slug}`}
-          className="group mt-4 flex overflow-hidden rounded-2xl border border-line transition-colors hover:border-ink/30"
-        >
-          <div className="relative w-36 shrink-0 overflow-hidden sm:w-44">
-            <ProjectCover seed={project.seed} tone={project.tone} className="absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-105" />
-          </div>
-          <div className="min-w-0 p-4">
-            <p className="text-[13px] font-semibold text-leaf-deep">
-              {project.output}, {project.context.toLowerCase()}
-            </p>
-            <p className="mt-1 font-display text-lg font-bold leading-tight tracking-[-0.02em]">{project.title}</p>
-            <p className="mt-1 line-clamp-2 text-sm text-moss">{project.summary}</p>
-          </div>
-        </Link>
-      )}
-      {project && <Credit slug={project.slug} />}
-
-      <div className="mt-4 flex items-center justify-between text-sm text-moss">
-        <span className="flex items-center gap-1.5">
-          <span className="flex -space-x-1" aria-hidden="true">
-            {REACTIONS.slice(0, 3).map((r) => (
-              <span key={r.key} className="flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-white" style={{ background: r.tint }}>
-                <r.icon className="h-3 w-3" style={{ color: r.color }} />
-              </span>
-            ))}
-          </span>
-          <span className="tabular-nums">{count}</span>
-        </span>
-        <span>
-          {comments.length} bình luận, {post.reposts} lượt đăng lại
-        </span>
+          {group && (
+            <>
+              <span className={t.sub}> trong </span>
+              <Link href={`/groups/${group.slug}`} className="font-bold hover:underline">
+                {group.name}
+              </Link>
+            </>
+          )}
+        </p>
+        <p className={`truncate text-[13px] ${t.sub}`}>
+          {author.intro}, {post.when}
+        </p>
       </div>
+      {withTag && <KindTag kind={post.kind} look={look} version={post.version} />}
+      <button type="button" aria-label="Tùy chọn bài viết" className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${look === "dark" ? "text-white/65 hover:bg-white/10" : "text-moss hover:bg-black/5"}`}>
+        <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+      </button>
+    </header>
+  );
 
-      <div className="mt-3 flex gap-1 border-t border-line pt-2">
-        <div
-          className="relative flex-1"
-          onMouseEnter={showPicker}
-          onMouseLeave={leavePicker}
-          onBlur={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPicker(false);
-          }}
-          onKeyDown={(e) => e.key === "Escape" && setPicker(false)}
-        >
-          <button
-            type="button"
-            aria-pressed={!!reaction}
-            onClick={() => setReaction((v) => (v ? null : "like"))}
-            onTouchStart={showPicker}
-            onTouchEnd={() => hold.current && clearTimeout(hold.current)}
-            onFocus={(e) => e.currentTarget.matches(":focus-visible") && setPicker(true)}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold transition-colors hover:bg-mist"
-            style={{ color: current?.color }}
-          >
-            <motion.span key={reaction ?? "none"} initial={{ scale: reaction ? 0.3 : 1 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 12 }}>
-              <Icon className="h-[18px] w-[18px]" fill={reaction === "like" ? "currentColor" : "none"} aria-hidden="true" />
-            </motion.span>
-            {current?.label ?? "Thích"}
-          </button>
-          <AnimatePresence>
-            {picker && (
-              <motion.div
-                role="toolbar"
-                aria-label="Chọn cảm xúc"
-                initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 6, scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 420, damping: 26 }}
-                className="absolute -top-16 left-0 z-20 flex gap-1.5 rounded-full border border-line bg-white p-1.5 shadow-[0_12px_32px_-12px_rgba(6,17,10,0.35)]"
-              >
-                {REACTIONS.map((r, i) => {
-                  const on = hot === r.key;
-                  return (
-                    <motion.button
-                      key={r.key}
-                      type="button"
-                      aria-label={r.label}
-                      initial={{ y: 12, opacity: 0 }}
-                      animate={{ y: on ? -6 : 0, scale: on ? 1.22 : 1, opacity: 1, transition: { delay: on ? 0 : i * 0.025, type: "spring", stiffness: 500, damping: 22 } }}
-                      onMouseEnter={() => setHot(r.key)}
-                      onMouseLeave={() => setHot(null)}
-                      onFocus={() => setHot(r.key)}
-                      onBlur={() => setHot(null)}
-                      onClick={() => {
-                        setReaction(r.key);
-                        setPicker(false);
-                        setHot(null);
-                      }}
-                      className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-150"
-                      style={{ background: on ? r.color : r.tint }}
-                    >
-                      <r.icon className="h-5 w-5" style={{ color: on ? "#fff" : r.color }} aria-hidden="true" />
-                      <AnimatePresence>
-                        {on && (
-                          <motion.span
-                            aria-hidden="true"
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 2 }}
-                            transition={{ duration: 0.12 }}
-                            className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
-                            style={{ background: r.color }}
-                          >
-                            {r.label}
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </motion.button>
-                  );
-                })}
-              </motion.div>
-            )}
-          </AnimatePresence>
+  const versions = project ? [...project.versions].reverse().slice(-5) : [];
+  const curVer = post.version ?? project?.versions[0]?.tag;
+
+  return (
+    <article id={post.id} className={`scroll-mt-24 overflow-hidden rounded-[20px] ${t.card}`}>
+      {look === "hero" && (
+        <div className="relative">
+          <MediaGrid media={post.media!} bleed />
+          <span className="pointer-events-none absolute left-4 top-4">
+            <KindTag kind={post.kind} look={look} version={post.version} />
+          </span>
         </div>
-        <button
-          type="button"
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-          className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl text-[15px] font-semibold transition-colors hover:bg-mist"
-        >
-          <MessageCircle className="h-[18px] w-[18px]" aria-hidden="true" /> Bình luận
-        </button>
-        {post.kind === "Tìm cộng sự" ? (
-          <button
-            type="button"
-            aria-pressed={joined}
-            onClick={() => joinRequests.toggle(post.id)}
-            className={`flex h-11 flex-1 items-center justify-center rounded-xl text-[15px] font-semibold transition-colors ${joined ? "bg-sap text-leaf-deep" : "bg-ink text-white hover:bg-ink-2"}`}
-          >
-            {joined ? "Đã gửi lời xin tham gia" : "Xin tham gia"}
-          </button>
+      )}
+
+      <div className="p-4 sm:p-5">
+        {look === "quote" ? (
+          <>
+            <div className="flex items-center justify-between">
+              <KindTag kind={post.kind} look={look} />
+              <button type="button" aria-label="Tùy chọn bài viết" className="flex h-9 w-9 items-center justify-center rounded-full text-moss hover:bg-black/5">
+                <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+            <p className="mt-3 font-display text-[24px] font-bold leading-[1.22] tracking-[-0.02em] sm:text-[28px]">“{post.text}”</p>
+            <p className="mt-4 flex items-center gap-2.5 text-sm">
+              <Avatar initials={author.initials} tone={author.tone} size={32} />
+              <span>
+                <Link href={`/u/${author.handle}`} className="font-bold hover:underline">
+                  {author.name}
+                </Link>
+                <span className={t.sub}>, {post.when}</span>
+              </span>
+            </p>
+          </>
         ) : (
           <>
-            <button className="hidden h-11 flex-1 items-center justify-center gap-2 rounded-xl text-[15px] font-semibold hover:bg-mist sm:flex">
-              <Repeat2 className="h-[18px] w-[18px]" aria-hidden="true" /> Đăng lại
-            </button>
-            <button className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl text-[15px] font-semibold hover:bg-mist">
-              <Send className="h-[18px] w-[18px]" aria-hidden="true" /> Gửi
-            </button>
+            {header(look !== "hero")}
+            {look === "hero" && project ? (
+              <>
+                <Link href={`/p/${project.slug}`} className="mt-4 block font-display text-[22px] font-bold leading-tight tracking-[-0.02em] hover:underline sm:text-[26px]">
+                  {project.title}
+                  {curVer ? `, bản ${curVer}` : ""}
+                </Link>
+                <p className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-moss">{post.text}</p>
+              </>
+            ) : (
+              <p className={`mt-3.5 whitespace-pre-line leading-[1.65] ${look === "dark" ? "text-[17px] font-semibold" : "text-[16px]"}`}>{post.text}</p>
+            )}
           </>
         )}
-      </div>
 
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="flex flex-col gap-3 pt-4">
-              {comments.length === 0 && <p className="text-sm text-moss">Chưa có bình luận. Bạn là người đầu tiên.</p>}
-              <AnimatePresence initial={false}>
-                {comments.map((c) => {
-                  const u = userOf(c.author)!;
-                  return (
-                    <motion.div key={c.text} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2.5">
-                      <Avatar initials={u.initials} tone={u.tone} size={32} />
-                      <div className="rounded-2xl rounded-tl-md bg-mist px-3.5 py-2.5">
-                        <p className="text-sm">
-                          <span className="font-semibold">{u.name}</span> <span className="text-moss">{c.when}</span>
-                        </p>
-                        <p className="text-[15px] leading-relaxed">{c.text}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-              <form onSubmit={send} className="flex gap-2">
-                <label className="flex-1">
-                  <span className="sr-only">Viết bình luận</span>
-                  <input
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    placeholder="Viết bình luận"
-                    className="h-11 w-full rounded-full border border-line bg-mist px-4 text-[15px] outline-none focus:border-ink focus:bg-white"
-                  />
-                </label>
-                <button type="submit" disabled={!draft.trim()} className="h-11 rounded-full bg-ink px-4 text-sm font-semibold text-white disabled:opacity-40">
-                  Gửi
-                </button>
-              </form>
-            </div>
-          </motion.div>
+        {look !== "hero" && post.media && post.media.length > 0 && (
+          <div className="mt-3.5">
+            <MediaGrid media={post.media} />
+          </div>
         )}
-      </AnimatePresence>
+
+        {post.kind === "Tìm cộng sự" && (
+          <div className={`mt-4 rounded-2xl p-4 ${look === "dark" ? "bg-white/[.06]" : "bg-sap"}`}>
+            {post.needs && post.needs.length > 0 && (
+              <>
+                <p className={`text-[13px] font-bold ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`}>Đang cần {post.needs.length} người</p>
+                <ul className="mt-2 flex flex-wrap gap-2" aria-label="Cần tìm">
+                  {post.needs.map((n) => (
+                    <li key={n} className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] font-bold ${look === "dark" ? "bg-white/10" : "bg-white"}`}>
+                      <Plus className={`h-3.5 w-3.5 ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`} aria-hidden="true" />
+                      {n}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            <div className={`flex flex-wrap items-center justify-between gap-3 ${post.needs?.length ? "mt-3.5" : ""}`}>
+              <span className={`text-[13px] ${t.sub}`}>{joined ? "Chủ bài sẽ nhắn bạn nếu phù hợp." : "Ghi tên đầy đủ vào dự án khi làm xong."}</span>
+              {post.author !== ME && (
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.96 }}
+                  aria-pressed={joined}
+                  onClick={() => joinRequests.toggle(post.id)}
+                  className={`inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-bold transition-colors ${joined ? "bg-white/10 text-leaf" : "bg-leaf text-ink hover:brightness-95"}`}
+                >
+                  {joined && <Check className="h-4 w-4" aria-hidden="true" />}
+                  {joined ? "Đã xin tham gia" : "Xin tham gia"}
+                </motion.button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {look === "hero" && versions.length > 1 && <VersionTrack tags={versions.map((v) => v.tag)} current={curVer} />}
+
+        {project && look !== "hero" && (
+          <Link href={`/p/${project.slug}`} className={`mt-3.5 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${look === "dark" ? "bg-white/[.06] hover:bg-white/10" : "bg-mist hover:bg-line"}`}>
+            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${look === "dark" ? "bg-leaf text-ink" : "bg-ink text-leaf"}`}>
+              <Folder className="h-[18px] w-[18px]" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-bold">{project.title}</span>
+              <span className={`block truncate text-[13px] ${t.sub}`}>
+                {project.field}
+                {curVer ? `, bản ${curVer}` : ""}
+              </span>
+            </span>
+            <ArrowRight className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+          </Link>
+        )}
+
+        {topic && (
+          <Link
+            href={`/exchange/${topic.id}`}
+            className={`mt-2.5 flex items-center gap-2.5 rounded-xl border border-dashed px-3 py-2.5 text-sm ${look === "dark" ? "border-white/20 hover:bg-white/5" : "border-[#c9d0c4] hover:bg-mist"}`}
+          >
+            <HandHelping className={`h-[18px] w-[18px] shrink-0 ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`} aria-hidden="true" />
+            <span className="min-w-0 flex-1">
+              <strong>Đang mở trao đổi:</strong> {topic.question}
+            </span>
+            <span className={`shrink-0 font-bold ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`}>Góp ý</span>
+          </Link>
+        )}
+        {project && <Credit slug={project.slug} dark={look === "dark"} />}
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div
+            className="relative"
+            onMouseEnter={showPicker}
+            onMouseLeave={leavePicker}
+            onBlur={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPicker(false);
+            }}
+            onKeyDown={(e) => e.key === "Escape" && setPicker(false)}
+          >
+            <button
+              type="button"
+              aria-pressed={!!reaction}
+              aria-label={`${current?.label ?? "Thích"}, ${count} lượt`}
+              onClick={() => setReaction(reaction ? null : "like")}
+              onTouchStart={showPicker}
+              onTouchEnd={() => hold.current && clearTimeout(hold.current)}
+              onFocus={(e) => e.currentTarget.matches(":focus-visible") && setPicker(true)}
+              className={pill}
+              style={{ color: current && look !== "dark" ? current.color : undefined }}
+            >
+              <motion.span key={reaction ?? "none"} initial={{ scale: reaction ? 0.3 : 1 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 12 }}>
+                <Icon className={`h-[17px] w-[17px] ${!current ? (look === "dark" ? "text-leaf" : "text-leaf-deep") : ""}`} fill={reaction === "like" ? "currentColor" : "none"} aria-hidden="true" />
+              </motion.span>
+              {count}
+            </button>
+            <AnimatePresence>
+              {picker && (
+                <motion.div
+                  role="toolbar"
+                  aria-label="Chọn cảm xúc"
+                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 26 }}
+                  className="absolute -top-16 left-0 z-20 flex gap-1.5 rounded-full border border-line bg-white p-1.5 shadow-[0_12px_32px_-12px_rgba(6,17,10,0.35)]"
+                >
+                  {REACTIONS.map((r, i) => {
+                    const on = hot === r.key;
+                    return (
+                      <motion.button
+                        key={r.key}
+                        type="button"
+                        aria-label={r.label}
+                        initial={{ y: 12, opacity: 0 }}
+                        animate={{ y: on ? -6 : 0, scale: on ? 1.22 : 1, opacity: 1, transition: { delay: on ? 0 : i * 0.025, type: "spring", stiffness: 500, damping: 22 } }}
+                        onMouseEnter={() => setHot(r.key)}
+                        onMouseLeave={() => setHot(null)}
+                        onFocus={() => setHot(r.key)}
+                        onBlur={() => setHot(null)}
+                        onClick={() => {
+                          setReaction(r.key);
+                          setPicker(false);
+                          setHot(null);
+                        }}
+                        className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-150"
+                        style={{ background: on ? r.color : r.tint }}
+                      >
+                        <r.icon className="h-5 w-5" style={{ color: on ? "#fff" : r.color }} aria-hidden="true" />
+                        <AnimatePresence>
+                          {on && (
+                            <motion.span
+                              aria-hidden="true"
+                              initial={{ opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 2 }}
+                              transition={{ duration: 0.12 }}
+                              className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
+                              style={{ background: r.color }}
+                            >
+                              {r.label}
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </motion.button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <button type="button" onClick={() => openReply()} aria-label={`Bình luận, ${post.comments.length} bình luận`} className={pill}>
+            <MessageCircle className={`h-[17px] w-[17px] ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`} aria-hidden="true" />
+            {post.comments.length}
+          </button>
+          <button type="button" aria-pressed={reposted} onClick={() => repostedPosts.toggle(post.id)} aria-label={`Đăng lại, ${post.reposts + (reposted ? 1 : 0)} lượt`} className={pill}>
+            <Repeat2 className={`h-[17px] w-[17px] ${reposted ? "" : look === "dark" ? "text-leaf" : "text-leaf-deep"}`} strokeWidth={reposted ? 2.8 : 2} aria-hidden="true" />
+            {post.reposts + (reposted ? 1 : 0)}
+          </button>
+          <span className="flex-1" />
+          <button type="button" onClick={share} className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold transition-colors ${look === "dark" ? "text-white/70 hover:bg-white/10" : `${t.sub} hover:bg-black/5`}`}>
+            {copied ? <Check className="h-[17px] w-[17px]" aria-hidden="true" /> : <Link2 className="h-[17px] w-[17px]" aria-hidden="true" />}
+            <span className="hidden sm:inline">{copied ? "Đã chép" : "Chép liên kết"}</span>
+            <span className="sr-only sm:hidden">{copied ? "Đã chép" : "Chép liên kết"}</span>
+          </button>
+        </div>
+
+        <Thread post={post} look={look} open={replying} onReply={openReply} input={input} />
+      </div>
     </article>
   );
 }
 
+/** Luồng trò chuyện dưới bài: hai trả lời mới nhất, bấm để xem hết; đường chỉ nối các trả lời với ô trả lời. */
+function Thread({ post, look, open, onReply, input }: { post: Post; look: Look; open: boolean; onReply: (prefix?: string) => void; input: React.RefObject<HTMLInputElement | null> }) {
+  const t = THEME[look];
+  const me = useUser(ME)!;
+  const [all, setAll] = useState(false);
+  const comments = post.comments;
+  const shown = all ? comments : comments.slice(-2);
+  const hidden = comments.length - shown.length;
+  if (!comments.length && !open) return null;
+
+  const send = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const text = String(new FormData(form).get("reply") ?? "").trim();
+    if (!text) return;
+    updatePost(post.id, (p) => ({ ...p, comments: [...p.comments, { author: ME, text, when: "vừa xong" }] }));
+    form.reset();
+    setAll(true);
+  };
+
+  const ownerLabel = post.project ? "Chủ dự án" : "Người đăng";
+  const accent = look === "dark" ? "text-leaf" : "text-leaf-deep";
+
+  return (
+    <div className={`relative mt-4 border-t pt-1 ${look === "dark" ? "border-white/15" : look === "quote" ? "border-leaf-deep/20" : "border-line"}`}>
+      <span aria-hidden="true" className={`absolute bottom-6 left-[17px] top-9 w-0.5 rounded ${t.line}`} />
+      {hidden > 0 && (
+        <button type="button" onClick={() => setAll(true)} className={`relative mt-3 flex items-center gap-3 text-sm font-bold ${accent} hover:underline`}>
+          <span className="flex w-9 justify-center" aria-hidden="true">
+            <span className={`h-2.5 w-2.5 rounded-full ${t.line}`} />
+          </span>
+          Xem thêm {hidden} trả lời
+        </button>
+      )}
+      <AnimatePresence initial={false}>
+        {shown.map((c, i) => {
+          const u = userOf(c.author);
+          if (!u) return null;
+          return (
+            <motion.div key={`${c.author}-${c.when}-${i}-${c.text.slice(0, 12)}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="relative mt-3.5 flex gap-3">
+              <span className={`h-9 rounded-full ring-[3px] ${t.ring}`}>
+                <Avatar initials={u.initials} tone={u.tone} size={36} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className={`text-sm ${t.sub}`}>
+                  <Link href={`/u/${u.handle}`} className={`font-bold hover:underline ${look === "dark" ? "text-white" : "text-ink"}`}>
+                    {u.handle === ME ? "Bạn" : u.name}
+                  </Link>
+                  {c.author === post.author && (
+                    <span className={`ml-1.5 inline-flex h-5 items-center rounded-full px-1.5 align-[1px] text-[11px] font-bold ${look === "dark" ? "bg-leaf text-ink" : look === "quote" ? "bg-white text-leaf-deep" : "bg-sap text-leaf-deep"}`}>
+                      {ownerLabel}
+                    </span>
+                  )}{" "}
+                  · {c.when}
+                </p>
+                <p className="mt-0.5 text-[15px] leading-relaxed">{c.text}</p>
+                {u.handle !== ME && (
+                  <button type="button" onClick={() => onReply(`@${u.name} `)} className={`mt-1 text-xs font-bold ${t.sub} hover:underline`}>
+                    Trả lời
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+      <form onSubmit={send} className="relative mt-3.5 flex items-center gap-3">
+        <span className={`h-9 rounded-full ring-[3px] ${t.ring}`}>
+          <Avatar initials={me.initials} tone={me.tone} size={36} />
+        </span>
+        <label className="relative flex-1">
+          <span className="sr-only">Trả lời trong luồng</span>
+          <input
+            ref={input}
+            name="reply"
+            autoComplete="off"
+            placeholder={comments.length ? "Trả lời trong luồng…" : "Viết trả lời đầu tiên…"}
+            className={`h-10 w-full rounded-full pl-4 pr-12 text-[15px] outline-none ring-1 ring-transparent focus:ring-current ${t.input}`}
+          />
+          <button type="submit" aria-label="Gửi trả lời" className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-leaf text-ink hover:brightness-95">
+            <SendHorizontal className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </label>
+      </form>
+    </div>
+  );
+}
+
+/** Các phiên bản của dự án, bản đang công bố được tô xanh. */
+function VersionTrack({ tags, current }: { tags: string[]; current?: string }) {
+  const at = Math.max(0, tags.indexOf(current ?? ""));
+  return (
+    <ol aria-label="Các phiên bản" className="mt-4 flex items-center gap-1.5 rounded-xl bg-mist px-3.5 py-3">
+      {tags.map((tag, i) => (
+        <li key={tag} className={`flex items-center gap-1.5 ${i < tags.length - 1 ? "flex-1" : ""}`}>
+          <span
+            aria-current={i === at ? "step" : undefined}
+            className={`flex shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+              i === at ? "h-7 w-7 bg-leaf text-ink" : i < at ? "h-[22px] w-[22px] bg-ink text-white" : "h-[22px] w-[22px] border border-line bg-white text-moss"
+            }`}
+          >
+            {tag}
+          </span>
+          {i < tags.length - 1 && <span aria-hidden="true" className={`h-0.5 flex-1 rounded ${i < at ? "bg-ink" : "bg-line"}`} />}
+        </li>
+      ))}
+      <li className="ml-2 whitespace-nowrap text-[13px] font-bold text-leaf-deep">{at === tags.length - 1 ? "Bản mới nhất" : `Bản ${tags[at]}`}</li>
+    </ol>
+  );
+}
+
 /** Ghi công người có góp ý được áp dụng qua tab Trao đổi. */
-function Credit({ slug }: { slug: string }) {
+function Credit({ slug, dark }: { slug: string; dark: boolean }) {
   const people = contributorsOf(slug, useTopics())
     .map((h) => userOf(h))
     .filter((u) => !!u);
   if (!people.length) return null;
   return (
-    <p className="mt-3 flex items-center gap-2 text-sm text-moss">
+    <p className={`mt-3 flex items-center gap-2 text-sm ${dark ? "text-white/65" : "text-moss"}`}>
       <span className="flex -space-x-1.5" aria-hidden="true">
         {people.slice(0, 3).map((u) => (
-          <span key={u.handle} className="rounded-full ring-2 ring-white">
+          <span key={u.handle} className={`rounded-full ring-2 ${dark ? "ring-ink" : "ring-white"}`}>
             <Avatar initials={u.initials} tone={u.tone} size={22} />
           </span>
         ))}
@@ -307,7 +492,7 @@ function Credit({ slug }: { slug: string }) {
         {people.map((u, i) => (
           <span key={u.handle}>
             {i > 0 && (i === people.length - 1 ? " và " : ", ")}
-            <Link href={`/u/${u.handle}`} className="font-semibold text-ink hover:underline">
+            <Link href={`/u/${u.handle}`} className={`font-semibold hover:underline ${dark ? "text-white" : "text-ink"}`}>
               {u.handle === ME ? "bạn" : u.name}
             </Link>
           </span>

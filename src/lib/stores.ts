@@ -26,6 +26,9 @@ export const setReaction = (postId: string, key: string | null) =>
 /** Bài Tìm cộng sự bạn đã xin tham gia. */
 export const joinRequests = persistedSet("join-requests");
 
+/** Bài bạn đã đăng lại. */
+export const repostedPosts = persistedSet("reposted-posts");
+
 /** Dự án bạn tạo trong bản dùng thử. */
 export const myProjectsStore = persisted<Project[]>("projects", []);
 

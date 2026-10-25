@@ -29,18 +29,19 @@ function Vid({ src, poster, className, controls = false }: { src: string; poster
  */
 export { Img as LocalImg };
 
-export function MediaGrid({ media, compact = false }: { media: Media[]; compact?: boolean }) {
+/** `bleed`: tràn hết bề ngang thẻ, không bo góc, không viền (ảnh đầu thẻ Công bố). */
+export function MediaGrid({ media, compact = false, bleed = false }: { media: Media[]; compact?: boolean; bleed?: boolean }) {
   const [view, setView] = useState<number | null>(null);
   if (!media.length) return null;
   const shown = media.slice(0, 4);
   const more = media.length - shown.length;
-  const h = compact ? "h-[150px]" : "h-[260px] sm:h-[340px]";
+  const h = compact ? "h-[150px]" : bleed ? "h-[260px] sm:h-[360px]" : "h-[260px] sm:h-[340px]";
   const layout =
     shown.length === 1 ? "grid-cols-1" : shown.length === 2 ? "grid-cols-2" : "grid-cols-2 grid-rows-2 [&>*:first-child]:row-span-2";
 
   return (
     <>
-      <div className={`grid gap-1 overflow-hidden rounded-xl border border-line bg-mist ${layout} ${h}`}>
+      <div className={`grid gap-1 overflow-hidden bg-mist ${bleed ? "" : "rounded-xl border border-line"} ${layout} ${h}`}>
         {shown.map((m, i) => (
           <button
             key={m.src + i}
