@@ -115,7 +115,7 @@ export function GroupHome({ group }: { group: Group }) {
         </div>
       </section>
 
-      <div className="mx-auto mt-6 grid max-w-[1232px] grid-cols-[minmax(0,1fr)] items-start gap-6 md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[225px_minmax(0,1fr)_300px]">
+      <div className="mx-auto mt-6 grid max-w-[1232px] grid-cols-[minmax(0,1fr)] items-start gap-6 md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[225px_minmax(0,1fr)_300px]">
         <aside className="flex min-w-0 flex-col gap-3 md:sticky md:top-[88px]">
           <nav aria-label="Mục của nhóm" className="no-scrollbar flex gap-1 overflow-x-auto rounded-2xl border border-line bg-white p-1.5 md:flex-col md:overflow-visible">
             {menu.map(({ label, icon: Icon, count }) => {
@@ -244,7 +244,7 @@ export function GroupHome({ group }: { group: Group }) {
           )}
         </div>
 
-        <aside className="hidden flex-col gap-3 lg:sticky lg:top-[88px] lg:flex">
+        <aside className="hidden flex-col gap-3 xl:sticky xl:top-[88px] xl:flex">
           <section className="rounded-2xl border border-line bg-white p-4">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Đang online</h2>

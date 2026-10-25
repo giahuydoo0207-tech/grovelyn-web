@@ -182,21 +182,21 @@ export function ProjectStory({ project, showcase, canEdit }: { project: Project;
   );
 
   return (
-    <div id="noi-dung-du-an" className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[210px_minmax(0,1fr)_290px] lg:gap-10">
+    <div id="noi-dung-du-an" className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-8 xl:grid-cols-[210px_minmax(0,1fr)_290px] xl:gap-10">
       {/* Mục lục: cột trái trên máy tính, hàng nút cuộn ngang trên điện thoại */}
-      <nav aria-label="Trong dự án" className="min-w-0 lg:sticky lg:top-24 lg:self-start">
-        <p className="mb-2 hidden text-xs font-bold uppercase tracking-[0.06em] text-moss lg:block">Trong dự án</p>
-        <ol className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 lg:mx-0 lg:flex-col lg:px-0">
+      <nav aria-label="Trong dự án" className="min-w-0 xl:sticky xl:top-24 xl:self-start">
+        <p className="mb-2 hidden text-xs font-bold uppercase tracking-[0.06em] text-moss xl:block">Trong dự án</p>
+        <ol className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 xl:mx-0 xl:flex-col xl:px-0">
           {chapters.map((c, i) => (
-            <li key={c.id} className="shrink-0 lg:shrink">
+            <li key={c.id} className="shrink-0 xl:shrink">
               {navItem(c.title, view === "story" && active === c.id, () => goChapter(c.id), String(i + 1).padStart(2, "0"))}
             </li>
           ))}
-          <li className="shrink-0 lg:mt-4 lg:shrink lg:border-t lg:border-line lg:pt-3">
+          <li className="shrink-0 xl:mt-4 xl:shrink xl:border-t xl:border-line xl:pt-3">
             {navItem(`Trao đổi (${topicsOf(project.slug).filter((t) => t.status === "open").length})`, view === "exchange", () => goView("exchange"))}
           </li>
-          <li className="shrink-0 lg:shrink">{navItem(`Tài nguyên (${resourceCount})`, view === "resources", () => goView("resources"))}</li>
-          <li className="shrink-0 lg:shrink">{navItem(`Bình luận (${project.comments})`, false, () => goChapter("binh-luan"))}</li>
+          <li className="shrink-0 xl:shrink">{navItem(`Tài nguyên (${resourceCount})`, view === "resources", () => goView("resources"))}</li>
+          <li className="shrink-0 xl:shrink">{navItem(`Bình luận (${project.comments})`, false, () => goChapter("binh-luan"))}</li>
         </ol>
       </nav>
 
@@ -358,7 +358,7 @@ function ProjectAside({ project, showcase, onTimeline }: { project: Project; sho
   const now = currentPhase(showcase.milestones);
   const reached = PHASES.findIndex((p) => p.id === now);
   return (
-    <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
+    <aside className="flex flex-col gap-4 xl:sticky xl:top-24 xl:self-start">
       {(present.length > 0 || project.updated) && (
         <section className="rounded-2xl border border-line bg-white p-5">
           {present.length > 0 && (

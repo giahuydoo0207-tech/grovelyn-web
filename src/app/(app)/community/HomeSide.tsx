@@ -15,18 +15,6 @@ const DAY = 86_400_000;
 const daysUntil = (iso: string) => Math.round((Date.parse(`${iso}T00:00:00Z`) - Date.parse(`${TODAY}T00:00:00Z`)) / DAY);
 const countdown = (n: number) => (n <= 0 ? "Hôm nay" : n === 1 ? "Ngày mai" : `Còn ${n} ngày`);
 
-/** Nhịp cộng đồng: số bài, bình luận và góp ý thật đang có trên bản dùng thử. */
-function usePulse() {
-  const posts = postsStore.use();
-  const topics = useTopics();
-  const rows = [
-    { label: "bài đăng", n: posts.length },
-    { label: "bình luận", n: posts.reduce((s, p) => s + p.comments.length, 0) },
-    { label: "góp ý trong Trao đổi", n: topics.reduce((s, t) => s + t.replies.length, 0) },
-  ];
-  return { total: rows.reduce((s, r) => s + r.n, 0), rows };
-}
-
 /** Một dòng ngắn về việc người đó vừa làm, lấy từ bài mới nhất của họ. */
 function activityOf(handle: string, posts: Post[], openTopics: string[]): string {
   if (openTopics.includes(handle)) return "Đang mở trao đổi, chờ góp ý";
@@ -36,44 +24,6 @@ function activityOf(handle: string, posts: Post[], openTopics: string[]): string
   if (last.kind === "Công bố") return `Vừa công bố ${title ?? "bản mới"}${last.version ? ` ${last.version}` : ""}`;
   if (last.kind === "Tìm cộng sự") return "Đang tìm cộng sự";
   return title ? `Vừa chia sẻ về ${title}` : "Vừa chia sẻ một bài";
-}
-
-export function Pulse() {
-  const { total, rows } = usePulse();
-  const max = Math.max(...rows.map((r) => r.n), 1);
-  return (
-    <section aria-labelledby="nhip" className="rounded-[20px] bg-ink p-[18px] text-white">
-      <h2 id="nhip" className="flex items-center gap-2 text-[13px] font-bold text-leaf">
-        <span className="relative flex h-2 w-2" aria-hidden="true">
-          <span className="absolute inset-0 animate-ping rounded-full bg-leaf opacity-60 motion-reduce:animate-none" />
-          <span className="relative h-2 w-2 rounded-full bg-leaf" />
-        </span>
-        Nhịp cộng đồng
-      </h2>
-      <p className="mt-2 flex items-end gap-3">
-        <span className="font-display text-[40px] font-bold leading-none tracking-[-0.03em] tabular-nums">{total}</span>
-        <span className="pb-1 text-[13px] leading-snug text-white/70">bài, bình luận và góp ý đang có</span>
-      </p>
-      <ul className="mt-4 flex flex-col gap-2.5">
-        {rows.map((r, i) => (
-          <li key={r.label}>
-            <div className="flex justify-between text-[13px]">
-              <span className="text-white/75">{r.label}</span>
-              <span className="font-bold tabular-nums">{r.n}</span>
-            </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/10">
-              <motion.div
-                className={`h-full rounded-full ${i === 0 ? "bg-leaf" : i === 1 ? "bg-[#a8e58f]" : "bg-sap"}`}
-                initial={{ width: 0 }}
-                animate={{ width: `${(r.n / max) * 100}%` }}
-                transition={{ duration: 0.6, delay: 0.1 * i, ease: [0.22, 1, 0.36, 1] }}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
 }
 
 function Online() {
@@ -214,11 +164,13 @@ function Trending() {
   );
 }
 
-/** Cột phải Trang chủ trên màn hình rộng. */
+/** Cột phải Trang chủ trên màn hình rộng: đứng yên khi lướt bảng tin, dài quá thì tự cuộn riêng. */
 export function HomeSide() {
   return (
-    <aside className="hidden flex-col gap-4 lg:sticky lg:top-[88px] lg:flex">
-      <Pulse />
+    <aside
+      aria-label="Cột bên"
+      className="hidden flex-col gap-4 lg:sticky lg:top-[88px] lg:flex lg:max-h-[calc(100dvh-104px)] lg:overflow-y-auto lg:overscroll-contain lg:pb-2 lg:[scrollbar-color:#c9d0c4_transparent] lg:[scrollbar-width:thin]"
+    >
       <Online />
       <Events />
       <Trending />
@@ -228,17 +180,12 @@ export function HomeSide() {
 
 /** Trên điện thoại: một dải gọn trên bảng tin thay cho cột phải. */
 export function HomeStrip() {
-  const { total } = usePulse();
   const people = ONLINE.slice(0, 4)
     .map((h) => userOf(h))
     .filter((u) => !!u);
   const next = EVENTS.filter((e) => daysUntil(e.date) >= 0).sort((a, b) => a.date.localeCompare(b.date))[0];
   return (
     <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:hidden">
-      <span className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full bg-ink pl-3 pr-4 text-sm text-white">
-        <span className="h-2 w-2 rounded-full bg-leaf" aria-hidden="true" />
-        <strong className="tabular-nums">{total}</strong> hoạt động
-      </span>
       <span className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-line bg-white pl-1.5 pr-4 text-sm">
         <span className="flex -space-x-2" aria-hidden="true">
           {people.map((u) => (

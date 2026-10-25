@@ -212,7 +212,7 @@ export function Inbox() {
 
   return (
     // Phủ kín màn hình dưới thanh trên cùng; điện thoại chừa chỗ cho thanh tab ở đáy.
-    <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] top-16 z-20 flex overflow-hidden bg-white md:bottom-0">
+    <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] top-16 z-20 flex overflow-hidden bg-white md:bottom-0 md:left-24">
       <section
         aria-label="Cuộc trò chuyện"
         className={`${mobileChat ? "hidden" : "flex"} w-full min-w-0 flex-col border-line md:flex md:w-[300px] md:shrink-0 md:border-r lg:w-[340px] 2xl:w-[380px]`}

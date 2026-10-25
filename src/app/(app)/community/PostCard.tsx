@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Check, Folder, HandHelping, Link2, MessageCircle, MoreHorizontal, Plus, Repeat2, Rocket, SendHorizontal, ThumbsUp, UsersRound } from "lucide-react";
+import { ArrowRight, Bookmark, Check, Folder, HandHelping, Link2, MessageCircle, MoreHorizontal, Plus, Repeat2, Rocket, SendHorizontal, ThumbsUp, UsersRound } from "lucide-react";
 import type { Post } from "@/lib/data";
 import { ME, groupOf, userOf } from "@/lib/data";
 import { contributorsOf } from "@/lib/exchange";
@@ -11,7 +11,7 @@ import { useTopics } from "@/lib/topicStore";
 import { Avatar } from "@/components/Avatar";
 import { MediaGrid } from "@/components/MediaGrid";
 import { REACTIONS } from "./reactions";
-import { joinRequests, repostedPosts, useProject, useUser, reactionsStore, setReaction as saveReaction, updatePost } from "@/lib/stores";
+import { joinRequests, repostedPosts, savedPosts, useProject, useUser, reactionsStore, setReaction as saveReaction, updatePost } from "@/lib/stores";
 
 /**
  * Mỗi loại bài một dáng thẻ, chỉ dùng màu gốc Grovelyn:
@@ -68,6 +68,7 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
   const joined = joinRequests.use().includes(post.id);
   const reposted = repostedPosts.use().includes(post.id);
   const [copied, setCopied] = useState(false);
+  const [menu, setMenu] = useState(false);
   const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hide = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -88,7 +89,10 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
     try {
       await navigator.clipboard.writeText(`${location.origin}/community#${post.id}`);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
+      setTimeout(() => {
+        setCopied(false);
+        setMenu(false);
+      }, 1200);
     } catch {}
   };
 
@@ -103,7 +107,35 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
     }, 30);
   };
 
-  const pill = `inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold tabular-nums transition-colors ${t.pill}`;
+  const saved = savedPosts.use().includes(post.id);
+  const accentText = look === "dark" ? "text-leaf" : "text-leaf-deep";
+  const action = `flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold transition-colors max-sm:h-12 max-sm:flex-col max-sm:gap-0.5 max-sm:text-xs ${look === "dark" ? "hover:bg-white/10" : look === "quote" ? "hover:bg-white/60" : "hover:bg-mist"}`;
+  const more = (
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        aria-label="Tùy chọn bài viết"
+        aria-expanded={menu}
+        onClick={() => setMenu((v) => !v)}
+        onBlur={(e) => !e.currentTarget.parentElement?.contains(e.relatedTarget as Node | null) && setMenu(false)}
+        className={`flex h-9 w-9 items-center justify-center rounded-full ${look === "dark" ? "text-white/65 hover:bg-white/10" : "text-moss hover:bg-black/5"}`}
+      >
+        <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+      </button>
+      {menu && (
+        <div role="menu" className="absolute right-0 top-10 z-20 w-52 overflow-hidden rounded-xl border border-line bg-white p-1 text-ink shadow-[0_12px_32px_-12px_rgba(6,17,10,0.35)]">
+          <button type="button" role="menuitem" onClick={() => void share()} className="flex h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm font-semibold hover:bg-mist">
+            {copied ? <Check className="h-4 w-4 text-leaf-deep" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
+            {copied ? "Đã chép liên kết" : "Chép liên kết"}
+          </button>
+          <button type="button" role="menuitem" onClick={() => savedPosts.toggle(post.id)} className="flex h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm font-semibold hover:bg-mist">
+            <Bookmark className="h-4 w-4" fill={saved ? "currentColor" : "none"} aria-hidden="true" />
+            {saved ? "Bỏ lưu bài này" : "Lưu bài này"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   const header = (withTag: boolean) => (
     <header className="flex items-center gap-3">
@@ -129,9 +161,7 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
         </p>
       </div>
       {withTag && <KindTag kind={post.kind} look={look} version={post.version} />}
-      <button type="button" aria-label="Tùy chọn bài viết" className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${look === "dark" ? "text-white/65 hover:bg-white/10" : "text-moss hover:bg-black/5"}`}>
-        <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
-      </button>
+      {more}
     </header>
   );
 
@@ -154,9 +184,7 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
           <>
             <div className="flex items-center justify-between">
               <KindTag kind={post.kind} look={look} />
-              <button type="button" aria-label="Tùy chọn bài viết" className="flex h-9 w-9 items-center justify-center rounded-full text-moss hover:bg-black/5">
-                <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
-              </button>
+              {more}
             </div>
             <p className="mt-3 font-display text-[24px] font-bold leading-[1.22] tracking-[-0.02em] sm:text-[28px]">“{post.text}”</p>
             <p className="mt-4 flex items-center gap-2.5 text-sm">
@@ -228,36 +256,44 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
         {look === "hero" && versions.length > 1 && <VersionTrack tags={versions.map((v) => v.tag)} current={curVer} />}
 
         {project && look !== "hero" && (
-          <Link href={`/p/${project.slug}`} className={`mt-3.5 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${look === "dark" ? "bg-white/[.06] hover:bg-white/10" : "bg-mist hover:bg-line"}`}>
-            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${look === "dark" ? "bg-leaf text-ink" : "bg-ink text-leaf"}`}>
-              <Folder className="h-[18px] w-[18px]" aria-hidden="true" />
+          <Link href={`/p/${project.slug}`} className={`group mt-3.5 flex items-center gap-2.5 text-sm ${t.sub}`}>
+            <Folder className={`h-4 w-4 shrink-0 ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`} aria-hidden="true" />
+            <span className="min-w-0 truncate">
+              <span className={`font-bold group-hover:underline ${look === "dark" ? "text-white" : "text-ink"}`}>{project.title}</span>
+              {`, ${project.field}${curVer ? `, bản ${curVer}` : ""}`}
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-bold">{project.title}</span>
-              <span className={`block truncate text-[13px] ${t.sub}`}>
-                {project.field}
-                {curVer ? `, bản ${curVer}` : ""}
-              </span>
-            </span>
-            <ArrowRight className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+            <ArrowRight className="h-4 w-4 shrink-0 opacity-60" aria-hidden="true" />
           </Link>
         )}
 
         {topic && (
-          <Link
-            href={`/exchange/${topic.id}`}
-            className={`mt-2.5 flex items-center gap-2.5 rounded-xl border border-dashed px-3 py-2.5 text-sm ${look === "dark" ? "border-white/20 hover:bg-white/5" : "border-[#c9d0c4] hover:bg-mist"}`}
-          >
-            <HandHelping className={`h-[18px] w-[18px] shrink-0 ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`} aria-hidden="true" />
-            <span className="min-w-0 flex-1">
-              <strong>Đang mở trao đổi:</strong> {topic.question}
+          <Link href={`/exchange/${topic.id}`} className={`group mt-2 flex items-center gap-2.5 text-sm ${t.sub}`}>
+            <HandHelping className={`h-4 w-4 shrink-0 ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`} aria-hidden="true" />
+            <span className="min-w-0 truncate">
+              <span className={look === "dark" ? "text-white" : "text-ink"}>Đang mở trao đổi:</span> {topic.question}
             </span>
-            <span className={`shrink-0 font-bold ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`}>Góp ý</span>
+            <span className={`shrink-0 font-bold group-hover:underline ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`}>Góp ý</span>
           </Link>
         )}
         {project && <Credit slug={project.slug} dark={look === "dark"} />}
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className={`mt-4 flex items-center justify-between gap-3 text-[13px] ${t.sub}`}>
+          <span className="flex items-center gap-1.5">
+            <span className="flex -space-x-1" aria-hidden="true">
+              {REACTIONS.slice(0, 3).map((r) => (
+                <span key={r.key} className={`flex h-5 w-5 items-center justify-center rounded-full ring-2 ${look === "dark" ? "ring-ink" : look === "quote" ? "ring-sap" : "ring-white"}`} style={{ background: r.tint }}>
+                  <r.icon className="h-3 w-3" style={{ color: r.color }} />
+                </span>
+              ))}
+            </span>
+            <span className="tabular-nums">{count}</span>
+          </span>
+          <span className="tabular-nums">
+            {post.comments.length} bình luận, {post.reposts + (reposted ? 1 : 0)} lượt đăng lại
+          </span>
+        </div>
+
+        <div className={`mt-2.5 grid grid-cols-4 gap-1 border-t pt-1.5 ${look === "dark" ? "border-white/15" : look === "quote" ? "border-leaf-deep/20" : "border-line"}`}>
           <div
             className="relative"
             onMouseEnter={showPicker}
@@ -270,18 +306,17 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
             <button
               type="button"
               aria-pressed={!!reaction}
-              aria-label={`${current?.label ?? "Thích"}, ${count} lượt`}
               onClick={() => setReaction(reaction ? null : "like")}
               onTouchStart={showPicker}
               onTouchEnd={() => hold.current && clearTimeout(hold.current)}
               onFocus={(e) => e.currentTarget.matches(":focus-visible") && setPicker(true)}
-              className={pill}
+              className={action}
               style={{ color: current && look !== "dark" ? current.color : undefined }}
             >
               <motion.span key={reaction ?? "none"} initial={{ scale: reaction ? 0.3 : 1 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 12 }}>
-                <Icon className={`h-[17px] w-[17px] ${!current ? (look === "dark" ? "text-leaf" : "text-leaf-deep") : ""}`} fill={reaction === "like" ? "currentColor" : "none"} aria-hidden="true" />
+                <Icon className="h-[18px] w-[18px]" fill={reaction === "like" ? "currentColor" : "none"} aria-hidden="true" />
               </motion.span>
-              {count}
+              {current?.label ?? "Thích"}
             </button>
             <AnimatePresence>
               {picker && (
@@ -338,20 +373,17 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
               )}
             </AnimatePresence>
           </div>
-
-          <button type="button" onClick={() => openReply()} aria-label={`Bình luận, ${post.comments.length} bình luận`} className={pill}>
-            <MessageCircle className={`h-[17px] w-[17px] ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`} aria-hidden="true" />
-            {post.comments.length}
+          <button type="button" onClick={() => openReply()} className={action}>
+            <MessageCircle className="h-[18px] w-[18px]" aria-hidden="true" />
+            Bình luận
           </button>
-          <button type="button" aria-pressed={reposted} onClick={() => repostedPosts.toggle(post.id)} aria-label={`Đăng lại, ${post.reposts + (reposted ? 1 : 0)} lượt`} className={pill}>
-            <Repeat2 className={`h-[17px] w-[17px] ${reposted ? "" : look === "dark" ? "text-leaf" : "text-leaf-deep"}`} strokeWidth={reposted ? 2.8 : 2} aria-hidden="true" />
-            {post.reposts + (reposted ? 1 : 0)}
+          <button type="button" aria-pressed={reposted} onClick={() => repostedPosts.toggle(post.id)} className={`${action} ${reposted ? accentText : ""}`}>
+            <Repeat2 className="h-[18px] w-[18px]" strokeWidth={reposted ? 2.6 : 2} aria-hidden="true" />
+            {reposted ? "Đã đăng lại" : "Đăng lại"}
           </button>
-          <span className="flex-1" />
-          <button type="button" onClick={share} className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold transition-colors ${look === "dark" ? "text-white/70 hover:bg-white/10" : `${t.sub} hover:bg-black/5`}`}>
-            {copied ? <Check className="h-[17px] w-[17px]" aria-hidden="true" /> : <Link2 className="h-[17px] w-[17px]" aria-hidden="true" />}
-            <span className="hidden sm:inline">{copied ? "Đã chép" : "Chép liên kết"}</span>
-            <span className="sr-only sm:hidden">{copied ? "Đã chép" : "Chép liên kết"}</span>
+          <button type="button" aria-pressed={saved} onClick={() => savedPosts.toggle(post.id)} className={`${action} ${saved ? accentText : ""}`}>
+            <Bookmark className="h-[18px] w-[18px]" fill={saved ? "currentColor" : "none"} aria-hidden="true" />
+            {saved ? "Đã lưu" : "Lưu"}
           </button>
         </div>
 
@@ -453,7 +485,7 @@ function Thread({ post, look, open, onReply, input }: { post: Post; look: Look; 
 function VersionTrack({ tags, current }: { tags: string[]; current?: string }) {
   const at = Math.max(0, tags.indexOf(current ?? ""));
   return (
-    <ol aria-label="Các phiên bản" className="mt-4 flex items-center gap-1.5 rounded-xl bg-mist px-3.5 py-3">
+    <ol aria-label="Các phiên bản" className="mt-4 flex items-center gap-1.5">
       {tags.map((tag, i) => (
         <li key={tag} className={`flex items-center gap-1.5 ${i < tags.length - 1 ? "flex-1" : ""}`}>
           <span
