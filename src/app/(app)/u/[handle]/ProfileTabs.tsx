@@ -75,7 +75,7 @@ export function ProfileTabs({
             >
               {t}
               {count[t] !== undefined && (
-                <span className={`rounded-full px-1.5 text-xs tabular-nums ${on ? "bg-leaf text-ink" : "bg-mist text-moss"}`}>{count[t]}</span>
+                <span className={`text-sm font-bold tabular-nums ${on ? "text-leaf" : "text-leaf-deep"}`}>{count[t]}</span>
               )}
             </button>
           );
