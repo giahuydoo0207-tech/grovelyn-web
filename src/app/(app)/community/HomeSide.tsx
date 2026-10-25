@@ -169,7 +169,7 @@ export function HomeSide() {
   return (
     <aside
       aria-label="Cột bên"
-      className="hidden flex-col gap-4 lg:sticky lg:top-[88px] lg:flex lg:max-h-[calc(100dvh-104px)] lg:overflow-y-auto lg:overscroll-contain lg:pb-2 lg:[scrollbar-color:#c9d0c4_transparent] lg:[scrollbar-width:thin]"
+      className="hidden flex-col gap-4 lg:sticky lg:top-[88px] lg:flex lg:max-h-[calc(100dvh-104px)] lg:overflow-y-auto lg:overscroll-contain lg:pb-2 no-scrollbar"
     >
       <Online />
       <Events />
