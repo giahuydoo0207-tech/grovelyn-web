@@ -184,7 +184,7 @@ export function ImageCropper({ src, ratio, round = false, title = "Chỉnh khung
             </>
           )}
           <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-semibold text-white">
-            {round ? "Khung tròn" : `Khung ${ratio}:1`}
+            {round ? "Khung tròn" : `Khung ${String(ratio).replace(".", ",")}:1`}
           </span>
         </div>
 

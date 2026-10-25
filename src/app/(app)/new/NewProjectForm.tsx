@@ -663,7 +663,8 @@ export function NewProjectForm() {
               {cropping && (
                 <ImageCropper
                   src={cropping}
-                  ratio={2}
+                  // Gần đúng tỉ lệ thân bìa trên thẻ dự án và trang dự án, để phần đã chọn hiện gần như nguyên vẹn.
+                  ratio={2.2}
                   title="Căn chỉnh ảnh bìa"
                   outputWidth={1400}
                   onCancel={() => setCropping(null)}

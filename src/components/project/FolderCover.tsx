@@ -10,15 +10,11 @@ const TONE: Record<
   sap: { back: "#c6ecb5", front: "#dcf6cf", line: "#1d6b1d", tab: "#06110a" },
 };
 
-/** Hình mặt trước của bìa, dùng làm mặt nạ khi bìa là ảnh: ảnh co giãn theo khung như phần vẽ màu. */
-const FRONT_MASK = `url("data:image/svg+xml,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" preserveAspectRatio="none"><path d="M0 26 C110 2 290 2 400 26 V200 H0 Z"/></svg>',
-)}") center / 100% 100% no-repeat`;
-
 /**
  * Bìa dự án kiểu bìa hồ sơ: tab ghi loại dự án, logo dự án đặt chính giữa mặt trước như nhãn in sẵn.
  * `height` là chiều cao bìa; logo tự canh giữa phần mặt trước. Tab co giãn theo nhãn, chữ dài thì cắt bằng dấu ba chấm.
- * Có `coverSrc` thì ảnh phủ kín bìa (thân sau tối hơn, mặt trước rõ nét) và không đặt logo che ảnh.
+ * Có `coverSrc` thì ảnh phủ kín thân bìa đúng một lần (giữ nguyên khung đã căn chỉnh), mép bìa trước chỉ vẽ
+ * bằng đường sáng và phần phía trên hơi tối, không lặp ảnh. Có ảnh thì không đặt logo che ảnh.
  */
 export function FolderCover({
   tone,
@@ -72,12 +68,7 @@ export function FolderCover({
           background: c.back,
         }}
       >
-        {photo && (
-          <div
-            className="absolute inset-0 opacity-45 brightness-75"
-            style={photo}
-          />
-        )}
+        {photo && <div className="absolute inset-0" style={photo} />}
       </div>
       <div
         className="absolute left-0 top-0 flex max-w-[calc(100%-2.5rem)]"
@@ -106,11 +97,38 @@ export function FolderCover({
         </svg>
       </div>
       {photo ? (
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-[80%] w-full"
-          style={{ ...photo, mask: FRONT_MASK, WebkitMask: FRONT_MASK }}
-        />
+        <>
+          {/* Phần thân sau lộ ra phía trên mép bìa trước: phủ tối nhẹ để thấy hai lớp, ảnh vẫn liền một tấm. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bg-ink/30"
+            style={{
+              top: tab,
+              bottom: "80%",
+              borderTopRightRadius: big ? 14 : 10,
+            }}
+          />
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 400 200"
+            preserveAspectRatio="none"
+            className="absolute inset-x-0 bottom-0 h-[80%] w-full"
+          >
+            <path
+              d="M0 0 H400 V26 C290 2 110 2 0 26 Z"
+              fill="#06110a"
+              fillOpacity=".3"
+            />
+            <path
+              d="M0 26 C110 2 290 2 400 26"
+              fill="none"
+              stroke="#fff"
+              strokeOpacity=".9"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+        </>
       ) : (
         <svg
           aria-hidden="true"
