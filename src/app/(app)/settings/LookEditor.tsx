@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ImagePlus, Shuffle } from "lucide-react";
+import { Check, ImagePlus, Plus, Shuffle, X } from "lucide-react";
 import { ME, userOf, type CoverTone } from "@/lib/data";
 import {
   BACKGROUNDS,
@@ -19,7 +19,7 @@ import {
   type Character,
   type Status,
 } from "@/lib/character";
-import { STATUS_KEEP, setLook, useLook, type AvatarMode, type Look } from "@/lib/look";
+import { MAX_OUTFITS, STATUS_KEEP, setLook, useLook, type AvatarMode, type Look } from "@/lib/look";
 import { compressImage } from "@/lib/localMedia";
 import { CharacterArt } from "@/components/CharacterArt";
 import { PersonAvatar, STATUS_ICON } from "@/components/PersonAvatar";
@@ -118,7 +118,8 @@ function Tile({ on, onClick, label, children }: { on: boolean; onClick: () => vo
 export function AvatarCard({ toast }: { toast: (m: string) => void }) {
   const saved = useLook(ME);
   // Bản lưu trên trình duyệt đọc sau khi trang hiện ra: dựng lại khung chỉnh khi bản lưu đổi.
-  return <AvatarEditor key={JSON.stringify(saved)} saved={saved} toast={toast} />;
+  // Bộ phối đã lưu đổi riêng, không làm mất phần đang chỉnh dở.
+  return <AvatarEditor key={JSON.stringify({ ...saved, outfits: null })} saved={saved} toast={toast} />;
 }
 
 function AvatarEditor({ saved, toast }: { saved: Look; toast: (m: string) => void }) {
@@ -129,7 +130,7 @@ function AvatarEditor({ saved, toast }: { saved: Look; toast: (m: string) => voi
   const [warn, setWarn] = useState("");
   const c = draft.character;
   const setC = (patch: Partial<Character>) => setDraft((d) => ({ ...d, character: { ...d.character, ...patch } }));
-  const dirty = JSON.stringify({ ...draft, statusUntil: null }) !== JSON.stringify({ ...saved, statusUntil: null }) || (draft.status !== "Không hiện" && !!saved.statusUntil !== (until !== "Không tự tắt"));
+  const dirty = JSON.stringify({ ...draft, statusUntil: null, outfits: null }) !== JSON.stringify({ ...saved, statusUntil: null, outfits: null }) || (draft.status !== "Không hiện" && !!saved.statusUntil !== (until !== "Không tự tắt"));
 
   const pickStatus = (s: Status) => {
     setDraft((d) => ({ ...d, status: s }));
@@ -148,7 +149,9 @@ function AvatarEditor({ saved, toast }: { saved: Look; toast: (m: string) => voi
   };
 
   const save = () => {
-    setLook({ ...draft, statusUntil: draft.status === "Không hiện" ? null : untilAt(until) });
+    const { outfits: _keep, ...rest } = draft;
+    void _keep;
+    setLook({ ...rest, statusUntil: draft.status === "Không hiện" ? null : untilAt(until) });
     toast("Đã lưu ảnh đại diện");
   };
 
@@ -172,6 +175,8 @@ function AvatarEditor({ saved, toast }: { saved: Look; toast: (m: string) => voi
         <span className="h-2 w-2 rounded-full bg-leaf" aria-hidden="true" />
         {draft.mode === "photo" ? "Ảnh thật hiện công khai với mọi người xem hồ sơ của bạn." : "Nhân vật giúp bạn có ảnh đại diện riêng mà không cần đăng ảnh thật."}
       </p>
+
+      <Outfits saved={saved} draft={draft} toast={toast} />
 
       <div className="mt-5 flex flex-col gap-6">
         <div className="z-10 flex flex-wrap sm:sticky sm:top-[72px] items-center gap-x-6 gap-y-4 rounded-2xl bg-mist p-4 shadow-[0_8px_24px_-18px_rgba(6,17,10,0.4)]">
@@ -372,6 +377,105 @@ function AvatarEditor({ saved, toast }: { saved: Look; toast: (m: string) => voi
         />
       )}
     </Shell>
+  );
+}
+
+const same = (a: Character, b: Character) => JSON.stringify(a) === JSON.stringify(b);
+
+/** Bộ phối đã lưu: bấm một lần là đổi nhân vật; lưu bộ đang chỉnh với một cái tên; xoá bộ không dùng. */
+function Outfits({ saved, draft, toast }: { saved: Look; draft: Look; toast: (m: string) => void }) {
+  const [naming, setNaming] = useState(false);
+  const [name, setName] = useState("");
+  const list = saved.outfits;
+  const full = list.length >= MAX_OUTFITS;
+  const exists = list.some((o) => same(o.character, draft.character));
+
+  const add = (e: React.FormEvent) => {
+    e.preventDefault();
+    const n = name.trim() || `Bộ phối ${list.length + 1}`;
+    setLook({ outfits: [...list, { id: `${Date.now().toString(36)}`, name: n.slice(0, 24), character: draft.character }] });
+    setNaming(false);
+    setName("");
+    toast(`Đã lưu bộ phối "${n.slice(0, 24)}"`);
+  };
+
+  return (
+    <div className="mt-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <Label hint={`(${list.length}/${MAX_OUTFITS}, bấm để đổi ngay)`}>Bộ phối đã lưu</Label>
+        {draft.mode === "character" && !naming && (
+          <button
+            type="button"
+            disabled={full || exists}
+            onClick={() => setNaming(true)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-line px-3 text-sm font-bold hover:bg-mist disabled:opacity-40"
+            title={full ? `Tối đa ${MAX_OUTFITS} bộ phối, xoá bớt để lưu thêm` : exists ? "Bộ phối này đã có trong danh sách" : undefined}
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" /> Lưu bộ đang chỉnh
+          </button>
+        )}
+      </div>
+      {naming && (
+        <form onSubmit={add} className="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-mist p-2">
+          <span className="block h-10 w-10 overflow-hidden rounded-full">
+            <CharacterArt c={draft.character} close className="block h-full w-full" />
+          </span>
+          <label className="min-w-[180px] flex-1">
+            <span className="sr-only">Tên bộ phối</span>
+            <input
+              autoFocus
+              value={name}
+              maxLength={24}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={`Ví dụ: Đi phỏng vấn`}
+              className="h-10 w-full rounded-lg border border-line bg-white px-3 text-[15px] outline-none focus:border-ink"
+            />
+          </label>
+          <button type="submit" className="h-10 rounded-lg bg-ink px-4 text-sm font-bold text-white hover:bg-ink-2">
+            Lưu
+          </button>
+          <button type="button" onClick={() => setNaming(false)} className="h-10 rounded-lg px-3 text-sm font-semibold text-moss hover:bg-white">
+            Huỷ
+          </button>
+        </form>
+      )}
+      {list.length > 0 ? (
+        <ul className="mt-2 flex flex-wrap gap-2">
+          {list.map((o) => {
+            const on = saved.mode === "character" && same(o.character, saved.character);
+            return (
+              <li key={o.id} className={`group relative flex items-center rounded-full ${on ? "bg-sap shadow-[inset_0_0_0_2px_#1d6b1d]" : "border border-line bg-white"}`}>
+                <button
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => {
+                    setLook({ mode: "character", character: o.character });
+                    toast(`Đã đổi sang "${o.name}"`);
+                  }}
+                  className="flex h-12 items-center gap-2 rounded-full pl-1 pr-2 text-sm font-bold"
+                >
+                  <span className="block h-10 w-10 overflow-hidden rounded-full">
+                    <CharacterArt c={o.character} close className="block h-full w-full" />
+                  </span>
+                  {o.name}
+                  {on && <Check className="h-4 w-4 text-leaf-deep" aria-hidden="true" />}
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Xoá bộ phối ${o.name}`}
+                  onClick={() => setLook({ outfits: list.filter((x) => x.id !== o.id) })}
+                  className="mr-1.5 flex h-7 w-7 items-center justify-center rounded-full text-moss hover:bg-black/5 hover:text-ink"
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="mt-2 text-sm text-moss">Chưa có bộ phối nào. Phối xong bấm &quot;Lưu bộ đang chỉnh&quot; để đổi nhanh lần sau.</p>
+      )}
+    </div>
   );
 }
 

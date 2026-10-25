@@ -12,6 +12,14 @@ import { persisted } from "./persist";
 export type AvatarMode = "character" | "photo" | "initials";
 export type Cover = { kind: "garden"; seed: number } | { kind: "photo"; src: string; original?: string };
 
+export interface SavedOutfit {
+  id: string;
+  name: string;
+  character: Character;
+}
+
+export const MAX_OUTFITS = 6;
+
 export interface Look {
   mode: AvatarMode;
   character: Character;
@@ -24,7 +32,16 @@ export interface Look {
   status: Status;
   /** Mốc tự tắt trạng thái (ms). null: không tự tắt. */
   statusUntil: number | null;
+  /** Bộ phối đã lưu để đổi nhanh. */
+  outfits: SavedOutfit[];
 }
+
+/** Ba bộ phối mẫu cho tài khoản dùng thử. */
+const SAMPLE_OUTFITS = (base: Character): SavedOutfit[] => [
+  { id: "di-hoc", name: "Đi học", character: { ...base, outfit: "Áo thun", outfitColor: 1, extras: ["Tai nghe"], emotion: "Cười nhe răng", bg: 0 } },
+  { id: "di-lam", name: "Đi làm", character: { ...base, outfit: "Blazer", outfitColor: 0, extras: ["Kính"], emotion: "Tự tin", bg: 5 } },
+  { id: "di-choi", name: "Đi chơi", character: { ...base, outfit: "Hoodie", outfitColor: 5, extras: ["Mũ lưỡi trai", "Kính râm"], emotion: "Nháy mắt", bg: 4 } },
+];
 
 export const STATUS_KEEP: Status[] = ["Sẵn sàng nhận việc", "Tìm cộng sự"];
 
@@ -37,6 +54,7 @@ export function lookFor(handle: string): Look {
     cover: null,
     status: preset?.status ?? "Không hiện",
     statusUntil: null,
+    outfits: handle === ME ? SAMPLE_OUTFITS(preset?.character ?? characterFor(handle)) : [],
   };
 }
 
@@ -77,7 +95,12 @@ export function useLook(handle: string): Look {
   const time = useNow();
   if (handle !== ME) return lookFor(handle);
   const base = lookFor(ME);
-  const look: Look = { ...base, ...mine, character: normalize(mine.character ?? {}, base.character) };
+  const look: Look = {
+    ...base,
+    ...mine,
+    character: normalize(mine.character ?? {}, base.character),
+    outfits: (mine.outfits ?? base.outfits).map((o) => ({ ...o, character: normalize(o.character, base.character) })),
+  };
   if (look.statusUntil && time && time > look.statusUntil) return { ...look, status: "Không hiện", statusUntil: null };
   return look;
 }
