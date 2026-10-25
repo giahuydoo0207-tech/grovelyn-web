@@ -149,6 +149,8 @@ export function NewProjectForm() {
   const [sections, setSections] = useState<Record<string, string>>({});
   const [tone, setTone] = useState<CoverTone>("ink");
   const [logoSrc, setLogoSrc] = useState<string | undefined>();
+  const [coverSrc, setCoverSrc] = useState<string | undefined>();
+  const coverInput = useRef<HTMLInputElement>(null);
   const [shots, setShots] = useState<Shot[]>([]);
   const [files, setFiles] = useState<Picked[]>([]);
   const [links, setLinks] = useState<LinkRow[]>([{ id: 1, label: "", url: "" }]);
@@ -257,6 +259,7 @@ export function NewProjectForm() {
         gallery: shots.map((sh) => ({ src: sh.url, caption: sh.name })),
         links: filledLinks.map((l) => ({ label: l.label.trim() || "Liên kết", url: l.url.trim(), kind: "other" as const })),
         logoSrc,
+        coverSrc,
       },
     };
     // Lưu dự án vào trình duyệt; công bố thì thêm bài Công bố lên Trang chủ.
@@ -590,7 +593,7 @@ export function NewProjectForm() {
               <ProjectLogo title={title || "Dự án mới"} src={logoSrc} size={64} />
             </span>
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-semibold">Logo và màu bìa {optional}</p>
+              <p className="text-sm font-semibold">Logo và bìa {optional}</p>
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={() => logoInput.current?.click()} className="h-10 rounded-lg border border-line px-4 text-sm font-semibold hover:bg-mist">
                   {logoSrc ? "Đổi logo" : "Tải logo lên"}
@@ -603,7 +606,16 @@ export function NewProjectForm() {
                 <span className="mx-1 h-6 w-px bg-line" aria-hidden="true" />
                 {TONES.map((t) => (
                   <label key={t.id} className="cursor-pointer">
-                    <input type="radio" name="tone" className="peer sr-only" checked={tone === t.id} onChange={() => setTone(t.id)} />
+                    <input
+                      type="radio"
+                      name="tone"
+                      className="peer sr-only"
+                      checked={!coverSrc && tone === t.id}
+                      onChange={() => {
+                        setTone(t.id);
+                        setCoverSrc(undefined);
+                      }}
+                    />
                     <span
                       className="block h-9 w-9 rounded-full border border-line ring-offset-2 peer-checked:ring-2 peer-checked:ring-ink peer-focus-visible:ring-2 peer-focus-visible:ring-leaf-deep"
                       style={{ background: t.swatch }}
@@ -611,8 +623,41 @@ export function NewProjectForm() {
                     <span className="sr-only">Màu bìa {t.name}</span>
                   </label>
                 ))}
+                {/* Ô thứ tư: ảnh bìa. Bấm để chọn ảnh sản phẩm, bản vẽ… phủ kín bìa thay cho màu. */}
+                <button
+                  type="button"
+                  onClick={() => coverInput.current?.click()}
+                  aria-pressed={!!coverSrc}
+                  aria-label={coverSrc ? "Đổi ảnh bìa" : "Dùng ảnh làm bìa"}
+                  className={`relative flex h-9 items-center gap-1.5 overflow-hidden rounded-full border border-line px-3 text-sm font-semibold ring-offset-2 hover:bg-mist ${coverSrc ? "w-9 px-0 ring-2 ring-ink" : ""}`}
+                  style={coverSrc ? { backgroundImage: `url("${coverSrc}")`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+                >
+                  {!coverSrc && (
+                    <>
+                      <ImagePlus className="h-4 w-4" aria-hidden="true" /> Ảnh bìa
+                    </>
+                  )}
+                </button>
+                {coverSrc && (
+                  <button type="button" onClick={() => setCoverSrc(undefined)} className="h-9 rounded-lg px-2.5 text-sm font-semibold text-moss hover:bg-mist hover:text-ink">
+                    Bỏ ảnh bìa
+                  </button>
+                )}
               </div>
+              <p className="text-[13px] text-moss">Ảnh bìa phủ kín bìa thư mục, ví dụ ảnh sản phẩm hoặc phối cảnh. Có ảnh bìa thì logo không hiện trên bìa.</p>
             </div>
+            <input
+              ref={coverInput}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              aria-label="Chọn ảnh bìa dự án"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void compressImage(f, 1400).then(setCoverSrc);
+                e.target.value = "";
+              }}
+            />
             <input
               ref={logoInput}
               type="file"
@@ -749,7 +794,7 @@ export function NewProjectForm() {
         <p className="text-sm font-semibold text-moss">Xem trước thẻ dự án</p>
         <article className="overflow-hidden rounded-xl border border-line bg-white">
           <div className="bg-mist px-[18px] pt-[22px]">
-            <FolderCover tone={tone} title={title || "Dự án mới"} logoSrc={logoSrc} kind={output || undefined} height={176} logoSize={78} />
+            <FolderCover tone={tone} title={title || "Dự án mới"} logoSrc={logoSrc} coverSrc={coverSrc} kind={output || undefined} height={176} logoSize={78} />
           </div>
           <div className="flex flex-col gap-2 p-5">
             <div className="flex justify-between gap-3 text-[13px]">

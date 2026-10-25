@@ -71,6 +71,8 @@ export interface Project {
     gallery: { src: string; caption: string }[];
     links: { label: string; url: string; kind: "demo" | "file" | "repo" | "other" }[];
     logoSrc?: string;
+    /** Ảnh phủ bìa thư mục. */
+    coverSrc?: string;
   };
 }
 

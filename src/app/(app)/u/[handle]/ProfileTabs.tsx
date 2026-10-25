@@ -188,7 +188,7 @@ function AboutTab({ user, projects, isMe }: { user: User; projects: Project[]; i
                 return (
                   <li key={p.slug} className="grid gap-5 rounded-2xl border border-line bg-[#fbfcfa] p-4 sm:grid-cols-[176px_minmax(0,1fr)]">
                     <div className="rounded-xl bg-mist px-3 pt-3.5">
-                      <FolderCover tone={p.tone} title={p.title} logo={sc.logo} height={100} logoSize={46} />
+                      <FolderCover tone={p.tone} title={p.title} logo={sc.logo} logoSrc={p.local?.logoSrc} coverSrc={p.local?.coverSrc} height={100} logoSize={46} />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-start justify-between gap-3">

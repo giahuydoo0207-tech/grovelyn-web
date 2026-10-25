@@ -35,6 +35,8 @@ export function ProjectCard({
           tone={project.tone}
           title={project.title}
           logo={showcase.logo}
+          logoSrc={project.local?.logoSrc}
+          coverSrc={project.local?.coverSrc}
           kind={project.output}
           height={featured ? 240 : 176}
           logoSize={featured ? 104 : 78}

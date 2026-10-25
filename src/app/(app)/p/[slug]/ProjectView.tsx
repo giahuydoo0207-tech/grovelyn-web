@@ -93,6 +93,7 @@ export function ProjectView({ project }: { project: Project }) {
                   title={project.title}
                   logo={showcase.logo}
                   logoSrc={project.local?.logoSrc}
+                  coverSrc={project.local?.coverSrc}
                   kind={project.output}
                   height={220}
                   logoSize={96}
