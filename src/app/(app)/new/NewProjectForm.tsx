@@ -15,6 +15,7 @@ import { PROGRESS, phaseLabel, type Phase } from "@/lib/showcase";
 import { Avatar } from "@/components/Avatar";
 import { FolderCover } from "@/components/project/FolderCover";
 import { ProjectLogo } from "@/components/project/ProjectLogo";
+import { ImageCropper } from "@/components/ImageCropper";
 
 const MAX_FILE_MB = 25;
 const MAX_SHOTS = 12;
@@ -150,6 +151,9 @@ export function NewProjectForm() {
   const [tone, setTone] = useState<CoverTone>("ink");
   const [logoSrc, setLogoSrc] = useState<string | undefined>();
   const [coverSrc, setCoverSrc] = useState<string | undefined>();
+  // Ảnh gốc để căn chỉnh lại bìa nhiều lần mà không bị mờ dần; mở khung căn chỉnh khi có `cropping`.
+  const [coverOriginal, setCoverOriginal] = useState<string | undefined>();
+  const [cropping, setCropping] = useState<string | null>(null);
   const coverInput = useRef<HTMLInputElement>(null);
   const [shots, setShots] = useState<Shot[]>([]);
   const [files, setFiles] = useState<Picked[]>([]);
@@ -639,12 +643,36 @@ export function NewProjectForm() {
                   )}
                 </button>
                 {coverSrc && (
-                  <button type="button" onClick={() => setCoverSrc(undefined)} className="h-9 rounded-lg px-2.5 text-sm font-semibold text-moss hover:bg-mist hover:text-ink">
-                    Bỏ ảnh bìa
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setCropping(coverOriginal ?? coverSrc)}
+                      className="h-9 rounded-lg border border-line px-3 text-sm font-semibold hover:bg-mist"
+                    >
+                      Căn chỉnh
+                    </button>
+                    <button type="button" onClick={() => setCoverSrc(undefined)} className="h-9 rounded-lg px-2.5 text-sm font-semibold text-moss hover:bg-mist hover:text-ink">
+                      Bỏ ảnh bìa
+                    </button>
+                  </>
                 )}
               </div>
-              <p className="text-[13px] text-moss">Ảnh bìa phủ kín bìa thư mục, ví dụ ảnh sản phẩm hoặc phối cảnh. Có ảnh bìa thì logo không hiện trên bìa.</p>
+              <p className="text-[13px] text-moss">
+                Ảnh bìa phủ kín bìa thư mục, ví dụ ảnh sản phẩm hoặc phối cảnh. Kéo và phóng to để chọn phần muốn hiện. Có ảnh bìa thì logo không hiện trên bìa.
+              </p>
+              {cropping && (
+                <ImageCropper
+                  src={cropping}
+                  ratio={2}
+                  title="Căn chỉnh ảnh bìa"
+                  outputWidth={1400}
+                  onCancel={() => setCropping(null)}
+                  onDone={(url) => {
+                    setCoverSrc(url);
+                    setCropping(null);
+                  }}
+                />
+              )}
             </div>
             <input
               ref={coverInput}
@@ -654,7 +682,12 @@ export function NewProjectForm() {
               aria-label="Chọn ảnh bìa dự án"
               onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) void compressImage(f, 1400).then(setCoverSrc);
+                // Giữ bản lớn làm ảnh gốc rồi mở khung căn chỉnh ngay.
+                if (f)
+                  void compressImage(f, 2400, 0.9).then((src) => {
+                    setCoverOriginal(src);
+                    setCropping(src);
+                  });
                 e.target.value = "";
               }}
             />
