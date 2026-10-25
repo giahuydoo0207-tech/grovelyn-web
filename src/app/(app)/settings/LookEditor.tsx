@@ -505,7 +505,7 @@ export function CoverCard({ toast }: { toast: (m: string) => void }) {
   return (
     <Shell id="anh-bia" title="Ảnh bìa" desc="Mặc định là một luống vườn, mỗi người một kiểu. Bạn có thể đổi kiểu vườn hoặc tải ảnh của mình lên.">
       <div className="mt-4 overflow-hidden rounded-2xl border border-line">
-        <div className="relative h-28 sm:h-36">
+        <div className="relative aspect-[3/1]">
           {cover?.kind === "photo" ? <LocalImg src={cover.src} alt="Ảnh bìa hiện tại" className="h-full w-full object-cover" /> : <GardenCover seed={seed} className="absolute inset-0 h-full w-full" />}
         </div>
       </div>
@@ -565,14 +565,14 @@ export function CoverCard({ toast }: { toast: (m: string) => void }) {
               </button>
             )}
           </div>
-          <p className={`text-[13px] ${warn ? "font-semibold text-[#b42318]" : "text-moss"}`}>{warn || "Ảnh ngang, tối thiểu 1500 x 300 px."}</p>
+          <p className={`text-[13px] ${warn ? "font-semibold text-[#b42318]" : "text-moss"}`}>{warn || "Ảnh ngang, tối thiểu 1500 x 500 px. Bấm vào ảnh bìa trên hồ sơ để xem toàn bộ ảnh gốc."}</p>
         </div>
       </div>
 
       {crop && (
         <ImageCropper
           src={crop}
-          ratio={5}
+          ratio={3}
           title="Căn chỉnh ảnh bìa"
           outputWidth={1600}
           onCancel={() => setCrop(null)}
