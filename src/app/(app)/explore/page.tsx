@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { PROJECTS } from "@/lib/data";
 import { ExploreGrid } from "./ExploreGrid";
 
-export const metadata: Metadata = { title: "Khám phá" };
+export const metadata: Metadata = { title: "Sản phẩm" };
 
 export default function ExplorePage() {
   return (

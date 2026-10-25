@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import {
   Bell,
-  Compass,
+  Folder,
   HandHelping,
   House,
   MessageCircleMore,
@@ -46,8 +46,8 @@ const ITEMS: Item[] = [
   },
   {
     href: "/explore",
-    label: "Khám phá",
-    icon: Compass,
+    label: "Sản phẩm",
+    icon: Folder,
     match: (p) => p.startsWith("/explore") || p.startsWith("/p/"),
   },
   {

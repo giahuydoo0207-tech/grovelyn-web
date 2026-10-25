@@ -17,7 +17,7 @@ export function SavedGrid() {
       <p className="rounded-xl border border-line bg-white px-6 py-10 text-center text-moss">
         Chưa lưu dự án nào.{" "}
         <Link href="/explore" className="font-semibold text-leaf-deep hover:underline">
-          Vào Khám phá
+          Xem Sản phẩm
         </Link>
       </p>
     );
