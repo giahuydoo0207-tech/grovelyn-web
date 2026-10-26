@@ -13,11 +13,25 @@ export interface ChatMessage {
   /** Slug dự án được chia sẻ. */
   project?: string;
   file?: { name: string; size: string };
-  /** Ảnh gửi kèm (đường dẫn hoặc object URL). */
+  /** Ảnh gửi kèm (đường dẫn hoặc data URL). Bản cũ chỉ có một ảnh. */
   image?: string;
+  /** Cụm ảnh gửi cùng lúc, tối đa 10. */
+  images?: string[];
   /** Số lượt thả tim. */
   hearts?: number;
+  /** Bạn đã thả tim tin này chưa. */
+  liked?: boolean;
+  /** Tin đang trả lời (id). */
+  replyTo?: string;
+  /** Tin được ghim lên đầu cuộc trò chuyện. */
+  pinned?: boolean;
 }
+
+/** Mọi ảnh trong một tin, gộp kiểu cũ và kiểu mới. */
+export const imagesOf = (m: ChatMessage) => [...(m.image ? [m.image] : []), ...(m.images ?? [])];
+
+/** Tối đa ảnh mỗi lần gửi. */
+export const MAX_IMAGES = 10;
 
 export interface Conversation {
   id: string;
@@ -35,6 +49,12 @@ export interface Conversation {
   about?: string;
   /** Số tin chưa đọc lúc mở trang. */
   unread: number;
+  /** Cuộc trò chuyện được ghim lên đầu danh sách. */
+  pinned?: boolean;
+  /** Dự án gắn với nhóm chat. */
+  project?: string;
+  /** Sự kiện cả hai cùng quan tâm hoặc nhóm sắp tham gia. */
+  event?: string;
   /** Ai đang soạn tin. */
   typing?: string;
   /** Lần cuối hoạt động khi không online. */
@@ -52,16 +72,20 @@ export const CONVERSATIONS: Conversation[] = [
     mark: "KT",
     tone: "leaf",
     members: ["ngocanh", "quocbao", "minhkhoa", ME],
-    about: "Nhóm chat 4 thành viên",
+    about: "Nhóm chat của dự án · 4 thành viên",
     unread: 5,
-    typing: "quocbao",
+    pinned: true,
+    project: "nha-pho-thong-gio",
+    event: "gop-y-mat-cat-nha-pho",
+    typing: "minhkhoa",
     when: "14:20",
     messages: [
+      { id: "k0", from: "ngocanh", at: "09:02", text: "Hạn nộp bản mặt cắt thứ sáu 17:00, gửi PDF vào tài nguyên dự án", pinned: true },
       { id: "k1", from: "ngocanh", at: "13:58", text: "Mọi người ơi, mình vừa up bản mặt cắt v2" },
       { id: "k2", from: "ngocanh", at: "13:58", file: { name: "MatCat_v2.pdf", size: "4,2 MB" } },
       { id: "k3", from: "quocbao", at: "14:05", text: "Giếng trời đẩy lên tầng 3 thì gió chéo tốt hơn đó", hearts: 2 },
-      { id: "k4", from: ME, at: "14:12", text: "Mình dựng lại 3D theo góp ý của Bảo nhé" },
-      { id: "k5", from: ME, at: "14:12", project: "nha-pho-thong-gio" },
+      { id: "k4", from: ME, at: "14:12", text: "Mình dựng lại 3D theo góp ý của Bảo nhé", replyTo: "k3" },
+      { id: "k5", from: ME, at: "14:16", text: "Phối cảnh đêm và mặt cắt thông gió, mọi người xem thử", images: ["/demo/chat/nha-1.svg", "/demo/chat/nha-2.svg", "/demo/chat/nha-3.svg", "/demo/chat/nha-4.svg"] },
       { id: "k6", from: "minhkhoa", at: "14:20", text: "Ok, tối nay mình ghép vào slide" },
     ],
   },
@@ -70,12 +94,15 @@ export const CONVERSATIONS: Conversation[] = [
     kind: "direct",
     with: "thuha",
     unread: 2,
+    pinned: true,
+    event: "portfolio-trai-nganh",
     when: "14:12",
     messages: [
       { id: "t1", from: "thuha", at: "14:02", text: "Chào Huy, chị xem hồ sơ của em rồi" },
-      { id: "t2", from: "thuha", at: "14:03", text: "Buổi portfolio Chủ nhật em lên chia sẻ 5 phút về dự án của em được không?" },
-      { id: "t3", from: ME, at: "14:10", text: "Dạ được chị, em chuẩn bị slide ngắn nhé" },
+      { id: "t2", from: "thuha", at: "14:03", text: "Buổi portfolio Chủ nhật em lên chia sẻ 5 phút về dự án của em được không?", pinned: true },
+      { id: "t3", from: ME, at: "14:10", text: "Dạ được chị, em chuẩn bị slide ngắn nhé", replyTo: "t2" },
       { id: "t4", from: ME, at: "14:10", project: "dat-ban-ca-phe" },
+      { id: "t6", from: "thuha", at: "14:11", text: "Mẫu bìa portfolio năm ngoái, em tham khảo nha", images: ["/demo/chat/bia-1.svg", "/demo/chat/bia-2.svg", "/demo/chat/bia-3.svg", "/demo/chat/bia-4.svg", "/demo/chat/bia-5.svg"] },
       { id: "t5", from: "thuha", at: "14:12", text: "Hay đó. Gửi chị trước thứ bảy nha", hearts: 1 },
     ],
   },

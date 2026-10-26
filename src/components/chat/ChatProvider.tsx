@@ -2,11 +2,12 @@
 
 import { createContext, useCallback, useContext, useState } from "react";
 import { ME, ONLINE, projectOf, userOf, type CoverTone } from "@/lib/data";
-import { CONVERSATIONS, nowLabel, type ChatMessage, type Conversation } from "@/lib/chat";
+import { CONVERSATIONS, imagesOf, nowLabel, type ChatMessage, type Conversation } from "@/lib/chat";
 import { persisted } from "@/lib/persist";
 
 /** Tin nhắn và cuộc trò chuyện đã tắt thông báo, lưu trên trình duyệt. */
-const convStore = persisted<Conversation[]>("conversations", CONVERSATIONS);
+// Đổi khoá khi thêm ghim, trả lời và cụm ảnh để bản lưu cũ không thiếu dữ liệu mẫu mới.
+const convStore = persisted<Conversation[]>("conversations-v2", CONVERSATIONS);
 const mutedStore = persisted<string[]>("muted", []);
 const setConvs = convStore.set;
 const setMuted = mutedStore.set;
@@ -66,7 +67,8 @@ export function previewOf(c: Conversation) {
   const m = c.messages[c.messages.length - 1];
   if (!m) return "Chưa có tin nhắn";
   const who = m.from === ME ? "Bạn: " : c.kind === "group" ? `${shortName(m.from)}: ` : "";
-  const body = m.text ?? (m.project ? `Đã chia sẻ ${projectOf(m.project)?.title ?? "một dự án"}` : m.image ? "Đã gửi một ảnh" : "Đã gửi một tệp");
+  const n = imagesOf(m).length;
+  const body = m.text ?? (m.project ? `Đã chia sẻ ${projectOf(m.project)?.title ?? "một dự án"}` : n ? (n > 1 ? `Đã gửi ${n} ảnh` : "Đã gửi một ảnh") : "Đã gửi một tệp");
   return who + body;
 }
 
@@ -75,6 +77,12 @@ interface ChatState {
   convOf: (id: string) => Conversation | undefined;
   send: (id: string, msg: Omit<ChatMessage, "id" | "from" | "at">) => void;
   markRead: (id: string) => void;
+  /** Thả hoặc bỏ tim một tin. */
+  toggleHeart: (id: string, msgId: string) => void;
+  /** Ghim hoặc bỏ ghim một tin. */
+  togglePin: (id: string, msgId: string) => void;
+  /** Ghim cuộc trò chuyện lên đầu danh sách. */
+  togglePinConv: (id: string) => void;
   muted: string[];
   toggleMute: (id: string) => void;
   /** Cuộc trò chuyện đang mở ở trang Tin nhắn. */
@@ -130,6 +138,21 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setConvs((all) => (all.some((c) => c.id === id && c.unread) ? all.map((c) => (c.id === id ? { ...c, unread: 0 } : c)) : all));
   }, []);
 
+  const editMsg = useCallback((id: string, msgId: string, fn: (m: ChatMessage) => ChatMessage) => {
+    setConvs((all) => all.map((c) => (c.id === id ? { ...c, messages: c.messages.map((m) => (m.id === msgId ? fn(m) : m)) } : c)));
+  }, []);
+
+  const toggleHeart = useCallback(
+    (id: string, msgId: string) => editMsg(id, msgId, (m) => ({ ...m, liked: !m.liked, hearts: Math.max(0, (m.hearts ?? 0) + (m.liked ? -1 : 1)) })),
+    [editMsg],
+  );
+
+  const togglePin = useCallback((id: string, msgId: string) => editMsg(id, msgId, (m) => ({ ...m, pinned: !m.pinned })), [editMsg]);
+
+  const togglePinConv = useCallback((id: string) => {
+    setConvs((all) => all.map((c) => (c.id === id ? { ...c, pinned: !c.pinned } : c)));
+  }, []);
+
   const toggleMute = useCallback((id: string) => {
     setMuted((m) => (m.includes(id) ? m.filter((x) => x !== id) : [...m, id]));
   }, []);
@@ -166,7 +189,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const unreadCount = convs.filter((c) => c.unread > 0 && !muted.includes(c.id)).length;
 
   // React Compiler tự ghi nhớ giá trị này.
-  const value: ChatState = { convs, convOf, send, markRead, muted, toggleMute, active, setActive, startDirect, unreadCount, wins, openWindow, toggleWindow, closeWindow, listOpen, setListOpen };
+  const value: ChatState = { convs, convOf, send, markRead, toggleHeart, togglePin, togglePinConv, muted, toggleMute, active, setActive, startDirect, unreadCount, wins, openWindow, toggleWindow, closeWindow, listOpen, setListOpen };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

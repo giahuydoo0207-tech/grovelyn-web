@@ -5,21 +5,24 @@ import { usePathname } from "next/navigation";
 import { BellOff, ChevronUp, Maximize2, X } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { ME, userOf } from "@/lib/data";
-import { Composer, ConvAvatar, MessageList } from "./ChatParts";
+import { useState } from "react";
+import { Composer, ConvAvatar, MessageList, PinnedBar } from "./ChatParts";
 import { lookOf, previewOf, useChat } from "./ChatProvider";
 
 const SHADOW = "shadow-[0_-4px_30px_rgba(6,17,10,0.18)]";
 
 function ChatWindow({ id, open, index }: { id: string; open: boolean; index: number }) {
   const { convOf, toggleWindow, closeWindow, setActive } = useChat();
+  const [reply, setReply] = useState<string | null>(null);
   const conv = convOf(id);
   if (!conv) return null;
+  const replyTo = reply ? conv.messages.find((m) => m.id === reply) : undefined;
   const l = lookOf(conv);
   return (
     <section
       aria-label={`Trò chuyện với ${l.name}`}
       // Cửa sổ thứ hai chỉ hiện khi màn hình đủ rộng.
-      className={`${index > 0 ? "hidden xl:flex" : "flex"} w-[328px] flex-col overflow-hidden rounded-t-2xl bg-white ${SHADOW} ${open ? "h-[440px]" : "h-[54px]"}`}
+      className={`${index > 0 ? "hidden xl:flex" : "flex"} w-[328px] flex-col overflow-hidden rounded-t-2xl bg-white ${SHADOW} ${open ? "h-[480px]" : "h-[54px]"}`}
     >
       <div className={`flex h-[54px] shrink-0 items-center gap-1 pl-3 pr-2 ${open ? "bg-ink text-white" : "bg-white text-ink"}`}>
         <button
@@ -56,8 +59,9 @@ function ChatWindow({ id, open, index }: { id: string; open: boolean; index: num
       </div>
       {open && (
         <>
-          <MessageList conv={conv} compact />
-          <Composer convId={id} compact label={`Tin nhắn cho ${l.name}`} />
+          <PinnedBar conv={conv} scope="dock" compact />
+          <MessageList conv={conv} compact scope="dock" onReply={setReply} />
+          <Composer convId={id} compact label={`Tin nhắn cho ${l.name}`} placeholder="Aa" replyTo={replyTo} onCancelReply={() => setReply(null)} />
         </>
       )}
     </section>

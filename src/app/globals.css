@@ -19,6 +19,9 @@
   --color-sap: #dcf6cf;
   --color-moss: #56614f;
   --color-fog: #a8b5a6;
+  /* Tin ghim trong chat. */
+  --color-pin: #fff6dc;
+  --color-pin-ink: #765600;
 
   --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
