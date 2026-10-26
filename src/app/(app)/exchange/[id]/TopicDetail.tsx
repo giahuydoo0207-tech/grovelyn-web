@@ -237,7 +237,7 @@ export function TopicDetail({ id }: { id: string }) {
                         {u.intro}, {r.when}
                       </span>
                     </p>
-                    <p className="mt-1.5 max-w-[66ch] text-base leading-relaxed">
+                    <p className="mt-1.5 max-w-[66ch] text-[17px] leading-relaxed">
                       {r.text}
                     </p>
                     {r.media && r.media.length > 0 && (
@@ -279,7 +279,7 @@ export function TopicDetail({ id }: { id: string }) {
                         {r.answers.map((a, i) => {
                           const au = userOf(a.author)!;
                           return (
-                            <li key={i} className="text-[15px] leading-relaxed">
+                            <li key={i} className="text-base leading-relaxed">
                               <span className="font-bold">
                                 {au.handle === ME ? "Bạn" : au.name}
                               </span>{" "}

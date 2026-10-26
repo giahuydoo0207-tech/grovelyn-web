@@ -202,7 +202,7 @@ function Quote({ m, dark, onJump }: { m: ChatMessage; dark: boolean; onJump: () 
     <button
       type="button"
       onClick={onJump}
-      className={`mb-1.5 flex w-full min-w-0 items-center gap-1.5 rounded-[10px] px-2.5 py-1.5 text-left text-[13px] ${dark ? "bg-white/10 text-white/75 hover:bg-white/15" : "bg-mist text-moss hover:bg-line"}`}
+      className={`mb-1.5 flex w-full min-w-0 items-center gap-1.5 rounded-[10px] px-2.5 py-1.5 text-left text-[14.5px] ${dark ? "bg-white/10 text-white/75 hover:bg-white/15" : "bg-mist text-moss hover:bg-line"}`}
     >
       <Reply className={`h-3.5 w-3.5 shrink-0 ${dark ? "text-leaf" : "text-leaf-deep"}`} aria-hidden="true" />
       <span className="min-w-0 truncate">
@@ -343,7 +343,7 @@ export function MessageList({
             >
               {!mine && (lastOfRun && u ? <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={avSize} /> : <span style={{ width: avSize }} className="shrink-0" aria-hidden="true" />)}
               <div className={`flex min-w-0 flex-col gap-1 ${mine ? "items-end" : "items-start"} ${compact ? "max-w-[82%]" : "max-w-[80%] lg:max-w-[66%]"}`}>
-                {group && !mine && firstOfRun && <span className="ml-1 text-xs font-semibold text-moss">{u?.name ?? m.from}</span>}
+                {group && !mine && firstOfRun && <span className="ml-1 text-[13.5px] font-semibold text-moss">{u?.name ?? m.from}</span>}
                 <div
                   className="group/msg relative flex max-w-full flex-col gap-1"
                   style={{ alignItems: mine ? "flex-end" : "flex-start" }}
@@ -354,7 +354,7 @@ export function MessageList({
                 >
                   {shots.length > 0 && <Album srcs={shots} compact={compact} onOpen={(k) => setView({ srcs: shots, i: k })} />}
                   {m.text && (
-                    <div className={`max-w-full whitespace-pre-wrap break-words ${bubble} ${round} ${compact ? "px-3 py-2 text-sm" : "px-3.5 py-2.5 text-[15px]"} leading-snug`}>
+                    <div className={`max-w-full whitespace-pre-wrap break-words ${bubble} ${round} ${compact ? "px-3 py-2 text-[15px]" : "px-4 py-2.5 text-[17px]"} leading-snug`}>
                       {quoted && <Quote m={quoted} dark={mine} onJump={() => jumpTo(scope, conv.id, quoted.id)} />}
                       {m.text}
                     </div>
@@ -366,8 +366,8 @@ export function MessageList({
                         <FileText className="h-5 w-5 text-leaf-deep" aria-hidden="true" />
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-bold">{m.file.name}</span>
-                        <span className="text-xs text-moss">{m.file.size} · Bấm để xem trước</span>
+                        <span className="block truncate text-[15px] font-bold">{m.file.name}</span>
+                        <span className="text-[13px] text-moss">{m.file.size} · Bấm để xem trước</span>
                       </span>
                     </a>
                   )}
@@ -381,7 +381,7 @@ export function MessageList({
                   </div>
                 )}
                 {showMeta && (
-                  <span className={`mx-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-moss ${mine ? "justify-end" : ""}`}>
+                  <span className={`mx-1 flex flex-wrap items-center gap-x-2 gap-y-1 ${compact ? "text-xs" : "text-[13px]"} text-moss ${mine ? "justify-end" : ""}`}>
                     {lastOfRun && <span>{m.at}</span>}
                     {shots.length > 1 && lastOfRun && <span>· {shots.length} ảnh</span>}
                     {m.pinned && (
@@ -428,7 +428,7 @@ export function MessageList({
         })}
       </AnimatePresence>
       {typer && (
-        <p className={`mt-2 flex items-center gap-2.5 text-[13px] text-moss ${compact ? "" : ""}`}>
+        <p className={`mt-2 flex items-center gap-2.5 text-[14px] text-moss ${compact ? "" : ""}`}>
           <Avatar initials={typer.initials} tone={typer.tone} handle={typer.handle} size={compact ? 22 : 26} />
           <span className="inline-flex gap-[3px] rounded-full bg-mist px-2.5 py-2" aria-hidden="true">
             {[0, 1, 2].map((d) => (
@@ -639,7 +639,7 @@ export function Composer({
         )}
 
         {replyTo && (
-          <div className="mb-2 flex items-center gap-2 rounded-xl bg-mist py-1.5 pl-3 pr-1.5 text-[13px]">
+          <div className="mb-2 flex items-center gap-2 rounded-xl bg-mist py-1.5 pl-3 pr-1.5 text-[14.5px]">
             <Reply className="h-3.5 w-3.5 shrink-0 text-leaf-deep" aria-hidden="true" />
             <span className="min-w-0 flex-1 truncate text-moss">
               Trả lời <strong className="text-ink">{replyTo.from === ME ? "chính bạn" : userOf(replyTo.from)?.name}</strong>: {snippetOf(replyTo)}
@@ -718,7 +718,7 @@ export function Composer({
             placeholder={shots.length ? "Thêm chú thích cho ảnh…" : placeholder}
             autoComplete="off"
             aria-autocomplete="list"
-            className={`block w-full resize-none bg-transparent leading-snug outline-none placeholder:text-moss focus-visible:outline-none ${compact ? "min-h-9 flex-1 rounded-[18px] bg-mist px-3.5 py-2 text-sm" : "min-h-[30px] px-1 text-[15.5px]"}`}
+            className={`block w-full resize-none bg-transparent leading-snug outline-none placeholder:text-moss focus-visible:outline-none ${compact ? "min-h-9 flex-1 rounded-[18px] bg-mist px-3.5 py-2 text-[15px]" : "min-h-[30px] px-1 text-[17px]"}`}
           />
           {compact && (
             <button type="submit" aria-label="Gửi" disabled={!canSend} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-leaf text-ink transition hover:brightness-95 disabled:opacity-50">

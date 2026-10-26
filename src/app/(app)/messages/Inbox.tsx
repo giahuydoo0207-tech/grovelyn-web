@@ -301,14 +301,14 @@ function ConvRow({ c, on, onOpen }: { c: Conversation; on: boolean; onOpen: () =
         <ConvAvatar conv={c} size={48} ring="ring-white" />
         <span className="min-w-0 flex-1">
           <span className="flex items-center justify-between gap-2">
-            <span className={`flex min-w-0 items-center gap-1 text-[15px] ${unread ? "font-bold" : "font-semibold"}`}>
+            <span className={`flex min-w-0 items-center gap-1 text-base ${unread ? "font-bold" : "font-semibold"}`}>
               <span className="truncate">{cl.name}</span>
               {muted.includes(c.id) && <BellOff className="h-3.5 w-3.5 shrink-0 text-moss" aria-label="Đã tắt thông báo" />}
             </span>
             <span className={`shrink-0 text-xs ${unread ? "font-bold text-leaf-deep" : "text-moss"}`}>{c.when}</span>
           </span>
           <span className="mt-0.5 flex items-center justify-between gap-2">
-            <span className={`truncate text-[13px] ${unread ? "font-bold text-ink" : "text-moss"}`}>{previewOf(c)}</span>
+            <span className={`truncate text-[14px] ${unread ? "font-bold text-ink" : "text-moss"}`}>{previewOf(c)}</span>
             {unread && (
               <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-leaf-deep px-1.5 text-[11px] font-bold text-white">
                 {c.unread}
@@ -432,8 +432,8 @@ export function Inbox() {
           </button>
           <ConvAvatar conv={conv} size={44} />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[17px] font-bold">{l.name}</span>
-            <span className={`block truncate text-[13px] ${l.online ? "font-semibold text-leaf-deep" : "text-moss"}`}>{statusLine(conv)}</span>
+            <span className="block truncate text-lg font-bold">{l.name}</span>
+            <span className={`block truncate text-sm ${l.online ? "font-semibold text-leaf-deep" : "text-moss"}`}>{statusLine(conv)}</span>
           </span>
           <button
             type="button"

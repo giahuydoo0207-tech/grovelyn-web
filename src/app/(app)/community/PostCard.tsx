@@ -439,7 +439,7 @@ function Thread({ post, look, open, onReply, input }: { post: Post; look: Look; 
                 <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={36} />
               </span>
               <div className="min-w-0 flex-1">
-                <p className={`text-sm ${t.sub}`}>
+                <p className={`text-[15px] ${t.sub}`}>
                   <Link href={`/u/${u.handle}`} className={`font-bold hover:underline ${look === "dark" ? "text-white" : "text-ink"}`}>
                     {u.handle === ME ? "Bạn" : u.name}
                   </Link>
@@ -450,9 +450,9 @@ function Thread({ post, look, open, onReply, input }: { post: Post; look: Look; 
                   )}{" "}
                   · {c.when}
                 </p>
-                <p className="mt-0.5 text-[15px] leading-relaxed">{c.text}</p>
+                <p className="mt-0.5 text-[17px] leading-relaxed">{c.text}</p>
                 {u.handle !== ME && (
-                  <button type="button" onClick={() => onReply(`@${u.name} `)} className={`mt-1 text-xs font-bold ${t.sub} hover:underline`}>
+                  <button type="button" onClick={() => onReply(`@${u.name} `)} className={`mt-1 text-sm font-bold ${t.sub} hover:underline`}>
                     Trả lời
                   </button>
                 )}
@@ -472,9 +472,9 @@ function Thread({ post, look, open, onReply, input }: { post: Post; look: Look; 
             name="reply"
             autoComplete="off"
             placeholder={comments.length ? "Trả lời trong luồng…" : "Viết trả lời đầu tiên…"}
-            className={`h-10 w-full rounded-full pl-4 pr-12 text-[15px] outline-none ring-1 ring-transparent focus:ring-current ${t.input}`}
+            className={`h-11 w-full rounded-full pl-4 pr-12 text-base outline-none ring-1 ring-transparent focus:ring-current ${t.input}`}
           />
-          <button type="submit" aria-label="Gửi trả lời" className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-leaf text-ink hover:brightness-95">
+          <button type="submit" aria-label="Gửi trả lời" className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-leaf text-ink hover:brightness-95">
             <SendHorizontal className="h-4 w-4" aria-hidden="true" />
           </button>
         </label>
