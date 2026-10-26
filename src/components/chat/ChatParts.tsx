@@ -782,9 +782,9 @@ export function PinnedBar({ conv, scope, compact = false }: { conv: Conversation
       className={`flex w-full shrink-0 items-center gap-2.5 border-b border-line bg-pin text-left hover:brightness-[0.98] ${compact ? "px-3 py-1.5 text-xs" : "px-4 py-2.5 text-[13.5px] sm:px-6"}`}
     >
       <Pin className={`${compact ? "h-3.5 w-3.5" : "h-4 w-4"} shrink-0 text-pin-ink`} aria-hidden="true" />
-      {!compact && <strong className="shrink-0">Đã ghim</strong>}
+      {!compact && <strong className="shrink-0 text-pin-ink">Đã ghim</strong>}
       <span className="min-w-0 flex-1 truncate text-moss">{snippetOf(m)}</span>
-      {pins.length > 1 && <span className="shrink-0 font-bold text-leaf-deep">{compact ? `${at + 1}/${pins.length}` : `${pins.length} tin ghim`}</span>}
+      {pins.length > 1 && <span className="shrink-0 font-bold text-pin-ink">{compact ? `${at + 1}/${pins.length}` : `${pins.length} tin ghim`}</span>}
     </button>
   );
 }
