@@ -19,9 +19,9 @@
   --color-sap: #dcf6cf;
   --color-moss: #56614f;
   --color-fog: #a8b5a6;
-  /* Tin ghim trong chat: xanh dương nhạt, tách khỏi các màu xanh lá của web. */
-  --color-pin: #e8f1fc;
-  --color-pin-ink: #2563a8;
+  /* Tin ghim trong chat: xanh lá ngả ngọc, nhạt hơn và lạnh hơn các màu lá của web. */
+  --color-pin: #e2f5ec;
+  --color-pin-ink: #0f7a55;
 
   --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
