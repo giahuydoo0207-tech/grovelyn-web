@@ -274,7 +274,9 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
             <span className="min-w-0 truncate">
               <span className={look === "dark" ? "text-white" : "text-ink"}>Đang mở trao đổi:</span> {topic.question}
             </span>
-            <span className={`shrink-0 font-bold group-hover:underline ${look === "dark" ? "text-leaf" : "text-leaf-deep"}`}>Góp ý</span>
+            <span className={`inline-flex h-6 shrink-0 items-center rounded-full px-2.5 text-xs font-bold transition-colors ${look === "dark" ? "bg-leaf text-ink group-hover:brightness-95" : "bg-sap text-leaf-deep group-hover:brightness-95"}`}>
+              Góp ý
+            </span>
           </Link>
         )}
         {project && <Credit slug={project.slug} dark={look === "dark"} />}

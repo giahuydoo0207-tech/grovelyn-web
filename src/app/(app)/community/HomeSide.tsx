@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Check, Hash, MessageCircle } from "lucide-react";
-import { ONLINE, ONLINE_TOTAL, projectOf, userOf, type Post } from "@/lib/data";
+import { ONLINE, ONLINE_TOTAL, projectOf, userOf, type Post, type Project } from "@/lib/data";
 import { EVENTS, TODAY, dateParts, placeLine } from "@/lib/events";
+import type { Topic } from "@/lib/exchange";
 import { useTopics } from "@/lib/topicStore";
 import { interestedEvents, myProjectsStore, postsStore } from "@/lib/stores";
 import { useChat } from "@/components/chat/ChatProvider";
@@ -15,22 +16,28 @@ const DAY = 86_400_000;
 const daysUntil = (iso: string) => Math.round((Date.parse(`${iso}T00:00:00Z`) - Date.parse(`${TODAY}T00:00:00Z`)) / DAY);
 const countdown = (n: number) => (n <= 0 ? "Hôm nay" : n === 1 ? "Ngày mai" : `Còn ${n} ngày`);
 
-/** Một dòng ngắn về việc người đó vừa làm, lấy từ bài mới nhất của họ. */
-function activityOf(handle: string, posts: Post[], openTopics: string[]): string {
-  if (openTopics.includes(handle)) return "Đang mở trao đổi, chờ góp ý";
+/** Một dòng ngắn về việc người đó vừa làm, lấy từ trao đổi đang mở hoặc bài mới nhất của họ. */
+function activityOf(handle: string, posts: Post[], openTopics: Topic[], mine: Project[]): { text: string; href?: string } {
+  const topic = openTopics.find((t) => t.lead === handle);
+  if (topic) {
+    const title = (projectOf(topic.project) ?? mine.find((p) => p.slug === topic.project))?.title;
+    return {
+      text: title ? `Cần góp ý cho ${title}` : "Cần góp ý trong trao đổi",
+      href: `/exchange/${topic.id}`,
+    };
+  }
   const last = posts.find((p) => p.author === handle);
-  if (!last) return userOf(handle)?.intro ?? "";
-  const title = last.project ? projectOf(last.project)?.title : undefined;
-  if (last.kind === "Công bố") return `Vừa công bố ${title ?? "bản mới"}${last.version ? ` ${last.version}` : ""}`;
-  if (last.kind === "Tìm cộng sự") return "Đang tìm cộng sự";
-  return title ? `Vừa chia sẻ về ${title}` : "Vừa chia sẻ một bài";
+  if (!last) return { text: userOf(handle)?.intro ?? "" };
+  const title = last.project ? (projectOf(last.project) ?? mine.find((p) => p.slug === last.project))?.title : undefined;
+  if (last.kind === "Công bố") return { text: `Vừa công bố ${title ?? "bản mới"}${last.version ? ` ${last.version}` : ""}` };
+  if (last.kind === "Tìm cộng sự") return { text: "Đang tìm cộng sự" };
+  return { text: title ? `Vừa chia sẻ về ${title}` : "Vừa chia sẻ một bài" };
 }
 
 function Online() {
   const posts = postsStore.use();
-  const openTopics = useTopics()
-    .filter((t) => t.status === "open")
-    .map((t) => t.lead);
+  const mine = myProjectsStore.use();
+  const openTopics = useTopics().filter((t) => t.status === "open");
   const { startDirect, openWindow, setActive } = useChat();
   const router = useRouter();
   const people = ONLINE.slice(0, 4)
@@ -53,24 +60,33 @@ function Online() {
         <span className="text-[13px] text-moss">{ONLINE_TOTAL} người</span>
       </div>
       <ul className="mt-3 flex flex-col gap-3">
-        {people.map((u) => (
-          <li key={u.handle} className="flex items-center gap-2.5">
-            <Link href={`/u/${u.handle}`} className="relative shrink-0" aria-hidden="true" tabIndex={-1}>
-              <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={38} />
-              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-leaf ring-2 ring-white" />
-            </Link>
-            <span className="min-w-0 flex-1">
-              <Link href={`/u/${u.handle}`} className="block truncate text-sm font-bold hover:underline">
-                {u.name}
-                <span className="sr-only">, đang online</span>
+        {people.map((u) => {
+          const act = activityOf(u.handle, posts, openTopics, mine);
+          return (
+            <li key={u.handle} className="flex items-center gap-2.5">
+              <Link href={`/u/${u.handle}`} className="relative shrink-0" aria-hidden="true" tabIndex={-1}>
+                <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={38} />
+                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-leaf ring-2 ring-white" />
               </Link>
-              <span className="block truncate text-xs text-moss">{activityOf(u.handle, posts, openTopics)}</span>
-            </span>
-            <button type="button" onClick={() => chat(u.handle)} aria-label={`Nhắn tin cho ${u.name}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mist text-leaf-deep hover:bg-sap">
-              <MessageCircle className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </li>
-        ))}
+              <span className="min-w-0 flex-1">
+                <Link href={`/u/${u.handle}`} className="block truncate text-sm font-bold hover:underline">
+                  {u.name}
+                  <span className="sr-only">, đang online</span>
+                </Link>
+                {act.href ? (
+                  <Link href={act.href} className="block truncate text-xs text-moss hover:text-leaf-deep hover:underline">
+                    {act.text}
+                  </Link>
+                ) : (
+                  <span className="block truncate text-xs text-moss">{act.text}</span>
+                )}
+              </span>
+              <button type="button" onClick={() => chat(u.handle)} aria-label={`Nhắn tin cho ${u.name}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mist text-leaf-deep hover:bg-sap">
+                <MessageCircle className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

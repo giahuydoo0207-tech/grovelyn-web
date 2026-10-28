@@ -4,17 +4,19 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { FIELDS, PROJECTS as SAMPLE, userOf } from "@/lib/data";
-import { myProjectsStore } from "@/lib/stores";
+import { FIELDS, ME, PROJECTS as SAMPLE, USERS, userOf } from "@/lib/data";
+import { myProjectsStore, prefsStore } from "@/lib/stores";
 import { showcaseOf } from "@/lib/showcase";
 import { OUTPUTS, type Output } from "@/lib/model";
+import { Avatar } from "@/components/Avatar";
 import { ProjectCard } from "@/components/ProjectCard";
 
-const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").toLowerCase();
+const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/Đ/g, "d").toLowerCase();
 
 export function ExploreGrid() {
   const params = useSearchParams();
   const q = params.get("q") ?? "";
+  const prefs = prefsStore.use();
   // Dự án bạn tạo (lưu trên trình duyệt) đứng đầu, rồi tới dự án mẫu.
   const PROJECTS = [...myProjectsStore.use(), ...SAMPLE];
   const fromLink = params.get("nganh");
@@ -26,8 +28,14 @@ export function ExploreGrid() {
   // Chỉ hiện dạng đầu ra có ít nhất một dự án, để bộ lọc không có lựa chọn rỗng.
   const outputs = OUTPUTS.map((o) => o.id).filter((o) => PROJECTS.some((p) => p.output === o));
 
+  const needle = norm(q.trim());
+  const people = needle
+    ? USERS.map((u) => (u.handle === ME ? { ...u, name: prefs.name, headline: prefs.headline, location: prefs.location } : u)).filter((u) =>
+        norm([u.name, u.handle, u.intro, u.headline, u.location, ...u.skills, ...u.lenses].join(" ")).includes(needle),
+      )
+    : [];
+
   const list = (() => {
-    const needle = norm(q.trim());
     return PROJECTS.filter((p) => (field === "Tất cả" || p.field === field) && (output === "Tất cả" || p.output === output)).filter((p) => {
       if (!needle) return true;
       const owner = userOf(p.owner)?.name ?? "";
@@ -78,6 +86,35 @@ export function ExploreGrid() {
             Xóa tìm kiếm
           </Link>
         </p>
+      )}
+
+      {people.length > 0 && (
+        <section aria-label="Mọi người phù hợp" className="flex flex-col gap-3">
+          <h2 className="font-display text-lg font-bold tracking-[-0.02em]">Mọi người</h2>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {people.map((u) => (
+              <li key={u.handle}>
+                <Link
+                  href={`/u/${u.handle}`}
+                  className="group flex items-center gap-3.5 rounded-2xl border border-line bg-white p-4 transition-colors hover:bg-mist"
+                >
+                  <Avatar initials={u.initials} tone={u.tone} handle={u.handle} size={48} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[15px] font-bold group-hover:underline">
+                      {u.name} <span className="font-normal text-moss">@{u.handle}</span>
+                    </span>
+                    <span className="block truncate text-xs text-moss">{u.intro}</span>
+                    {u.skills.length > 0 && (
+                      <span className="mt-1 block truncate text-xs font-semibold text-leaf-deep">
+                        {u.skills.slice(0, 3).join(" · ")}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {list.length === 0 ? (

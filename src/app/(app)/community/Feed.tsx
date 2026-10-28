@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { ArrowDownUp, ImagePlus, Rocket, UsersRound } from "lucide-react";
+import { ArrowDownUp, Folder, ImagePlus, Rocket, UsersRound } from "lucide-react";
 import { ME, MY_GROUPS, POST_KINDS, userOf, type PostKind } from "@/lib/data";
 import { following, joinedGroups, leftGroups, myGroupsStore, postsStore, useMyProjects, useUser } from "@/lib/stores";
 import type { Media } from "@/lib/media";
@@ -59,9 +59,9 @@ export function Feed({ group }: { group?: string } = {}) {
   const [sort, setSort] = useState<(typeof SORTS)[number]>("Mới nhất");
   const box = useRef<HTMLTextAreaElement>(null);
 
-  const start = (k: PostKind) => {
+  const start = (k: PostKind, projectSlug?: string) => {
     setKind(k);
-    setSlug(k === "Công bố" ? (ready[0]?.slug ?? "") : "");
+    setSlug(projectSlug ?? (k === "Công bố" ? (ready[0]?.slug ?? "") : ""));
     setOpen(true);
     setTimeout(() => box.current?.focus(), 60);
   };
@@ -154,6 +154,17 @@ export function Feed({ group }: { group?: string } = {}) {
                 <span className="hidden sm:inline">{label}</span>
               </button>
             ))}
+            {mine[0] && (
+              <button
+                type="button"
+                onClick={() => start("Chia sẻ", mine[0].slug)}
+                aria-label={`Cập nhật ${mine[0].title}`}
+                className="inline-flex h-10 max-w-[240px] shrink-0 items-center gap-2 rounded-full border border-ink-line bg-ink-2 px-3.5 text-sm font-bold text-sap transition-colors hover:bg-white/[.12]"
+              >
+                <Folder className="h-[18px] w-[18px] shrink-0 text-leaf" aria-hidden="true" />
+                <span className="truncate">Cập nhật {mine[0].title}</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -261,22 +272,33 @@ export function Feed({ group }: { group?: string } = {}) {
       </form>
 
       {!group && (
-        <div role="tablist" aria-label="Bảng tin" className="flex gap-6 overflow-x-auto border-b border-line [scrollbar-width:none]">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              type="button"
-              role="tab"
-              aria-selected={tab === t}
-              onClick={() => {
-                setTab(t);
-                setFilter("Tất cả");
-              }}
-              className={`-mb-px shrink-0 border-b-[3px] pb-2.5 pt-1 text-[16px] font-bold transition-colors ${tab === t ? "border-leaf text-ink" : "border-transparent text-moss hover:text-ink"}`}
-            >
-              {t}
-            </button>
-          ))}
+        <div className="flex items-center justify-between gap-3 border-b border-line">
+          <div role="tablist" aria-label="Bảng tin" className="flex min-w-0 gap-4 overflow-x-auto [scrollbar-width:none] sm:gap-6">
+            {TABS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="tab"
+                aria-selected={tab === t}
+                onClick={() => {
+                  setTab(t);
+                  setFilter("Tất cả");
+                }}
+                className={`-mb-px shrink-0 border-b-[3px] pb-2.5 pt-1 text-[15px] font-bold transition-colors sm:text-[16px] ${tab === t ? "border-leaf text-ink" : "border-transparent text-moss hover:text-ink"}`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+          <label className="relative flex shrink-0 items-center gap-1.5 pb-2 pt-1 text-sm font-semibold text-moss hover:text-ink">
+            <ArrowDownUp className="pointer-events-none h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">Sắp xếp</span>
+            <select value={sort} onChange={(e) => setSort(e.target.value as (typeof SORTS)[number])} className="cursor-pointer appearance-none bg-transparent outline-none">
+              {SORTS.map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </select>
+          </label>
         </div>
       )}
 
@@ -288,23 +310,27 @@ export function Feed({ group }: { group?: string } = {}) {
               type="button"
               aria-pressed={filter === f}
               onClick={() => setFilter(f)}
-              className={`inline-flex h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 font-bold transition-colors ${filter === f ? "border-ink bg-ink text-white" : "border-line bg-white hover:bg-mist"}`}
+              className={`inline-flex h-8 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3 text-[13px] font-bold transition-colors ${filter === f ? "border-ink bg-ink text-white" : "border-line bg-white hover:bg-mist"}`}
             >
               {f}
               <span className={`text-xs tabular-nums ${filter === f ? "text-leaf" : "text-leaf-deep"}`}>{countOf(f)}</span>
             </button>
           ))}
         </div>
-        <span className="flex-1" />
-        <label className="relative flex items-center gap-1.5 font-semibold text-moss">
-          <ArrowDownUp className="pointer-events-none h-4 w-4" aria-hidden="true" />
-          <span className="sr-only">Sắp xếp</span>
-          <select value={sort} onChange={(e) => setSort(e.target.value as (typeof SORTS)[number])} className="cursor-pointer appearance-none bg-transparent outline-none">
-            {SORTS.map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-        </label>
+        {group && (
+          <>
+            <span className="flex-1" />
+            <label className="relative flex items-center gap-1.5 font-semibold text-moss">
+              <ArrowDownUp className="pointer-events-none h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">Sắp xếp</span>
+              <select value={sort} onChange={(e) => setSort(e.target.value as (typeof SORTS)[number])} className="cursor-pointer appearance-none bg-transparent outline-none">
+                {SORTS.map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+            </label>
+          </>
+        )}
       </div>
 
       {shown.length === 0 && (
