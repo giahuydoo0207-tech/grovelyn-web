@@ -141,7 +141,7 @@ export function Feed({ group }: { group?: string } = {}) {
           )}
         </div>
         {!open && (
-          <div className="relative mt-3 flex gap-2 overflow-x-auto [scrollbar-width:none] sm:pl-[60px]">
+          <div className="relative mt-3 flex gap-2 overflow-x-auto [scrollbar-width:none]">
             {quick.map(({ k, label, short, icon: Icon }) => (
               <button
                 key={label}
@@ -159,10 +159,10 @@ export function Feed({ group }: { group?: string } = {}) {
                 type="button"
                 onClick={() => start("Chia sẻ", mine[0].slug)}
                 aria-label={`Cập nhật ${mine[0].title}`}
-                className="inline-flex h-10 max-w-[240px] shrink-0 items-center gap-2 rounded-full border border-ink-line bg-ink-2 px-3.5 text-sm font-bold text-sap transition-colors hover:bg-white/[.12]"
+                className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-ink-line bg-ink-2 px-3.5 text-sm font-bold text-sap transition-colors hover:bg-white/[.12] sm:min-w-0 sm:shrink"
               >
                 <Folder className="h-[18px] w-[18px] shrink-0 text-leaf" aria-hidden="true" />
-                <span className="truncate">Cập nhật {mine[0].title}</span>
+                <span className="truncate">Cập nhật {mine[0].title.split(":")[0]}</span>
               </button>
             )}
           </div>
