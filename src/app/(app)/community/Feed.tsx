@@ -158,11 +158,11 @@ export function Feed({ group }: { group?: string } = {}) {
               <button
                 type="button"
                 onClick={() => start("Chia sẻ", mine[0].slug)}
-                aria-label={`Cập nhật ${mine[0].title}`}
-                className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-ink-line bg-ink-2 px-3.5 text-sm font-bold text-sap transition-colors hover:bg-white/[.12] sm:min-w-0 sm:shrink"
+                aria-label="Cập nhật"
+                className="inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-white/15 bg-white/[.06] px-3.5 text-sm font-bold transition-colors hover:bg-white/[.12]"
               >
-                <Folder className="h-[18px] w-[18px] shrink-0 text-leaf" aria-hidden="true" />
-                <span className="truncate">Cập nhật {mine[0].title.split(":")[0]}</span>
+                <Folder className="h-[18px] w-[18px] text-leaf" aria-hidden="true" />
+                <span>Cập nhật</span>
               </button>
             )}
           </div>
