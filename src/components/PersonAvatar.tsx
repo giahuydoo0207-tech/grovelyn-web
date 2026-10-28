@@ -67,9 +67,10 @@ export function PersonAvatar({
       >
         {face}
       </span>
+      {/* Huy hiệu công việc nằm góc trái dưới, góc phải dưới để dành cho chấm đang online. */}
       {badge && (
         <span
-          className={`absolute -bottom-0.5 -right-0.5 flex items-center justify-center rounded-full ring-2 ring-white ${status === "Sẵn sàng nhận việc" ? "bg-leaf-deep text-white" : "bg-ink text-leaf"}`}
+          className={`absolute -bottom-0.5 -left-0.5 flex items-center justify-center rounded-full ring-2 ring-white ${status === "Sẵn sàng nhận việc" ? "bg-leaf-deep text-white" : "bg-ink text-leaf"}`}
           style={{ width: b, height: b }}
         >
           <Icon style={{ width: Math.round(b * 0.6), height: Math.round(b * 0.6) }} strokeWidth={2.6} />
