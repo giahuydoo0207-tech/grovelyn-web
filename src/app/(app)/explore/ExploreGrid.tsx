@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { ArrowDownUp } from "lucide-react";
+import { ArrowDownUp, X } from "lucide-react";
 import { FIELDS, ME, PROJECTS as SAMPLE, USERS, userOf } from "@/lib/data";
 import { myProjectsStore, prefsStore } from "@/lib/stores";
 import { showcaseOf } from "@/lib/showcase";
@@ -24,9 +24,14 @@ export function ExploreGrid() {
   // Dự án bạn tạo (lưu trên trình duyệt) đứng đầu, rồi tới dự án mẫu.
   const PROJECTS = [...myProjectsStore.use(), ...SAMPLE];
   const fromLink = params.get("nganh");
+  const [lastLink, setLastLink] = useState(fromLink);
   const [field, setField] = useState<(typeof FIELDS)[number]>(() =>
     FIELDS.find((f) => f === fromLink) ?? "Tất cả",
   );
+  if (fromLink !== lastLink) {
+    setLastLink(fromLink);
+    setField(FIELDS.find((f) => f === fromLink) ?? "Tất cả");
+  }
 
   const [output, setOutput] = useState<Output | "Tất cả">("Tất cả");
   const [onlyReal, setOnlyReal] = useState(false);
@@ -41,9 +46,6 @@ export function ExploreGrid() {
         norm([u.name, u.handle, u.intro, u.headline, u.location, ...u.skills, ...u.lenses].join(" ")).includes(needle),
       )
     : [];
-
-  const countOfField = (f: (typeof FIELDS)[number]) =>
-    f === "Tất cả" ? PROJECTS.length : PROJECTS.filter((p) => p.field === f).length;
 
   const list = (() => {
     const filtered = PROJECTS.filter(
@@ -62,35 +64,14 @@ export function ExploreGrid() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div role="radiogroup" aria-label="Lọc theo ngành" className="no-scrollbar -mx-4 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        {FIELDS.map((f) => {
-          const on = f === field;
-          return (
-            <button
-              key={f}
-              type="button"
-              role="radio"
-              aria-checked={on}
-              onClick={() => setField(f)}
-              className={`inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-sm font-bold transition-colors ${
-                on ? "border-ink bg-ink text-white" : "border-line bg-white text-ink hover:bg-mist"
-              }`}
-            >
-              <span>{f}</span>
-              <span className={`text-xs tabular-nums ${on ? "text-leaf" : "text-leaf-deep"}`}>{countOfField(f)}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 text-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="flex items-center gap-2 text-moss">
-            Dạng đầu ra
+      <div className="no-scrollbar -mx-4 flex items-center justify-between gap-2 overflow-x-auto border-b border-line px-4 pb-3 text-sm sm:mx-0 sm:px-0">
+        <div className="flex shrink-0 items-center gap-2">
+          <label className="inline-flex h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-line bg-white pl-3.5 pr-2.5 text-[13px] text-moss focus-within:border-ink">
+            <span>Dạng đầu ra</span>
             <select
               value={output}
               onChange={(e) => setOutput(e.target.value as Output | "Tất cả")}
-              className="h-9 rounded-lg border border-line bg-white px-3 text-sm font-semibold text-ink outline-none focus:border-ink"
+              className="cursor-pointer bg-transparent font-bold text-ink outline-none"
             >
               <option value="Tất cả">Tất cả</option>
               {outputs.map((o) => (
@@ -102,7 +83,7 @@ export function ExploreGrid() {
             type="button"
             aria-pressed={onlyReal}
             onClick={() => setOnlyReal((v) => !v)}
-            className={`inline-flex h-9 items-center rounded-full border px-3.5 text-[13px] font-bold transition-colors ${
+            className={`inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-full border px-3.5 text-[13px] font-bold transition-colors ${
               onlyReal ? "border-ink bg-ink text-white" : "border-line bg-white text-ink hover:bg-mist"
             }`}
           >
@@ -112,7 +93,7 @@ export function ExploreGrid() {
             type="button"
             aria-pressed={onlyExchange}
             onClick={() => setOnlyExchange((v) => !v)}
-            className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-bold transition-colors ${
+            className={`inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-bold transition-colors ${
               onlyExchange ? "border-ink bg-ink text-white" : "border-line bg-white text-ink hover:bg-mist"
             }`}
           >
@@ -120,8 +101,8 @@ export function ExploreGrid() {
           </button>
         </div>
 
-        <label className="relative flex items-center gap-1.5 font-semibold text-moss hover:text-ink">
-          <ArrowDownUp className="pointer-events-none h-4 w-4" aria-hidden="true" />
+        <label className="relative inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-line bg-white px-3.5 text-[13px] font-bold text-ink hover:bg-mist">
+          <ArrowDownUp className="pointer-events-none h-3.5 w-3.5 text-moss" aria-hidden="true" />
           <span className="sr-only">Sắp xếp</span>
           <select value={sort} onChange={(e) => setSort(e.target.value as (typeof SORTS)[number])} className="cursor-pointer appearance-none bg-transparent outline-none">
             {SORTS.map((s) => (
@@ -130,6 +111,22 @@ export function ExploreGrid() {
           </select>
         </label>
       </div>
+
+      {field !== "Tất cả" && (
+        <div className="flex items-center">
+          <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line bg-white pl-3.5 pr-1.5 text-[13px] font-bold text-ink">
+            Ngành: {field}
+            <button
+              type="button"
+              aria-label="Bỏ lọc ngành"
+              onClick={() => setField("Tất cả")}
+              className="flex h-5 w-5 items-center justify-center rounded-full text-moss transition-colors hover:bg-mist hover:text-ink"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </span>
+        </div>
+      )}
 
       {q && (
         <p className="text-[15px] text-moss">
@@ -170,10 +167,12 @@ export function ExploreGrid() {
       )}
 
       {list.length === 0 ? (
-        <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-line p-10">
-          <p className="font-display text-2xl font-bold tracking-[-0.02em]">Chưa có dự án nào ở đây</p>
-          <p className="max-w-[48ch] text-moss">Thử ngành khác, hoặc là người đầu tiên đăng dự án cho ngành này.</p>
-          <Link href="/new" className="mt-2 rounded-xl bg-leaf px-5 py-3 font-bold text-ink hover:bg-[#6ee04d]">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-dashed border-line bg-white px-6 py-7">
+          <div className="flex flex-col gap-1">
+            <p className="font-display text-lg font-bold tracking-[-0.02em] text-ink">Chưa có dự án nào ở đây</p>
+            <p className="text-sm text-moss">Thử đổi bộ lọc, hoặc đăng dự án đầu tiên của bạn vào mục này.</p>
+          </div>
+          <Link href="/new" className="inline-flex h-10 shrink-0 items-center rounded-xl bg-leaf px-4 text-sm font-bold text-ink transition-colors hover:bg-[#6ee04d]">
             Tạo dự án
           </Link>
         </div>
