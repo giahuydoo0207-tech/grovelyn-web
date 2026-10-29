@@ -3,20 +3,24 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { ArrowDownUp } from "lucide-react";
 import { FIELDS, ME, PROJECTS as SAMPLE, USERS, userOf } from "@/lib/data";
 import { myProjectsStore, prefsStore } from "@/lib/stores";
 import { showcaseOf } from "@/lib/showcase";
+import { useTopics } from "@/lib/topicStore";
 import { OUTPUTS, type Output } from "@/lib/model";
 import { Avatar } from "@/components/Avatar";
 import { ProjectCard } from "@/components/ProjectCard";
 
+const SORTS = ["Mới cập nhật", "Nhiều phiên bản nhất"] as const;
 const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/Đ/g, "d").toLowerCase();
 
 export function ExploreGrid() {
   const params = useSearchParams();
   const q = params.get("q") ?? "";
   const prefs = prefsStore.use();
+  const openTopics = useTopics().filter((t) => t.status === "open");
+  const openSlugs = new Set(openTopics.map((t) => t.project));
   // Dự án bạn tạo (lưu trên trình duyệt) đứng đầu, rồi tới dự án mẫu.
   const PROJECTS = [...myProjectsStore.use(), ...SAMPLE];
   const fromLink = params.get("nganh");
@@ -25,6 +29,9 @@ export function ExploreGrid() {
   );
 
   const [output, setOutput] = useState<Output | "Tất cả">("Tất cả");
+  const [onlyReal, setOnlyReal] = useState(false);
+  const [onlyExchange, setOnlyExchange] = useState(false);
+  const [sort, setSort] = useState<(typeof SORTS)[number]>("Mới cập nhật");
   // Chỉ hiện dạng đầu ra có ít nhất một dự án, để bộ lọc không có lựa chọn rỗng.
   const outputs = OUTPUTS.map((o) => o.id).filter((o) => PROJECTS.some((p) => p.output === o));
 
@@ -35,49 +42,94 @@ export function ExploreGrid() {
       )
     : [];
 
+  const countOfField = (f: (typeof FIELDS)[number]) =>
+    f === "Tất cả" ? PROJECTS.length : PROJECTS.filter((p) => p.field === f).length;
+
   const list = (() => {
-    return PROJECTS.filter((p) => (field === "Tất cả" || p.field === field) && (output === "Tất cả" || p.output === output)).filter((p) => {
+    const filtered = PROJECTS.filter(
+      (p) =>
+        (field === "Tất cả" || p.field === field) &&
+        (output === "Tất cả" || p.output === output) &&
+        (!onlyReal || p.usage === "Đã dùng thực tế") &&
+        (!onlyExchange || openSlugs.has(p.slug)),
+    ).filter((p) => {
       if (!needle) return true;
       const owner = userOf(p.owner)?.name ?? "";
       return norm([p.title, p.summary, p.field, p.output, p.context, owner, ...p.tools, ...showcaseOf(p).tags].join(" ")).includes(needle);
     });
+    return sort === "Nhiều phiên bản nhất" ? [...filtered].sort((a, b) => b.versions.length - a.versions.length) : filtered;
   })();
 
   return (
-    <div className="flex flex-col gap-6">
-      <div role="radiogroup" aria-label="Lọc theo ngành" className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+    <div className="flex flex-col gap-4">
+      <div role="radiogroup" aria-label="Lọc theo ngành" className="no-scrollbar -mx-4 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         {FIELDS.map((f) => {
           const on = f === field;
           return (
             <button
               key={f}
+              type="button"
               role="radio"
               aria-checked={on}
               onClick={() => setField(f)}
-              className={`relative shrink-0 rounded-full px-4 py-2.5 text-[15px] font-medium transition-colors ${on ? "text-white" : "text-moss hover:text-ink"}`}
+              className={`inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-sm font-bold transition-colors ${
+                on ? "border-ink bg-ink text-white" : "border-line bg-white text-ink hover:bg-mist"
+              }`}
             >
-              {on && (
-                <motion.span
-                  layoutId="field-pill"
-                  className="absolute inset-0 rounded-full bg-ink"
-                  transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                />
-              )}
-              <span className="relative">{f}</span>
+              <span>{f}</span>
+              <span className={`text-xs tabular-nums ${on ? "text-leaf" : "text-leaf-deep"}`}>{countOfField(f)}</span>
             </button>
           );
         })}
       </div>
 
-      <label className="-mt-2 flex items-center gap-2.5 text-sm text-moss">
-        Dạng đầu ra
-        <select value={output} onChange={(e) => setOutput(e.target.value as Output | "Tất cả")} className="h-10 rounded-lg border border-line bg-white px-3 text-sm font-semibold text-ink outline-none focus:border-ink">
-          <option value="Tất cả">Tất cả</option>
-          {outputs.map((o) => (
-            <option key={o}>{o}</option>
-          ))}
-        </select>
-      </label>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 text-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 text-moss">
+            Dạng đầu ra
+            <select
+              value={output}
+              onChange={(e) => setOutput(e.target.value as Output | "Tất cả")}
+              className="h-9 rounded-lg border border-line bg-white px-3 text-sm font-semibold text-ink outline-none focus:border-ink"
+            >
+              <option value="Tất cả">Tất cả</option>
+              {outputs.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            aria-pressed={onlyReal}
+            onClick={() => setOnlyReal((v) => !v)}
+            className={`inline-flex h-9 items-center rounded-full border px-3.5 text-[13px] font-bold transition-colors ${
+              onlyReal ? "border-ink bg-ink text-white" : "border-line bg-white text-ink hover:bg-mist"
+            }`}
+          >
+            Đã dùng thực tế
+          </button>
+          <button
+            type="button"
+            aria-pressed={onlyExchange}
+            onClick={() => setOnlyExchange((v) => !v)}
+            className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-bold transition-colors ${
+              onlyExchange ? "border-ink bg-ink text-white" : "border-line bg-white text-ink hover:bg-mist"
+            }`}
+          >
+            Đang mở trao đổi
+          </button>
+        </div>
+
+        <label className="relative flex items-center gap-1.5 font-semibold text-moss hover:text-ink">
+          <ArrowDownUp className="pointer-events-none h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">Sắp xếp</span>
+          <select value={sort} onChange={(e) => setSort(e.target.value as (typeof SORTS)[number])} className="cursor-pointer appearance-none bg-transparent outline-none">
+            {SORTS.map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       {q && (
         <p className="text-[15px] text-moss">
@@ -126,25 +178,13 @@ export function ExploreGrid() {
           </Link>
         </div>
       ) : (
-        <motion.ul layout className="grid auto-rows-auto grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <AnimatePresence mode="popLayout" initial={true}>
-            {list.map((p, i) => {
-              const featured = i === 0 && field === "Tất cả" && output === "Tất cả" && !q;
-              return (
-                <motion.li
-                  key={p.slug}
-                  layout
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 6) * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
-                  exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15 } }}
-                  className={featured ? "sm:col-span-2 lg:row-span-2" : ""}
-                >
-                  <ProjectCard project={p} featured={featured} />
-                </motion.li>
-              );
-            })}
-          </AnimatePresence>
-        </motion.ul>
+        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {list.map((p) => (
+            <li key={p.slug}>
+              <ProjectCard project={p} />
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
