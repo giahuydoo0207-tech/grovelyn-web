@@ -36,7 +36,7 @@ export function ProjectCard({
     >
       <div className="relative bg-mist px-4 pt-5">
         {curVer && (
-          <span className="pointer-events-none absolute bottom-2.5 right-6 z-10 rounded-full border border-line bg-white px-2.5 py-0.5 text-[11px] font-bold tabular-nums text-ink">
+          <span className="pointer-events-none absolute bottom-2.5 right-6 z-10 rounded-full border border-line bg-white px-2.5 py-0.5 text-xs font-bold tabular-nums text-ink">
             bản {curVer}
           </span>
         )}
@@ -52,7 +52,7 @@ export function ProjectCard({
         />
       </div>
       <div className="flex flex-1 flex-col gap-2.5 p-5">
-        <div className="flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center justify-between gap-2 text-[13px]">
           <span
             className="truncate rounded-full px-2.5 py-0.5 font-bold"
             style={{ background: fieldColor(project.field).bg, color: fieldColor(project.field).fg }}
@@ -72,16 +72,16 @@ export function ProjectCard({
         <h3 className="line-clamp-2 font-display text-[17px] font-bold leading-snug tracking-[-0.02em] text-ink">
           {project.title}
         </h3>
-        <p className="line-clamp-2 text-[13.5px] leading-relaxed text-moss">
+        <p className="line-clamp-2 text-sm leading-relaxed text-moss">
           {project.summary}
         </p>
         <div className="mt-auto flex flex-col gap-2 pt-1">
           {versionTrail && (
-            <p className="truncate text-[11px] font-bold tracking-wide tabular-nums text-leaf-deep">
+            <p className="truncate text-xs font-bold tracking-wide tabular-nums text-leaf-deep">
               {versionTrail}
             </p>
           )}
-          <div className="flex items-center justify-between gap-3 border-t border-line pt-3 text-xs">
+          <div className="flex items-center justify-between gap-3 border-t border-line pt-3 text-[13px]">
             {owner && (
               <span className="flex min-w-0 items-center gap-2 font-semibold text-ink">
                 <Avatar initials={owner.initials} tone={owner.tone} handle={owner.handle} size={22} />

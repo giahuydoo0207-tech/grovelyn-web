@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ArrowDownUp, X } from "lucide-react";
 import { FIELDS, ME, PROJECTS as SAMPLE, USERS, userOf } from "@/lib/data";
@@ -17,6 +17,7 @@ const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/
 
 export function ExploreGrid() {
   const params = useSearchParams();
+  const router = useRouter();
   const q = params.get("q") ?? "";
   const prefs = prefsStore.use();
   const openTopics = useTopics().filter((t) => t.status === "open");
@@ -64,8 +65,8 @@ export function ExploreGrid() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="no-scrollbar -mx-4 flex items-center justify-between gap-2 overflow-x-auto border-b border-line px-4 pb-3 text-sm sm:mx-0 sm:px-0">
-        <div className="flex shrink-0 items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 text-sm">
+        <div className="flex flex-wrap items-center gap-2">
           <label className="inline-flex h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-line bg-white pl-3.5 pr-2.5 text-[13px] text-moss focus-within:border-ink">
             <span>Dạng đầu ra</span>
             <select
@@ -119,7 +120,10 @@ export function ExploreGrid() {
             <button
               type="button"
               aria-label="Bỏ lọc ngành"
-              onClick={() => setField("Tất cả")}
+              onClick={() => {
+                setField("Tất cả");
+                router.replace(q ? `/explore?q=${encodeURIComponent(q)}` : "/explore");
+              }}
               className="flex h-5 w-5 items-center justify-center rounded-full text-moss transition-colors hover:bg-mist hover:text-ink"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
