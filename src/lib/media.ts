@@ -5,6 +5,39 @@ export interface Media {
   alt: string;
   /** Ảnh đại diện của video. */
   poster?: string;
+  /** Kích thước gốc, để lưới tự chọn cách chia. Ảnh mẫu cũ không có. */
+  w?: number;
+  h?: number;
+}
+
+/**
+ * Cách chia lưới khi có từ 3 ảnh:
+ * - auto: tự chọn theo tỉ lệ ảnh đầu (ngang thì để trên, dọc thì để trái), không rõ thì đổi theo từng bài cho đỡ lặp.
+ * - tall: một tấm to bên trái, các tấm còn lại xếp dọc bên phải.
+ * - wide: một tấm to bên trên, các tấm còn lại xếp ngang bên dưới.
+ * - even: chia đều.
+ */
+export type MediaLayout = "auto" | "tall" | "wide" | "even";
+export const MEDIA_LAYOUTS: { id: MediaLayout; label: string }[] = [
+  { id: "auto", label: "Tự chọn" },
+  { id: "tall", label: "To bên trái" },
+  { id: "wide", label: "To bên trên" },
+  { id: "even", label: "Chia đều" },
+];
+
+/** Chốt kiểu lưới thật sự dùng. `seed` để kiểu auto đổi theo từng bài. */
+export function resolveLayout(media: Media[], layout: MediaLayout | undefined, seed: string): Exclude<MediaLayout, "auto"> {
+  if (layout && layout !== "auto") return layout;
+  const f = media[0];
+  if (f?.w && f?.h) {
+    const r = f.w / f.h;
+    if (r >= 1.25) return "wide";
+    if (r <= 0.85) return "tall";
+    return media.length === 3 ? "even" : "tall";
+  }
+  let x = 0;
+  for (const ch of seed) x = (x * 31 + ch.charCodeAt(0)) >>> 0;
+  return (["tall", "wide", "even"] as const)[x % 3];
 }
 
 export const MAX_MEDIA = 6;

@@ -6,11 +6,11 @@ import Link from "next/link";
 import { ArrowDownUp, Folder, ImagePlus, Rocket, UsersRound } from "lucide-react";
 import { ME, MY_GROUPS, POST_KINDS, userOf, type PostKind } from "@/lib/data";
 import { following, joinedGroups, leftGroups, myGroupsStore, postsStore, useMyProjects, useVisiblePosts, useUser } from "@/lib/stores";
-import type { Media } from "@/lib/media";
+import type { Media, MediaLayout } from "@/lib/media";
 import { currentPhase, showcaseOf } from "@/lib/showcase";
 import { canAnnounce } from "@/lib/model";
 import { Avatar } from "@/components/Avatar";
-import { MediaPicker } from "@/components/MediaGrid";
+import { LayoutPicker, MediaGrid, MediaPicker } from "@/components/MediaGrid";
 import { PostCard } from "./PostCard";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Leaves } from "@/components/Leaves";
@@ -53,6 +53,7 @@ export function Feed({ group }: { group?: string } = {}) {
   const [kind, setKind] = useState<PostKind>("Chia sẻ");
   const [text, setText] = useState("");
   const [media, setMedia] = useState<Media[]>([]);
+  const [layout, setLayout] = useState<MediaLayout>("auto");
   const [slug, setSlug] = useState("");
   const [needs, setNeeds] = useState("");
   const [filter, setFilter] = useState<Filter>("Tất cả");
@@ -69,6 +70,7 @@ export function Feed({ group }: { group?: string } = {}) {
     setOpen(false);
     setText("");
     setMedia([]);
+    setLayout("auto");
     setNeeds("");
   };
 
@@ -93,6 +95,7 @@ export function Feed({ group }: { group?: string } = {}) {
         project: project?.slug,
         needs: kind === "Tìm cộng sự" && list.length ? list : undefined,
         media: media.length ? media : undefined,
+        layout: media.length >= 3 && layout !== "auto" ? layout : undefined,
         when: "vừa xong",
         text: text.trim(),
         likes: 0,
@@ -251,6 +254,12 @@ export function Feed({ group }: { group?: string } = {}) {
                     </label>
 
                     <MediaPicker value={media} onChange={setMedia} />
+                    {media.length >= 3 && (
+                      <div className="flex flex-col gap-2.5">
+                        <LayoutPicker media={media} value={layout} onChange={setLayout} />
+                        <MediaGrid media={media} layout={layout} compact />
+                      </div>
+                    )}
                   </>
                 )}
 

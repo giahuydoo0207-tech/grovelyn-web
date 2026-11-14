@@ -9,6 +9,11 @@ import { useEffect, useSyncExternalStore } from "react";
  */
 
 export async function compressImage(file: Blob, max = 1600, quality = 0.82): Promise<string> {
+  return (await compressImageSized(file, max, quality)).src;
+}
+
+/** Như compressImage, kèm kích thước ảnh sau khi thu nhỏ. */
+export async function compressImageSized(file: Blob, max = 1600, quality = 0.82): Promise<{ src: string; w: number; h: number }> {
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise<HTMLImageElement>((ok, fail) => {
@@ -26,7 +31,7 @@ export async function compressImage(file: Blob, max = 1600, quality = 0.82): Pro
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, c.width, c.height);
     ctx.drawImage(img, 0, 0, c.width, c.height);
-    return c.toDataURL("image/jpeg", quality);
+    return { src: c.toDataURL("image/jpeg", quality), w: c.width, h: c.height };
   } finally {
     URL.revokeObjectURL(url);
   }

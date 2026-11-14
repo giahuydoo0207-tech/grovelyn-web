@@ -1,5 +1,5 @@
 import type { Context, Output, Usage } from "./model";
-import { MEDIA, type Media } from "./media";
+import { MEDIA, type Media, type MediaLayout } from "./media";
 /**
  * Dữ liệu mẫu cho bản giao diện. Chưa nối Supabase: mọi tên người, dự án và con số ở đây chỉ để minh họa.
  */
@@ -504,6 +504,8 @@ export interface Post {
   version?: string;
   needs?: string[];
   media?: Media[];
+  /** Cách chia lưới ảnh khi có từ 3 tấm. */
+  layout?: MediaLayout;
   /** Bài đăng trong một nhóm (slug nhóm). Không có thì là bài trên Trang chủ. */
   group?: string;
   likes: number;

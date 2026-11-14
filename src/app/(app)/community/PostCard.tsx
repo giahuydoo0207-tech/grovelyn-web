@@ -251,7 +251,7 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
     <article id={post.id} className={`scroll-mt-24 rounded-[20px] ${menu ? "relative z-30" : ""} ${t.card}`}>
       {look === "hero" && (
         <div className="relative overflow-hidden rounded-t-[20px]">
-          <MediaGrid media={post.media!} bleed />
+          <MediaGrid media={post.media!} layout={post.layout} bleed />
           <span className="pointer-events-none absolute left-4 top-4">
             <KindTag kind={post.kind} look={look} version={post.version} />
           </span>
@@ -295,7 +295,7 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
 
         {look !== "hero" && post.media && post.media.length > 0 && (
           <div className="mt-3.5">
-            <MediaGrid media={post.media} />
+            <MediaGrid media={post.media} layout={post.layout} />
           </div>
         )}
 
