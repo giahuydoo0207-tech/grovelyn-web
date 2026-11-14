@@ -509,6 +509,8 @@ export interface Post {
   likes: number;
   comments: { author: string; text: string; when: string }[];
   reposts: number;
+  /** Ai được xem bài. Không có hoặc "all" là mọi người; "close" là chỉ bạn thân của người đăng. */
+  audience?: "all" | "close";
 }
 
 export const POSTS: Post[] = [

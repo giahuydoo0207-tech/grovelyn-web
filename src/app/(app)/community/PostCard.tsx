@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Bookmark, Check, Folder, HandHelping, Link2, MessageCircle, MoreHorizontal, Plus, Repeat2, Rocket, SendHorizontal, ThumbsUp, UsersRound } from "lucide-react";
+import { ArrowRight, Bookmark, Check, Folder, HandHelping, Link2, MessageCircle, Globe, MoreHorizontal, Plus, Repeat2, Rocket, SendHorizontal, ThumbsUp, Trash2, Users, UsersRound } from "lucide-react";
 import type { Post } from "@/lib/data";
 import { ME, groupOf, userOf } from "@/lib/data";
 import { contributorsOf } from "@/lib/exchange";
@@ -12,7 +12,8 @@ import { Avatar } from "@/components/Avatar";
 import { MediaGrid } from "@/components/MediaGrid";
 import { useLook } from "@/lib/look";
 import { REACTIONS } from "./reactions";
-import { joinRequests, repostedPosts, savedPosts, useProject, useUser, reactionsStore, setReaction as saveReaction, updatePost } from "@/lib/stores";
+import { CloseFriendsDialog } from "./CloseFriendsDialog";
+import { joinRequests, repostedPosts, savedPosts, useProject, useUser, reactionsStore, setReaction as saveReaction, updatePost, closeFriends, postsStore } from "@/lib/stores";
 
 /**
  * Mỗi loại bài một dáng thẻ, chỉ dùng màu gốc Grovelyn:
@@ -71,6 +72,11 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
   const reposted = repostedPosts.use().includes(post.id);
   const [copied, setCopied] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
+  const [friendsOpen, setFriendsOpen] = useState(false);
+  const isMine = post.author === ME;
+  const close = post.audience === "close";
+  const friendCount = closeFriends.use().length;
   const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hide = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -112,30 +118,101 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
   const saved = savedPosts.use().includes(post.id);
   const accentText = look === "dark" ? "text-leaf" : "text-leaf-deep";
   const action = `flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold transition-colors max-sm:h-12 max-sm:flex-col max-sm:gap-0.5 max-sm:text-xs ${look === "dark" ? "hover:bg-white/10" : look === "quote" ? "hover:bg-white/60" : "hover:bg-mist"}`;
+  const closeMenu = () => {
+    setMenu(false);
+    setAskDelete(false);
+  };
+  const item = "flex h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm font-semibold hover:bg-mist";
   const more = (
-    <div className="relative shrink-0">
-      <button
-        type="button"
-        aria-label="Tùy chọn bài viết"
-        aria-expanded={menu}
-        onClick={() => setMenu((v) => !v)}
-        onBlur={(e) => !e.currentTarget.parentElement?.contains(e.relatedTarget as Node | null) && setMenu(false)}
-        className={`flex h-9 w-9 items-center justify-center rounded-full ${look === "dark" ? "text-white/65 hover:bg-white/10" : "text-moss hover:bg-black/5"}`}
-      >
-        <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
-      </button>
-      {menu && (
-        <div role="menu" className="absolute right-0 top-10 z-20 w-52 overflow-hidden rounded-xl border border-line bg-white p-1 text-ink shadow-[0_12px_32px_-12px_rgba(6,17,10,0.35)]">
-          <button type="button" role="menuitem" onClick={() => void share()} className="flex h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm font-semibold hover:bg-mist">
-            {copied ? <Check className="h-4 w-4 text-leaf-deep" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
-            {copied ? "Đã chép liên kết" : "Chép liên kết"}
-          </button>
-          <button type="button" role="menuitem" onClick={() => savedPosts.toggle(post.id)} className="flex h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm font-semibold hover:bg-mist">
-            <Bookmark className="h-4 w-4" fill={saved ? "currentColor" : "none"} aria-hidden="true" />
-            {saved ? "Bỏ lưu bài này" : "Lưu bài này"}
-          </button>
-        </div>
+    <div className="flex shrink-0 items-center gap-1.5">
+      {close && (
+        <span className={`inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-xs font-bold ${look === "dark" ? "bg-white/10 text-leaf" : "bg-sap text-leaf-deep"}`}>
+          <Users className="h-3.5 w-3.5" aria-hidden="true" />
+          Bạn thân
+        </span>
       )}
+      <div className="relative">
+        <button
+          type="button"
+          aria-label="Tùy chọn bài viết"
+          aria-expanded={menu}
+          onClick={() => (menu ? closeMenu() : setMenu(true))}
+          onBlur={(e) => !e.currentTarget.parentElement?.contains(e.relatedTarget as Node | null) && closeMenu()}
+          className={`flex h-9 w-9 items-center justify-center rounded-full ${look === "dark" ? "text-white/65 hover:bg-white/10" : "text-moss hover:bg-black/5"}`}
+        >
+          <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+        </button>
+        {menu && (
+          <div role="menu" className="absolute right-0 top-10 z-20 w-64 overflow-hidden rounded-xl border border-line bg-white p-1 text-ink shadow-[0_12px_32px_-12px_rgba(6,17,10,0.35)]">
+            {askDelete ? (
+              <div className="flex flex-col gap-3 p-3">
+                <div>
+                  <p className="text-sm font-bold">Xóa bài này?</p>
+                  <p className="mt-0.5 text-[13px] text-moss">Bình luận trong bài cũng mất. Không hoàn tác được.</p>
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setAskDelete(false)} className="inline-flex h-9 flex-1 items-center justify-center rounded-lg border border-line text-sm font-bold hover:bg-mist">
+                    Hủy
+                  </button>
+                  <button
+                    type="button"
+                    autoFocus
+                    onClick={() => postsStore.set((all) => all.filter((x) => x.id !== post.id))}
+                    className="inline-flex h-9 flex-1 items-center justify-center rounded-lg bg-ink text-sm font-bold text-white hover:bg-ink/85"
+                  >
+                    Xóa bài
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <button type="button" role="menuitem" onClick={() => void share()} className={item}>
+                  {copied ? <Check className="h-4 w-4 text-leaf-deep" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
+                  {copied ? "Đã chép liên kết" : "Chép liên kết"}
+                </button>
+                <button type="button" role="menuitem" onClick={() => savedPosts.toggle(post.id)} className={item}>
+                  <Bookmark className="h-4 w-4" fill={saved ? "currentColor" : "none"} aria-hidden="true" />
+                  {saved ? "Bỏ lưu bài này" : "Lưu bài này"}
+                </button>
+                {isMine && (
+                  <>
+                    <div className="my-1 border-t border-line" />
+                    <p className="px-3 pb-1 pt-1.5 text-xs font-bold text-moss">Ai được xem bài này</p>
+                    <button type="button" role="menuitemradio" aria-checked={!close} onClick={() => updatePost(post.id, (p) => ({ ...p, audience: "all" }))} className={item}>
+                      <Globe className="h-4 w-4" aria-hidden="true" />
+                      <span className="flex-1">Mọi người</span>
+                      {!close && <Check className="h-4 w-4 text-leaf-deep" aria-hidden="true" />}
+                    </button>
+                    <button type="button" role="menuitemradio" aria-checked={close} onClick={() => updatePost(post.id, (p) => ({ ...p, audience: "close" }))} className={item}>
+                      <Users className="h-4 w-4" aria-hidden="true" />
+                      <span className="flex-1">Chỉ bạn thân</span>
+                      {close && <Check className="h-4 w-4 text-leaf-deep" aria-hidden="true" />}
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        closeMenu();
+                        setFriendsOpen(true);
+                      }}
+                      className={`${item} font-normal text-moss`}
+                    >
+                      <span className="w-4" aria-hidden="true" />
+                      {friendCount ? `Chọn bạn thân (${friendCount})` : "Chọn bạn thân"}
+                    </button>
+                    <div className="my-1 border-t border-line" />
+                    <button type="button" role="menuitem" onClick={() => setAskDelete(true)} className={item}>
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      Xóa bài
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+      {isMine && <CloseFriendsDialog open={friendsOpen} onClose={() => setFriendsOpen(false)} />}
     </div>
   );
 
@@ -171,9 +248,9 @@ export function PostCard({ post, showGroup = false }: { post: Post; showGroup?: 
   const curVer = post.version ?? project?.versions[0]?.tag;
 
   return (
-    <article id={post.id} className={`scroll-mt-24 overflow-hidden rounded-[20px] ${t.card}`}>
+    <article id={post.id} className={`scroll-mt-24 rounded-[20px] ${menu ? "relative z-30" : ""} ${t.card}`}>
       {look === "hero" && (
-        <div className="relative">
+        <div className="relative overflow-hidden rounded-t-[20px]">
           <MediaGrid media={post.media!} bleed />
           <span className="pointer-events-none absolute left-4 top-4">
             <KindTag kind={post.kind} look={look} version={post.version} />

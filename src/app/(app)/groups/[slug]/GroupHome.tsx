@@ -18,7 +18,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { interestedEvents, postsStore, useGroupStatus } from "@/lib/stores";
+import { interestedEvents, useVisiblePosts, useGroupStatus } from "@/lib/stores";
 import { ONLINE, ONLINE_TOTAL, PROJECTS, USERS, userOf, type Group } from "@/lib/data";
 import { EVENTS, dateParts } from "@/lib/events";
 import { Avatar } from "@/components/Avatar";
@@ -41,7 +41,7 @@ export function GroupHome({ group }: { group: Group }) {
   const [copied, setCopied] = useState(false);
 
   const projects = PROJECTS.filter((p) => group.fields.includes(p.field));
-  const seekers = postsStore.use().filter((p) => p.group === group.slug && p.kind === "Tìm cộng sự");
+  const seekers = useVisiblePosts().filter((p) => p.group === group.slug && p.kind === "Tìm cộng sự");
   const events = EVENTS.filter((e) => e.group?.name === group.name);
   const admins = group.admins.map(userOf).filter((u) => u !== undefined);
   const online = ONLINE.map(userOf).filter((u) => u !== undefined);

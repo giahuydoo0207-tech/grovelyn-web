@@ -26,6 +26,20 @@ export const setReaction = (postId: string, key: string | null) =>
 /** Bài Tìm cộng sự bạn đã xin tham gia. */
 export const joinRequests = persistedSet("join-requests");
 
+/** Bạn thân của bạn: chỉ những người này xem được bài bạn đặt chế độ "Bạn thân". */
+export const closeFriends = persistedSet("close-friends");
+
+/**
+ * Bài này bạn có được xem không. Bản dùng thử chỉ có một tài khoản, nên bài "Bạn thân" chỉ chủ bài thấy.
+ * Khi có tài khoản thật, phía máy chủ kiểm tra người xem có trong danh sách bạn thân của người đăng.
+ */
+export const canSeePost = (p: Post) => p.audience !== "close" || p.author === ME;
+
+/** Bài đăng bạn được phép xem, dùng cho mọi nơi hiển thị bài. */
+export function useVisiblePosts(): Post[] {
+  return postsStore.use().filter(canSeePost);
+}
+
 /** Bài đăng bạn đã lưu để xem lại (mục Đã lưu). */
 export const savedPosts = persistedSet("saved-posts");
 

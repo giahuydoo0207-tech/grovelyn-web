@@ -8,7 +8,7 @@ import { ONLINE, ONLINE_TOTAL, projectOf, userOf, type Post, type Project } from
 import { EVENTS, TODAY, dateParts, placeLine } from "@/lib/events";
 import type { Topic } from "@/lib/exchange";
 import { useTopics } from "@/lib/topicStore";
-import { interestedEvents, myProjectsStore, postsStore } from "@/lib/stores";
+import { interestedEvents, myProjectsStore, useVisiblePosts } from "@/lib/stores";
 import { useChat } from "@/components/chat/ChatProvider";
 import { Avatar } from "@/components/Avatar";
 
@@ -35,7 +35,7 @@ function activityOf(handle: string, posts: Post[], openTopics: Topic[], mine: Pr
 }
 
 function Online() {
-  const posts = postsStore.use();
+  const posts = useVisiblePosts();
   const mine = myProjectsStore.use();
   const openTopics = useTopics().filter((t) => t.status === "open");
   const { startDirect, openWindow, setActive } = useChat();
@@ -147,7 +147,7 @@ function Events() {
 
 /** Chủ đề được nói nhiều: gom bài theo bối cảnh hoặc ngành của dự án được gắn. */
 function Trending() {
-  const posts = postsStore.use();
+  const posts = useVisiblePosts();
   const mine = myProjectsStore.use();
   const tally = new Map<string, number>();
   for (const p of posts) {

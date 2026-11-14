@@ -1,11 +1,11 @@
 "use client";
 
 import { ME } from "@/lib/data";
-import { following, myProjectsStore, postsStore } from "@/lib/stores";
+import { following, myProjectsStore, useVisiblePosts } from "@/lib/stores";
 
 /** Số dự án, bài đăng, người theo dõi: tính cả những gì bạn vừa làm (lưu trên trình duyệt). */
 export function ProfileStats({ handle, projects, followers, follows }: { handle: string; projects: number; followers: number; follows: number }) {
-  const posts = postsStore.use().filter((p) => p.author === handle && !p.group).length;
+  const posts = useVisiblePosts().filter((p) => p.author === handle && !p.group).length;
   const mine = myProjectsStore.use().length;
   const followed = following.use();
   const isMe = handle === ME;

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { ArrowDownUp, Folder, ImagePlus, Rocket, UsersRound } from "lucide-react";
 import { ME, MY_GROUPS, POST_KINDS, userOf, type PostKind } from "@/lib/data";
-import { following, joinedGroups, leftGroups, myGroupsStore, postsStore, useMyProjects, useUser } from "@/lib/stores";
+import { following, joinedGroups, leftGroups, myGroupsStore, postsStore, useMyProjects, useVisiblePosts, useUser } from "@/lib/stores";
 import type { Media } from "@/lib/media";
 import { currentPhase, showcaseOf } from "@/lib/showcase";
 import { canAnnounce } from "@/lib/model";
@@ -38,7 +38,7 @@ export function Feed({ group }: { group?: string } = {}) {
   const ready = mine.filter((p) => p.owner === ME && canAnnounce(currentPhase(showcaseOf(p).milestones), p.usage));
 
   // Bài đăng lưu trong localStorage: tải lại trang vẫn còn bài bạn vừa đăng.
-  const all = postsStore.use();
+  const all = useVisiblePosts();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Dành cho bạn");
   const followed = following.use();
   const joined = joinedGroups.use();
@@ -376,6 +376,7 @@ export function Feed({ group }: { group?: string } = {}) {
             <motion.div
               key={p.id}
               layout
+              className="has-[[aria-expanded=true]]:relative has-[[aria-expanded=true]]:z-30"
               initial={{ opacity: 0, y: -16, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}

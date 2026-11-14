@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Building2, Handshake, Check, Circle, Eye, GraduationCap, Text as TextIcon, Briefcase, type LucideIcon } from "lucide-react";
 import { Pin } from "lucide-react";
 import type { Project, User } from "@/lib/data";
-import { myProjectsStore, postsStore } from "@/lib/stores";
+import { myProjectsStore, useVisiblePosts } from "@/lib/stores";
 import { ProjectCard } from "@/components/ProjectCard";
 import { FolderCover } from "@/components/project/FolderCover";
 import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
@@ -31,7 +31,7 @@ export function ProfileTabs({
   isMe: boolean;
 }) {
   // Bài đăng và dự án mới của bạn lưu trên trình duyệt; bài trong nhóm không lên hồ sơ.
-  const posts = postsStore.use().filter((p) => p.author === user.handle && !p.group);
+  const posts = useVisiblePosts().filter((p) => p.author === user.handle && !p.group);
   const mine = myProjectsStore.use();
   const projects = isMe ? [...mine, ...given] : given;
   const given2 = contributionsBy(user.handle, useTopics());

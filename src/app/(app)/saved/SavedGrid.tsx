@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { projectOf } from "@/lib/data";
-import { myProjectsStore, postsStore, savedPosts, savedProjects } from "@/lib/stores";
+import { myProjectsStore, useVisiblePosts, savedPosts, savedProjects } from "@/lib/stores";
 import { ProjectCard } from "@/components/ProjectCard";
 import { PostCard } from "../community/PostCard";
 
@@ -17,7 +17,7 @@ export function SavedGrid() {
     .use()
     .map((s) => projectOf(s) ?? mine.find((p) => p.slug === s))
     .filter((p) => p !== undefined);
-  const all = postsStore.use();
+  const all = useVisiblePosts();
   const saved = savedPosts.use();
   // Bài lưu sau cùng hiện trước.
   const posts = [...saved]
