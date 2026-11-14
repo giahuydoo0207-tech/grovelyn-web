@@ -257,7 +257,7 @@ export function Feed({ group }: { group?: string } = {}) {
                     {media.length >= 3 && (
                       <div className="flex flex-col gap-2.5">
                         <LayoutPicker media={media} value={layout} onChange={setLayout} />
-                        <MediaGrid media={media} layout={layout} compact />
+                        <MediaGrid media={media} layout={layout} />
                       </div>
                     )}
                   </>

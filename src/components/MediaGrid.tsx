@@ -30,7 +30,7 @@ function Vid({ src, poster, className, controls = false }: { src: string; poster
  */
 export { Img as LocalImg };
 
-/** Lớp lưới cho từng cách chia. `shown` là số tấm đang hiện (tối đa 4). */
+/** Lớp lưới cho từng cách chia khi không biết kích thước ảnh. `shown` là số tấm đang hiện (tối đa 4). */
 function gridOf(shown: number, layout: Exclude<MediaLayout, "auto">, bleed: boolean, compact: boolean): { grid: string; h: string } {
   const H = (tall: string, wide: string, even: string) => (compact ? "h-[150px]" : layout === "wide" ? wide : layout === "even" ? even : tall);
   if (shown === 1) return { grid: "grid-cols-1", h: compact ? "h-[150px]" : bleed ? "h-[260px] sm:h-[360px]" : "h-[260px] sm:h-[340px]" };
@@ -48,6 +48,62 @@ function gridOf(shown: number, layout: Exclude<MediaLayout, "auto">, bleed: bool
   return { grid: "grid-cols-3 grid-rows-3 [&>*:first-child]:col-span-2 [&>*:first-child]:row-span-3", h: H("h-[280px] sm:h-[360px]", "", "") };
 }
 
+/**
+ * Khi biết kích thước mọi ảnh: chia cột, hàng theo đúng tỉ lệ từng tấm và đặt tỉ lệ khung cho cả lưới,
+ * để ảnh hiện trọn thay vì bị cắt. Chỉ cắt nhẹ khi khung quá cao hoặc quá dẹt (giới hạn 4:5 đến 2:1).
+ */
+function fitOf(media: Media[], layout: Exclude<MediaLayout, "auto">): { grid: string; style: React.CSSProperties } | null {
+  if (media.some((m) => !m.w || !m.h || m.type !== "image")) return null;
+  const r = media.map((m) => m.w! / m.h!);
+  const fr = (xs: number[]) => xs.map((x) => `${x.toFixed(3)}fr`).join(" ");
+  const n = r.length;
+  let grid = "";
+  let cols: number[] | null = null;
+  let rows: number[] | null = null;
+  let aspect = 1;
+  if (n === 1) {
+    grid = "grid-cols-1";
+    aspect = r[0];
+  } else if (n === 2) {
+    if (layout === "wide") {
+      grid = "grid-cols-1";
+      rows = [1 / r[0], 1 / r[1]];
+      aspect = 1 / (rows[0] + rows[1]);
+    } else {
+      cols = [r[0], r[1]];
+      aspect = r[0] + r[1];
+    }
+  } else {
+    const small = r.slice(1);
+    const k = small.length; // số tấm nhỏ xếp cạnh tấm to
+    const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+    if (layout === "even" && n === 3) {
+      cols = r;
+      aspect = sum(r);
+    } else if (layout === "even") {
+      grid = "grid-rows-2";
+      cols = [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
+      aspect = (cols[0] + cols[1]) / 2;
+    } else if (layout === "wide") {
+      // Tấm to chiếm cả hàng trên; hàng dưới chia cột theo tỉ lệ từng tấm nhỏ nên cùng chiều cao mà không cắt.
+      grid = k === 2 ? "[&>*:first-child]:col-span-2" : "[&>*:first-child]:col-span-3";
+      cols = small;
+      rows = [1 / r[0], 1 / sum(small)];
+      aspect = 1 / (rows[0] + rows[1]);
+    } else {
+      // Tấm to chiếm cả cột trái; cột phải chia hàng theo tỉ lệ từng tấm nhỏ nên cùng chiều rộng mà không cắt.
+      grid = k === 2 ? "[&>*:first-child]:row-span-2" : "[&>*:first-child]:row-span-3";
+      rows = small.map((x) => 1 / x);
+      cols = [r[0], 1 / sum(rows)];
+      aspect = cols[0] + cols[1];
+    }
+  }
+  const style: React.CSSProperties = { aspectRatio: String(Math.min(layout === "even" ? 2.8 : 2, Math.max(0.8, aspect))) };
+  if (cols) style.gridTemplateColumns = fr(cols);
+  if (rows) style.gridTemplateRows = fr(rows);
+  return { grid, style };
+}
+
 /** `bleed`: tràn hết bề ngang thẻ, không bo góc, không viền (ảnh đầu thẻ Công bố). */
 export function MediaGrid({ media, layout, compact = false, bleed = false }: { media: Media[]; layout?: MediaLayout; compact?: boolean; bleed?: boolean }) {
   const [view, setView] = useState<number | null>(null);
@@ -55,11 +111,15 @@ export function MediaGrid({ media, layout, compact = false, bleed = false }: { m
   const shown = media.slice(0, 4);
   const more = media.length - shown.length;
   const kind = resolveLayout(media, layout, media.map((m) => m.src.slice(0, 40)).join("|"));
-  const { grid, h } = gridOf(shown.length, kind, bleed, compact);
+  const fit = compact ? null : fitOf(shown, kind);
+  const fixed = fit ? null : gridOf(shown.length, kind, bleed, compact);
 
   return (
     <>
-      <div className={`grid gap-1 overflow-hidden bg-mist ${bleed ? "" : "rounded-xl border border-line"} ${grid} ${h}`}>
+      <div
+        className={`grid gap-1 overflow-hidden bg-mist ${bleed ? "" : "rounded-xl border border-line"} ${fit ? fit.grid : `${fixed!.grid} ${fixed!.h}`}`}
+        style={fit?.style}
+      >
         {shown.map((m, i) => (
           <button
             key={m.src + i}
