@@ -3,7 +3,6 @@
 import Link from "next/link";
 import type { Project } from "@/lib/data";
 import { contextLabel, userOf } from "@/lib/data";
-import { fieldColor } from "@/lib/palette";
 import { currentPhase, phaseLabel, showcaseOf } from "@/lib/showcase";
 import { useTopics } from "@/lib/topicStore";
 import { FolderCover } from "./project/FolderCover";
@@ -53,18 +52,14 @@ export function ProjectCard({
       </div>
       <div className="flex flex-1 flex-col gap-2.5 p-5">
         <div className="flex items-center justify-between gap-2 text-[13px]">
-          <span
-            className="truncate rounded-full px-2.5 py-0.5 font-bold"
-            style={{ background: fieldColor(project.field).bg, color: fieldColor(project.field).fg }}
-          >
-            {project.field}
-          </span>
+          <span className="truncate rounded-md border border-ink bg-white px-2 py-0.5 font-bold text-ink">{project.field}</span>
+          {/* Trạng thái chỉ là chữ, phân biệt bằng ba sắc xanh lá: đang mở trao đổi, đã dùng thực tế, hoàn tất. Đang làm giữ xám rêu. */}
           {hasOpenTopic ? (
-            <span className="shrink-0 rounded-full bg-sap px-2.5 py-0.5 font-bold text-leaf-deep">
-              Đang mở trao đổi
-            </span>
+            <span className="shrink-0 font-bold text-leaf-deep">Đang mở trao đổi</span>
           ) : project.usage === "Đã dùng thực tế" ? (
-            <span className="shrink-0 font-bold text-leaf-deep">Đã dùng thực tế</span>
+            <span className="shrink-0 font-bold text-pin-ink">Đã dùng thực tế</span>
+          ) : phase === "Hoàn tất" ? (
+            <span className="shrink-0 font-bold text-olive">Hoàn tất</span>
           ) : (
             <span className="shrink-0 font-semibold text-moss">{phase}</span>
           )}

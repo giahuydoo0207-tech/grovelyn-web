@@ -22,6 +22,8 @@
   /* Tin ghim trong chat: xanh lá ngả ngọc, nhạt hơn và lạnh hơn các màu lá của web. */
   --color-pin: #e2f5ec;
   --color-pin-ink: #0f7a55;
+  /* Xanh ô liu, chỉ dùng cho nhãn Hoàn tất trên thẻ dự án. */
+  --color-olive: #4f6b2a;
 
   --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
